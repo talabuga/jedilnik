@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jedilnik-pwa-v2';
+const CACHE_NAME = 'jedilnik-pwa-v3';
 const APP_SHELL = [
   './index.html',
   './manifest.json',
