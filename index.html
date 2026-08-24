@@ -121,6 +121,19 @@
   .install-app-btn.visible{ display:flex; }
   .secondary-action{ background: var(--primary-light); color: var(--primary); border-color: var(--primary-mid); }
   .secondary-action:hover{ background: var(--primary-mid); color: var(--ink); }
+  .quick-nav{
+    position:sticky; top:10px; z-index:20; display:flex; gap:8px;
+    margin:0 0 16px; padding:7px; border:1px solid var(--border);
+    border-radius:14px; background:rgba(255,255,255,.92);
+    backdrop-filter:blur(10px); box-shadow:0 4px 16px rgba(28,38,33,.06);
+  }
+  .quick-nav button{
+    flex:1; min-height:42px; border:1px solid transparent; border-radius:9px;
+    background:transparent; color:var(--muted); cursor:pointer;
+    font-family:'IBM Plex Sans',sans-serif; font-size:13px; font-weight:600;
+  }
+  .quick-nav button:hover,.quick-nav button.active{ background:var(--primary-light); color:var(--primary); }
+  #weekPanel,#shoppingPanel{ scroll-margin-top:76px; }
 
   .panel{
     background: var(--surface);
@@ -1102,7 +1115,12 @@ function render(){
       <button class="db-open-btn install-app-btn" id="installAppBtn">📲 Namesti aplikacijo</button>
     </div>
 
-    <section class="panel">
+    <nav class="quick-nav" aria-label="Hitra navigacija">
+      <button id="jumpWeekBtn">📅 Teden</button>
+      <button id="jumpShoppingBtn">🛒 Nakupovalni seznam</button>
+    </nav>
+
+    <section class="panel" id="weekPanel">
       <h2>Tedenski meni</h2>
       <p class="sub">Za vsak dan izberi obrok iz baze. Klikni 📖, da odpreš recept.</p>
       <div class="table-scroll">
@@ -1113,7 +1131,7 @@ function render(){
       </div>
     </section>
 
-    <section class="panel">
+    <section class="panel" id="shoppingPanel">
       <h2>Nakupovalni seznam</h2>
       <p class="sub">Sestavljen iz sestavin vseh obrokov, izbranih v tedenskem meniju zgoraj — spodaj lahko dopišeš še kar koli ročno.</p>
       <div class="shop-add-row">
@@ -1140,6 +1158,12 @@ function render(){
 }
 
 function bindMainEvents(){
+  document.getElementById('jumpWeekBtn').addEventListener('click', ()=>{
+    document.getElementById('weekPanel').scrollIntoView({ behavior:'smooth', block:'start' });
+  });
+  document.getElementById('jumpShoppingBtn').addEventListener('click', ()=>{
+    document.getElementById('shoppingPanel').scrollIntoView({ behavior:'smooth', block:'start' });
+  });
   document.getElementById('prevWeekBtn').addEventListener('click', ()=>changeWeek(-7));
   document.getElementById('nextWeekBtn').addEventListener('click', ()=>changeWeek(7));
   const todayBtn = document.getElementById('todayBtn');
