@@ -1,0 +1,1830 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tedenski jedilnik</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#24543F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Jedilnik">
+<link rel="apple-touch-icon" href="./icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #F3F5F0;
+    --surface: #FFFFFF;
+    --ink: #1C2621;
+    --muted: #75847B;
+    --primary: #24543F;
+    --primary-light: #DDEAE1;
+    --primary-mid: #9CC1AC;
+    --accent: #C68A2E;
+    --accent-light: #F3E3C4;
+    --border: #E1E6DD;
+    --radius: 19px;
+
+    --cat-zajtrk: #C68A2E;
+    --cat-zajtrk-bg: #F3E3C4;
+    --cat-malica: #C15B6E;
+    --cat-malica-bg: #F5DFE2;
+    --cat-kosilo: #24543F;
+    --cat-kosilo-bg: #DDEAE1;
+    --cat-vecerja: #8B4F6B;
+    --cat-vecerja-bg: #ECDDE4;
+  }
+  *{ box-sizing: border-box; }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', sans-serif;
+    padding: 28px 20px 70px;
+  }
+  .wrap{ max-width: 1180px; margin: 0 auto; }
+
+  header{
+    display:flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+  .eyebrow{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 4px;
+  }
+  h1{
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 36px;
+    margin: 0;
+    line-height: 1.05;
+  }
+  .title-row{ display:flex; align-items:center; gap: 10px; flex-wrap: wrap; }
+  .nav-btn{
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--primary);
+    font-size: 17px;
+    cursor: pointer;
+    display:flex; align-items:center; justify-content:center;
+    flex: none;
+  }
+  .nav-btn:hover{ background: var(--primary-light); }
+  .week-range{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .today-btn{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size: 12.5px;
+    color: var(--muted);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    cursor: pointer;
+  }
+  .today-btn:hover{ color: var(--ink); border-color: var(--muted); }
+
+  .toolbar{
+    display:flex; justify-content:flex-end; gap: 10px; flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .db-open-btn{
+    display:flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:600; font-size: 14px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--primary);
+    cursor: pointer;
+  }
+  .db-open-btn:hover{ background: var(--primary-light); }
+  .generate-btn{ background: var(--primary); color: #fff; border-color: var(--primary); }
+  .generate-btn:hover{ background: #1B4132; }
+  .install-app-btn{ display:none; }
+  .install-app-btn.visible{ display:flex; }
+
+  .panel{
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 26px 30px;
+    margin-bottom: 28px;
+  }
+  .panel h2{
+    font-family:'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 6px;
+  }
+  .panel .sub{
+    font-size: 13px;
+    color: var(--muted);
+    margin: 0 0 20px;
+  }
+
+  /* ---------- Weekly menu table ---------- */
+  .table-scroll{ overflow-x:auto; padding-bottom: 4px; }
+  table.menu{
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    min-width: 640px;
+  }
+  table.menu th{
+    text-align:left;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    padding: 0 8px 8px;
+    text-transform: uppercase;
+  }
+  table.menu td{
+    padding: 5px 8px 5px 0;
+    vertical-align: middle;
+  }
+  .day-cell{
+    font-family:'Fraunces', serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    padding-right: 12px !important;
+    white-space: nowrap;
+  }
+  .day-cell .date{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-weight: 400;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  tr.day-row.today td.day-cell{ color: var(--primary); }
+  tr.day-row.today{ background: var(--primary-light); }
+  tr.day-row.today td{ border-radius: 0; }
+
+  /* Card-per-day layout on narrow screens instead of a horizontally
+     scrolling table — much easier to use one-handed on a phone. */
+  @media (max-width: 700px){
+    .table-scroll{ overflow-x: visible; }
+    table.menu{ min-width: 0; }
+    table.menu, table.menu thead, table.menu tbody, table.menu tr, table.menu td, table.menu th{
+      display: block; width: 100%;
+    }
+    table.menu thead{ display: none; }
+    tr.day-row{
+      border: 1px solid var(--border); border-radius: 20px;
+      padding: 18px 18px 10px; margin-bottom: 18px; background: var(--surface);
+    }
+    tr.day-row.today{ border-color: var(--primary); border-width: 2px; background: var(--primary-light); }
+    table.menu td{ padding: 10px 0; }
+    .day-cell{
+      padding-bottom: 12px !important;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 8px;
+      display:flex !important; align-items:baseline; gap: 10px;
+      font-size: 18px;
+    }
+    .day-cell .date{ display:inline; font-size: 13px; }
+    .today-badge{ font-size: 10.5px; padding: 3px 8px; }
+    table.menu td:not(.day-cell)::before{
+      content: attr(data-label);
+      display:block;
+      font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted);
+      text-transform: uppercase; letter-spacing:0.06em; margin-bottom: 6px;
+    }
+    .cell-inner{ gap: 10px; }
+    select.meal-select{
+      max-width: none; font-size: 15px; padding: 12px 10px; min-height: 46px;
+    }
+    input.custom-entry{ font-size: 13.5px; padding: 8px 9px; margin-top: 6px; }
+    .cell-thumb{ width: 42px; height: 42px; border-radius: 9px; }
+    .view-recipe-btn{ width: 42px; height: 42px; font-size: 18px; border-radius: 10px; }
+  }
+  .today-badge{
+    display:inline-block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 9px; font-weight: 600; letter-spacing: 0.06em;
+    background: var(--primary); color: #fff;
+    padding: 2px 6px; border-radius: 999px;
+    margin-left: 6px; vertical-align: middle;
+  }
+  .cell-inner{ display:flex; align-items:center; gap: 6px; }
+  select.meal-select{
+    flex: 1;
+    min-width: 0;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    padding: 8px 8px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    max-width: 190px;
+  }
+  select.meal-select.empty-select{
+    border-style: dashed;
+    border-color: var(--primary-mid);
+    background: var(--bg);
+    color: var(--muted);
+  }
+  select.meal-select:disabled{ color: var(--muted); background: var(--bg); }
+  select.meal-select.filled-zajtrk{ border-color: var(--cat-zajtrk); background: var(--cat-zajtrk-bg); }
+  select.meal-select.filled-malica{ border-color: var(--cat-malica); background: var(--cat-malica-bg); }
+  select.meal-select.filled-kosilo{ border-color: var(--cat-kosilo); background: var(--cat-kosilo-bg); }
+  select.meal-select.filled-vecerja{ border-color: var(--cat-vecerja); background: var(--cat-vecerja-bg); }
+  .view-recipe-btn{
+    flex: none;
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    font-size: 15px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .view-recipe-btn:hover{ background: var(--primary-light); }
+  .cell-thumb{
+    flex: none;
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    object-fit: cover;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+  }
+  .cell-thumb:hover{ border-color: var(--primary-mid); }
+  input.custom-entry{
+    width: 100%;
+    margin-top: 4px;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size: 12px;
+    font-style: italic;
+    padding: 5px 7px;
+    border-radius: 6px;
+    border: 1px dashed var(--border);
+    background: transparent;
+    color: var(--ink);
+    max-width: 190px;
+  }
+  input.custom-entry:focus{ outline: 2px solid var(--primary-mid); outline-offset: 1px; font-style: normal; }
+  input.custom-entry:not(:placeholder-shown){ border-style: solid; background: var(--bg); }
+
+  /* ---------- Shopping list ---------- */
+  .shop-cat-group{ margin-bottom: 18px; }
+  .shop-cat-group:last-child{ margin-bottom: 0; }
+  .shop-cat-heading{
+    font-family:'Fraunces', serif; font-weight: 600; font-size: 15px;
+    color: var(--ink); margin-bottom: 6px;
+    padding-bottom: 6px; border-bottom: 1px solid var(--border);
+  }
+  .shop-list{ list-style:none; margin:0; padding:0; columns: 2; column-gap: 24px; }
+  @media (max-width: 640px){ .shop-list{ columns: 1; } }
+  .shop-item{ display:flex; align-items:center; gap: 9px; padding: 6px 0; break-inside: avoid; font-size: 14px; }
+  .shop-item input[type=checkbox]{ width: 22px; height: 22px; accent-color: var(--primary); flex: none; cursor: pointer; }
+  .shop-item.checked span.txt{ color: var(--muted); text-decoration: line-through; }
+  .shop-item .count{ font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted); }
+  .shop-item .txt{ flex:1; }
+  .shop-del-btn{
+    border:none; background:none; color: var(--muted); cursor:pointer;
+    font-size: 13px; padding: 9px 8px; margin: -9px -8px -9px 0; flex: none;
+    line-height: 1; border-radius: 6px;
+  }
+  .shop-del-btn:hover{ color: var(--ink); }
+  .shop-add-row{ display:flex; gap: 8px; margin-bottom: 18px; }
+  .shop-add-row input{
+    flex: 1; min-width: 0;
+    font-family:'IBM Plex Sans', sans-serif; font-size: 14px;
+    padding: 10px 12px; border-radius: 9px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--ink);
+  }
+  .shop-add-row input:focus{ outline: 2px solid var(--primary-mid); outline-offset: 1px; }
+  .shop-add-row button{
+    font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size: 14px;
+    padding: 10px 16px; border-radius: 9px; border: none;
+    background: var(--primary); color: #fff; cursor:pointer; flex:none;
+  }
+  .shop-add-row button:hover{ background:#1B4132; }
+  .shop-empty{ color: var(--muted); font-size: 14px; }
+
+  /* ---------- Search-by-ingredients modal ---------- */
+  .search-input-row{ display:flex; gap: 8px; margin-bottom: 16px; }
+  .search-input-row input{
+    flex:1; min-width:0;
+    font-family:'IBM Plex Sans', sans-serif; font-size: 14px;
+    padding: 10px 12px; border-radius: 9px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--ink);
+  }
+  .search-input-row input:focus{ outline: 2px solid var(--primary-mid); outline-offset: 1px; }
+  .search-input-row button{
+    font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size: 14px;
+    padding: 10px 16px; border-radius: 9px; border: none;
+    background: var(--primary); color: #fff; cursor:pointer; flex:none;
+  }
+  .search-input-row button:hover{ background:#1B4132; }
+  .search-results{ display:flex; flex-direction:column; gap: 8px; }
+  .search-card{
+    border: 1px solid var(--border); border-radius: 18px;
+    padding: 12px 14px; background: var(--surface);
+  }
+  .search-card-row{ display:flex; gap: 10px; align-items:center; cursor: pointer; }
+  .search-card-row:hover{ opacity: 0.85; }
+  .search-thumb{ width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex:none; }
+  .search-thumb-empty{ background: var(--bg); border: 1px dashed var(--border); }
+  .search-card-body{ flex:1; min-width:0; }
+  .search-card-top{ display:flex; align-items:center; justify-content:space-between; gap: 8px; }
+  .search-card-name{ font-family:'Fraunces', serif; font-weight:600; font-size: 14.5px; }
+  .search-card-cat{ font-family:'IBM Plex Mono', monospace; font-size: 11px; flex:none; }
+  .search-card-match{ font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .search-card-actions{ display:flex; gap: 8px; margin-top: 8px; }
+  .search-action-btn{
+    font-family:'IBM Plex Sans', sans-serif; font-size: 12.5px; font-weight:600;
+    padding: 6px 12px; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--ink); cursor: pointer;
+  }
+  .search-action-btn:hover{ background: var(--primary-light); }
+  .search-action-btn.active{ background: var(--primary); color: #fff; border-color: var(--primary); }
+  .day-picker{
+    display:flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;
+    padding-top: 10px; border-top: 1px dashed var(--border);
+  }
+  .day-pick-btn{
+    display:flex; flex-direction:column; align-items:center; gap:1px;
+    font-family:'IBM Plex Sans', sans-serif; font-size: 11.5px; font-weight:600;
+    padding: 6px 9px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--ink); cursor: pointer;
+  }
+  .day-pick-btn span{ font-family:'IBM Plex Mono', monospace; font-weight:400; font-size: 10px; color: var(--muted); }
+  .day-pick-btn:hover{ background: var(--primary-light); }
+  .day-pick-btn.picked{ background: var(--primary); color: #fff; }
+  .day-pick-btn.picked span{ color: #fff; opacity:.8; }
+
+  footer{
+    display:flex; justify-content: space-between; align-items:center;
+    margin-top: 6px; font-size: 12px; color: var(--muted);
+    flex-wrap: wrap; gap: 10px;
+  }
+  footer button{
+    font-family:'IBM Plex Sans', sans-serif; font-size: 12.5px; color: var(--muted);
+    background: none; border: 1px solid var(--border); border-radius: 7px;
+    padding: 6px 12px; cursor: pointer;
+  }
+  footer button:hover{ color: var(--ink); border-color: var(--muted); }
+
+  .loading{ text-align:center; color: var(--muted); font-size: 13px; padding: 30px 0; }
+
+  /* ---------- Modals ---------- */
+  .modal-backdrop{
+    position: fixed; inset: 0;
+    background: rgba(28,38,33,0.45);
+    display:flex; align-items:flex-start; justify-content:center;
+    padding: 24px 14px;
+    overflow-y: auto;
+    z-index: 100;
+  }
+  .modal-box{
+    background: var(--surface);
+    border-radius: 20px;
+    max-width: 900px;
+    width: 100%;
+    padding: 28px 26px 30px;
+    margin: auto;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+  }
+  .modal-box.narrow{ max-width: 560px; }
+  .modal-head{
+    display:flex; align-items:flex-start; justify-content:space-between;
+    gap: 12px; margin-bottom: 18px;
+  }
+  .modal-head h2{
+    font-family:'Fraunces', serif; font-size: 24px; font-weight:600; margin:0;
+  }
+  @media (max-width: 640px){
+    .modal-backdrop{ padding: 0; align-items: stretch; }
+    .modal-box{
+      border-radius: 0;
+      max-width: none;
+      min-height: 100%;
+      max-height: none;
+      padding: 20px 16px 24px;
+    }
+    .modal-box.narrow{ max-width: none; }
+    .modal-head h2{ font-size: 21px; }
+  }
+  .modal-close{
+    flex: none;
+    width: 44px; height:44px; border-radius:50%;
+    border:1px solid var(--border); background: var(--bg);
+    cursor:pointer; font-size:17px; color: var(--muted);
+  }
+  .modal-close:hover{ color: var(--ink); }
+
+  /* recipe modal specifics */
+  .recipe-topline{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom: 14px; }
+  .prep-time-field{
+    display:flex; align-items:center; gap: 6px;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 999px;
+    padding: 4px 12px 4px 10px;
+  }
+  .prep-time-icon{ font-size: 13px; }
+  .prep-time-field input{
+    border:none; background:none; outline:none;
+    font-family:'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--ink); width: 128px;
+  }
+  .prep-time-field input::placeholder{ font-weight: 400; color: var(--muted); }
+  .star-rating{ display:flex; gap: 2px; }
+  .star-rating .star{
+    font-size: 22px; color: var(--border); cursor: pointer; line-height:1;
+    padding: 8px 3px; margin: -8px -3px;
+  }
+  .star-rating .star.on{ color: var(--accent); }
+  .star-rating .star:hover{ color: var(--accent); opacity: .7; }
+  .last-cooked{
+    font-family:'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted);
+    margin-left: auto;
+  }
+  .last-cooked.muted{ opacity: .7; }
+  .cat-select{
+    font-family:'IBM Plex Sans', sans-serif; font-size: 13px; font-weight:600;
+    padding: 6px 10px; border-radius: 999px; border: 1.5px solid var(--border);
+    background: var(--bg); color: var(--ink);
+  }
+  .macro-row{ display:flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
+  @media (max-width: 640px){
+    .macro-row{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+    .macro-field input{ width: 100%; box-sizing: border-box; font-size: 16px; padding: 9px 10px; }
+  }
+  .image-row{ display:flex; align-items:center; gap: 14px; margin-bottom: 16px; }
+  .meal-photo-preview{ width: 84px; height: 84px; border-radius: 10px; object-fit: cover; flex:none; border: 1px solid var(--border); }
+  .meal-photo-placeholder{
+    width: 84px; height: 84px; border-radius: 10px; flex:none;
+    background: var(--bg); border: 1px dashed var(--border);
+    display:flex; align-items:center; justify-content:center;
+    font-size: 11px; color: var(--muted); text-align:center; padding: 4px;
+  }
+  .image-row-actions{ display:flex; flex-direction:column; gap: 8px; align-items:flex-start; }
+  .upload-btn{
+    font-family:'IBM Plex Sans', sans-serif; font-size: 13px; font-weight:600;
+    padding: 7px 14px; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--primary-light); color: var(--primary); cursor: pointer;
+  }
+  .upload-btn:hover{ background: var(--primary-mid); color: #fff; }
+  .macro-field{ display:flex; flex-direction:column; gap: 4px; }
+  .macro-field label{
+    font-family:'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing:0.05em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .macro-field input{
+    width: 84px;
+    font-family:'IBM Plex Sans', sans-serif; font-size: 14px;
+    padding: 7px 9px; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--ink);
+  }
+  .macro-field input:focus{ outline: 2px solid var(--primary-mid); outline-offset: 1px; }
+  .modal-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 640px){ .modal-grid{ grid-template-columns: 1fr; } }
+  .modal-grid label, .field-label{
+    font-family:'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing:0.05em;
+    text-transform: uppercase; color: var(--muted); display:block; margin-bottom:5px;
+  }
+  .modal-grid textarea, .recipe-name-input{
+    width: 100%;
+    font-family: 'IBM Plex Sans', sans-serif; font-size: 14px;
+    padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--ink); resize: vertical; min-height: 140px;
+  }
+  .recipe-name-input{ min-height: unset; font-size: 20px; font-family:'Fraunces', serif; font-weight:600; margin-bottom: 10px; }
+  .modal-grid textarea:focus, .recipe-name-input:focus{ outline: 2px solid var(--primary-mid); outline-offset: 1px; }
+  .modal-actions{ display:flex; justify-content:space-between; align-items:center; margin-top: 18px; }
+  .modal-actions .save-note{ font-size: 12px; color: var(--muted); }
+  .danger-btn{
+    font-family:'IBM Plex Sans', sans-serif; font-size: 13px; color: #A0453A;
+    background: none; border: 1px solid #E9C9C3; border-radius: 7px;
+    padding: 7px 14px; cursor: pointer;
+  }
+  .danger-btn:hover{ background: #FBEEEC; }
+
+  /* database modal specifics */
+  .db-search-row{ position: relative; margin-bottom: 16px; }
+  .db-search-row input{
+    width: 100%;
+    font-family:'IBM Plex Sans', sans-serif; font-size: 14px;
+    padding: 10px 36px 10px 12px; border-radius: 9px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--ink);
+  }
+  .db-search-row input:focus{ outline: 2px solid var(--primary-mid); outline-offset: 1px; }
+  .db-search-row button{
+    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+    border:none; background:none; color: var(--muted); cursor:pointer; font-size: 13px;
+  }
+  .db-search-row button:hover{ color: var(--ink); }
+  .db-grid{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  @media (max-width: 860px){ .db-grid{ grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 500px){ .db-grid{ grid-template-columns: 1fr; } }
+  .cat-col{
+    border-radius: 18px; background: var(--bg); border: 1px solid var(--border);
+    padding: 16px; display:flex; flex-direction:column; min-height: 160px;
+  }
+  .cat-head{ display:flex; align-items:center; gap:8px; font-family:'Fraunces', serif; font-weight:600; font-size: 15px; margin-bottom: 8px; }
+  .cat-dot{ width:10px; height:10px; border-radius:50%; flex:none; }
+  .cat-count{ margin-left:auto; font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
+  .meal-list{ list-style:none; margin:0; padding:0 2px 0 0; flex:1; display:flex; flex-direction:column; gap:6px; margin-bottom: 10px; max-height: 340px; overflow-y: auto; }
+  .meal-item{
+    display:flex; align-items:center; justify-content:space-between;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 7px 10px; font-size: 13.5px; cursor: pointer;
+  }
+  .meal-item .meal-name{ display:flex; align-items:center; gap:6px; }
+  .meal-thumb{ width:22px; height:22px; border-radius:5px; object-fit:cover; flex:none; }
+  .meal-item .recipe-dot{ width:6px; height:6px; border-radius:50%; background: var(--accent); flex: none; }
+  .meal-item .del-btn{
+    border:none; background:none; color: var(--muted); cursor:pointer;
+    font-size: 15px; padding: 8px; margin: -8px -6px -8px 0;
+    line-height: 1; border-radius: 6px;
+  }
+  .meal-item .del-btn:hover{ color: var(--ink); }
+  .cat-empty{ font-size: 12.5px; color: var(--muted); padding: 4px 2px 8px; }
+  .cat-add{ display:flex; gap:6px; }
+  .cat-add input{
+    flex:1; font-family:'IBM Plex Sans', sans-serif; font-size: 13px;
+    padding: 8px 10px; border-radius: 7px; border: 1px solid var(--border);
+    background: var(--surface); color: var(--ink); min-width: 0;
+  }
+  .cat-add input:focus{ outline: 2px solid var(--primary-mid); outline-offset: 1px; }
+  .cat-add button{
+    font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size: 13px;
+    padding: 8px 12px; border-radius: 7px; border: none;
+    background: var(--primary); color: #fff; cursor:pointer; flex:none;
+  }
+  .cat-add button:hover{ background:#1B4132; }
+  .db-footer{ margin-top: 16px; border-top: 1px solid var(--border); padding-top: 14px; }
+  .db-footer-head{ display:flex; align-items:center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+  .db-footer-head span.lbl{ font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted); }
+  .db-footer-head button{
+    font-family:'IBM Plex Sans', sans-serif; font-size: 12.5px; color: var(--primary);
+    background: var(--primary-light); border: none; border-radius: 7px;
+    padding: 6px 12px; cursor: pointer;
+  }
+  .db-footer-head button:hover{ background: var(--primary-mid); color: #fff; }
+  textarea.io-box{
+    width: 100%; min-height: 80px; font-family: 'IBM Plex Mono', monospace; font-size: 12px;
+    padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--bg); color: var(--ink); resize: vertical;
+  }
+  .io-note{ font-size: 11.5px; color: var(--muted); margin: 6px 0 0; }
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <div class="loading" id="loading">Nalagam jedilnik …</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ====== 1) SEM PRILEPI SVOJ firebaseConfig IZ FIREBASE CONSOLE ======
+const firebaseConfig = {
+  apiKey: "AIzaSyAm_iXo27uK0ASguOJK7x43WLbE8LscI0Y",
+  authDomain: "baza-receptov.firebaseapp.com",
+  projectId: "baza-receptov",
+  storageBucket: "baza-receptov.firebasestorage.app",
+  messagingSenderId: "1066144103715",
+  appId: "1:1066144103715:web:9d2c585525c9bc1b24e096",
+};
+// =====================================================================
+
+const CONFIG_READY = !!firebaseConfig.apiKey && !!firebaseConfig.projectId;
+let dbFs = null;
+if(CONFIG_READY){
+  const fbApp = initializeApp(firebaseConfig);
+  dbFs = getFirestore(fbApp);
+}
+
+const DAY_NAMES = ['Ponedeljek','Torek','Sreda','Četrtek','Petek','Sobota','Nedelja'];
+const CATEGORIES = [
+  { id: 'zajtrk',  label: 'Zajtrk',  dot: 'var(--cat-zajtrk)' },
+  { id: 'kosilo',  label: 'Kosilo',  dot: 'var(--cat-kosilo)' },
+  { id: 'vecerja', label: 'Večerja', dot: 'var(--cat-vecerja)' },
+  { id: 'malica',  label: 'Sladice',  dot: 'var(--cat-malica)' },
+];
+const REAL_TODAY = new Date();
+
+let db = { meals: [] };
+let weekMenu = { selections: {}, shoppingChecked: {}, extraItems: [] };
+let weekStart = getMonday(REAL_TODAY);
+let openModal = null; // null | 'db' | 'recipe' | 'search'
+let recipeModalMealId = null;
+let recipeModalIsNew = false;
+let searchQueryText = '';
+let searchExpandedMealId = null;
+let dbSearchText = '';
+
+function pad(n){ return String(n).padStart(2,'0'); }
+function isoDate(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function getMonday(d){
+  const x = new Date(d);
+  const day = (x.getDay()+6)%7;
+  x.setDate(x.getDate()-day);
+  x.setHours(0,0,0,0);
+  return x;
+}
+function addDays(d, n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
+function weekKey(monday){ return `week-${isoDate(monday)}`; }
+function fmtShort(d){ return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.`; }
+
+function mealDocFields(m){
+  return {
+    name: m.name || '', category: m.category || 'kosilo',
+    ingredients: m.ingredients || [], recipe: m.recipe || '',
+    kcal: m.kcal || '', carbs: m.carbs || '', protein: m.protein || '', fat: m.fat || '',
+    image: m.image || '',
+    lastCooked: m.lastCooked || '', rating: m.rating || 0,
+    prepTime: m.prepTime || '', servings: m.servings || '',
+  };
+}
+
+async function loadDb(){
+  try{
+    const snap = await getDocs(collection(dbFs, 'meals'));
+    const meals = [];
+    snap.forEach(d => meals.push({ id: d.id, ...d.data() }));
+    db = { meals };
+    return;
+  }catch(e){ console.error('Nalaganje baze ni uspelo', e); }
+  db = { meals: [] };
+}
+// Persists a single meal document (each meal = its own Firestore doc,
+// so large photos on some meals can't blow past Firestore's 1MB/document
+// limit for the whole database the way one shared doc would).
+async function saveMeal(meal){
+  try{ await setDoc(doc(dbFs, 'meals', meal.id), mealDocFields(meal)); return true; }
+  catch(e){ console.error('Obrok se ni shranil', e); return false; }
+}
+async function deleteMealDoc(id){
+  try{ await deleteDoc(doc(dbFs, 'meals', id)); return true; }
+  catch(e){ console.error('Obroka ni bilo mogoče izbrisati', e); return false; }
+}
+async function saveMealsBatch(meals){
+  try{
+    const batch = writeBatch(dbFs);
+    meals.forEach(m => batch.set(doc(dbFs, 'meals', m.id), mealDocFields(m)));
+    await batch.commit();
+    return true;
+  }catch(e){ console.error('Obrokov ni bilo mogoče shraniti', e); return false; }
+}
+// Writes in small batches instead of one big one — keeps each request light
+// (important on mobile networks) and means a mid-way failure doesn't lose
+// meals that already saved successfully.
+async function saveMealsInChunks(meals, chunkSize=15){
+  for(let i=0;i<meals.length;i+=chunkSize){
+    const ok = await saveMealsBatch(meals.slice(i, i+chunkSize));
+    if(!ok) return false;
+  }
+  return true;
+}
+async function deleteAllMeals(){
+  try{
+    const batch = writeBatch(dbFs);
+    db.meals.forEach(m => batch.delete(doc(dbFs, 'meals', m.id)));
+    await batch.commit();
+    return true;
+  }catch(e){ console.error('Baze ni bilo mogoče počistiti', e); return false; }
+}
+async function loadWeek(){
+  const key = weekKey(weekStart);
+  try{
+    const snap = await getDoc(doc(dbFs, 'mealplan', key));
+    if(snap.exists() && snap.data().selections){
+      const d = snap.data();
+      weekMenu = { selections: d.selections, shoppingChecked: d.shoppingChecked || {}, extraItems: d.extraItems || [] };
+      return;
+    }
+  }catch(e){ console.error('Nalaganje tedna ni uspelo', e); }
+  weekMenu = { selections: {}, shoppingChecked: {}, extraItems: [] };
+}
+async function saveWeek(){
+  const key = weekKey(weekStart);
+  try{ await setDoc(doc(dbFs, 'mealplan', key), weekMenu); }
+  catch(e){ console.error('Teden se ni shranil', e); }
+}
+
+function mealsByCategory(catId){ return db.meals.filter(m => m.category === catId); }
+function mealById(id){ return db.meals.find(x=>x.id===id) || null; }
+function mealName(id){ const m = mealById(id); return m ? m.name : null; }
+
+// Whenever a viewed week includes days that are today or in the past, treat
+// any real (non-custom) meal assigned there as "cooked" that day — this is
+// how lastCooked gets filled in automatically, just from browsing/using the
+// weekly menu. Weeks never opened won't be picked up.
+async function syncCookedHistory(){
+  const todayIso = isoDate(REAL_TODAY);
+  const toSave = [];
+  for(let i=0;i<7;i++){
+    const d = addDays(weekStart, i);
+    const dayIso = isoDate(d);
+    if(dayIso > todayIso) continue;
+    const dayMap = weekMenu.selections[dayIso];
+    if(!dayMap) continue;
+    Object.keys(dayMap).forEach(cat=>{
+      const val = dayMap[cat];
+      if(!val || val.startsWith('~')) return; // custom free-text entry, not a saved meal
+      const meal = mealById(val);
+      if(!meal) return;
+      if(!meal.lastCooked || meal.lastCooked < dayIso){
+        meal.lastCooked = dayIso;
+        if(!toSave.includes(meal)) toSave.push(meal);
+      }
+    });
+  }
+  if(toSave.length) await saveMealsInChunks(toSave);
+}
+
+function daysAgoLabel(isoStr){
+  if(!isoStr) return null;
+  const then = new Date(isoStr + 'T00:00:00');
+  const diffDays = Math.round((new Date(isoDate(REAL_TODAY)+'T00:00:00') - then) / 86400000);
+  if(diffDays === 0) return 'danes';
+  if(diffDays === 1) return 'včeraj';
+  if(diffDays > 1) return `${diffDays} dni nazaj`;
+  return 'v prihodnjih dneh'; // lastCooked somehow in the future — shouldn't normally happen
+}
+function hasRecipeData(m){
+  return (m.ingredients && m.ingredients.length>0) || (m.recipe && m.recipe.trim().length>0);
+}
+function catLabel(id){ const c = CATEGORIES.find(x=>x.id===id); return c ? c.label : id; }
+
+function normalizeText(s){
+  return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+}
+
+function searchMealsByIngredients(queryText){
+  const terms = queryText.split(/[,;\n]+/).map(normalizeText).filter(Boolean);
+  if(terms.length === 0) return { terms: [], results: [] };
+  const results = db.meals.map(m=>{
+    const ingNorm = (m.ingredients||[]).map(normalizeText);
+    const nameNorm = normalizeText(m.name);
+    const matchedTerms = terms.filter(t => ingNorm.some(i=>i.includes(t)) || nameNorm.includes(t));
+    return { meal: m, matchCount: matchedTerms.length, matchedTerms };
+  }).filter(r=>r.matchCount>0)
+    .sort((a,b)=> b.matchCount - a.matchCount || a.meal.name.localeCompare(b.meal.name,'sl'));
+  return { terms, results };
+}
+
+const UNIT_ALIASES = {
+  'g':'g','dag':'dag','kg':'kg','ml':'ml','dcl':'dcl','l':'l',
+  'žlica':'žlica','žlici':'žlica','žlice':'žlica','žlico':'žlica',
+  'žlička':'žlička','žlički':'žlička','žličke':'žlička','žličko':'žlička','žličk':'žlička',
+  'skodelica':'skodelica','skodelici':'skodelica','skodelice':'skodelica','skodelico':'skodelica',
+  'kos':'kos','kosa':'kos','kosov':'kos','kosi':'kos',
+  'stroka':'stroka','stroki':'stroka','strok':'stroka',
+  'ščepec':'ščepec','ščep':'ščepec',
+  'zrno':'zrno','zrna':'zrno',
+};
+const FRACTION_MAP = { '½':0.5, '¼':0.25, '¾':0.75, '⅓':0.334, '⅔':0.667 };
+
+function parseQty(token){
+  if(FRACTION_MAP[token] != null) return FRACTION_MAP[token];
+  const cleaned = token.replace(',', '.').split('-')[0].split('/');
+  if(cleaned.length === 2){
+    const n = parseFloat(cleaned[0]), d = parseFloat(cleaned[1]);
+    if(!isNaN(n) && !isNaN(d) && d) return n/d;
+  }
+  const n = parseFloat(token.replace(',', '.').split('-')[0]);
+  return isNaN(n) ? null : n;
+}
+
+function stripDescriptors(text){
+  return text.replace(/\([^)]*\)/g, '').split(',')[0].trim();
+}
+
+// Very lightweight Slovenian noun-ending stripper — not a real lemmatizer,
+// just enough to match common declensions of the same word for shopping-list
+// grouping (jajce/jajca/jajc/jajci -> "jajc"). Only strips if a reasonable
+// stem remains, to avoid mangling short words.
+function stemSl(word){
+  const suffixes = ['ami','imi','ov','ev','ih','em','om','ah','eh','a','e','i','o','u'];
+  for(const suf of suffixes){
+    if(word.endsWith(suf) && word.length - suf.length >= 3){
+      return word.slice(0, word.length - suf.length);
+    }
+  }
+  return word;
+}
+
+function formatQty(n){
+  const rounded = Math.round(n * 100) / 100;
+  return Number.isInteger(rounded) ? String(rounded) : String(rounded).replace(/0+$/,'').replace(/\.$/,'');
+}
+
+function parseIngredientLine(line){
+  const m = line.match(/^([\d½¼¾⅓⅔]+(?:[.,]\d+)?(?:-\d+)?(?:\/\d+)?)\s*([a-zA-ZčšžĆĐ]*)\.?\s*(.*)$/);
+  if(!m || m[1] === undefined) return { qty: null, unit: '', name: stripDescriptors(line) || line };
+  const qty = parseQty(m[1]);
+  if(qty == null) return { qty: null, unit: '', name: stripDescriptors(line) || line };
+  const unitToken = (m[2] || '').toLowerCase();
+  if(UNIT_ALIASES[unitToken]){
+    return { qty, unit: UNIT_ALIASES[unitToken], name: stripDescriptors(m[3]) };
+  }
+  // no recognized unit word — the "unit" token is actually the start of the name
+  const rest = (unitToken + ' ' + m[3]).trim();
+  return { qty, unit: '', name: stripDescriptors(rest) };
+}
+
+// Rough meal-type classifier for "Kosilo" recipes, used by the week generator
+// (3 mesne, 1 riba, 1 testenine, 1 juha, 1 vegetarijanska). Based on keyword
+// matches in the name + ingredients — best-effort, not a real diet/nutrition
+// classifier.
+const RIBA_KW = ['riba','losos','tuna','skus','postrv','sardel','skamp','gamber','skoljk','lignj','hobotnic','polip','oslic','brancin','orad','morsk sadez'];
+const TESTENINE_KW = ['testenin','njok','spaget','penne','fuzij','lazanj','rezanc','makaron','tortelin'];
+const JUHA_KW = ['juh','krem juh','goveja juh','zelenjavna juh'];
+const MESO_KW = ['piscan','puran','goved','svinjin','telet','klobas','salam','sunk','slanin','meso','mesn','zrezek','krac','rebr','pancet','prsut','burger','cevap','jetr'];
+
+function classifyMealType(meal){
+  const text = normalizeText(meal.name + ' ' + (meal.ingredients||[]).join(' '));
+  if(JUHA_KW.some(k=>text.includes(k))) return 'juha';
+  if(RIBA_KW.some(k=>text.includes(k))) return 'riba';
+  if(TESTENINE_KW.some(k=>text.includes(k))) return 'testenine';
+  if(MESO_KW.some(k=>text.includes(k))) return 'meso';
+  return 'vegetarijansko';
+}
+
+const SHOP_CATEGORIES = [
+  { id: 'sadje-zelenjava', label: 'Sadje/zelenjava', emoji: '🥬', keywords: [
+    'cebul','ces','korenj','paradiznik','paprik','buc','spinac','solat','zelj',
+    'brokol','cvetac','jabolk','banan','limon','limet','pomaranc','jagod','borovnic','malin',
+    'grozdj','hrusk','avokad','gob','por','zelen','peters','koper','bazilik','meta','ingver',
+    'kumar','redkvic','breskv','marelic','sliv','kivi','ananas','melon','lubenic','rukol','blitv',
+    'artican','sparglj','repic','endivij','radic','regrat','koleraba','fizol','grah',
+    'baklazan','rabarbar','rozin','datelj','fig','oreh','mandelj','lesnik','kokos','chi',
+  ]},
+  { id: 'meso', label: 'Meso', emoji: '🥩', keywords: [
+    'piscan','puran','goved','svinjin','telet','klobas','salam','sunk','slanin','meso','mesn',
+    'zrezek','file','krac','rebr','mlet meso','mleto meso','pancet','prsut','burger','cevap',
+    'jetr','krvavic','ocvirk',
+  ]},
+  { id: 'riba-morski', label: 'Ribe/morski sadeži', emoji: '🐟', keywords: [
+    'losos','tuna','riba','skus','postrv','sardel','skamp','gamber','skoljk','lignj','hobotnic',
+    'polip','morsk sadez','oslic','brancin','orad',
+  ]},
+  { id: 'mlecni', label: 'Mlečni izdelki', emoji: '🥛', keywords: [
+    'mlek','jogurt','skut','sir','smetan','maslo','jajc','mascarpon','kefir','sirotk','rikot',
+    'mocarel','parmezan','feta','ementalec','kisla smetan','proteinski napitek','beljakovinski napitek',
+    'protein napitek','skyr',
+  ]},
+  { id: 'oh', label: 'Ogljikovi hidrati', emoji: '🍞', keywords: [
+    'kruh','riz','testenin','njok','zitaric','kosmic','mok','kus kus','kvinoj','quinoa','krompir',
+    'polent','jecmen','pirin','ajdova kas','prosena kas','tortilj','pita','pito','rogljic','zemlj',
+    'bageta','pesk','musli','koruzni zdrob','pura kasa',
+  ]},
+  { id: 'konzervirano', label: 'Konzervirano', emoji: '🥫', keywords: [
+    'konzerv','vlozen','pasirani paradiznik','paradiznikova mezg','koruza v pesocic','fizol v konzerv',
+    'kokosovo mlek','tunina v konzerv','pelat',
+  ]},
+  { id: 'zacimbe', label: 'Začimbe in osnovne sestavine', emoji: '🧂', keywords: [
+    'sol','poper','cili','curry','kumin','origan','timijan','rozmarin','cimet','muskatn','vanilij',
+    'kis','olje','sladkor','kvas','pecilni prasek','soda bikarbon','med','gorcic','sojina omak',
+    'oljcn olje','zacimb','lovorov','paprika v prahu','cesnov prah','cebulni prah',
+  ]},
+];
+
+function classifyShopItem(name){
+  const norm = normalizeText(name);
+  for(const cat of SHOP_CATEGORIES){
+    if(cat.keywords.some(k => norm.includes(k))) return cat.id;
+  }
+  return 'drugo';
+}
+
+function buildShoppingList(){
+  const groups = {}; // key -> { name, unit, qtySum, hasQty, count }
+  Object.keys(weekMenu.selections).forEach(day=>{
+    const dayMap = weekMenu.selections[day];
+    Object.keys(dayMap).forEach(cat=>{
+      const meal = mealById(dayMap[cat]);
+      if(!meal || !meal.ingredients) return;
+      meal.ingredients.forEach(line=>{
+        const trimmed = line.trim();
+        if(!trimmed) return;
+        const parsed = parseIngredientLine(trimmed);
+        const fullName = (parsed.name || trimmed).toLowerCase();
+        let nameForKey;
+        if(parsed.qty != null){
+          // quantity+noun line (e.g. "5 jajc", "3 velika jajca") — match on the
+          // stemmed last word so different declensions of the same noun group together
+          const words = fullName.trim().split(/\s+/);
+          const lastWord = words[words.length-1] || fullName;
+          nameForKey = stemSl(lastWord);
+        } else {
+          // free-text line (e.g. "sol in poper po okusu") — keep exact matching,
+          // stemming a whole descriptive phrase is too likely to mismatch
+          nameForKey = fullName;
+        }
+        const key = parsed.unit + '|' + nameForKey;
+        if(!groups[key]){
+          groups[key] = { name: parsed.name || trimmed, unit: parsed.unit, qtySum: 0, hasQty: false, count: 0 };
+        }
+        groups[key].count += 1;
+        if(parsed.qty != null){ groups[key].qtySum += parsed.qty; groups[key].hasQty = true; }
+      });
+    });
+  });
+  const recipeItems = Object.values(groups).map(g=>{
+    let label;
+    if(g.hasQty){
+      label = `${formatQty(g.qtySum)}${g.unit ? ' '+g.unit : ''} ${g.name}`.trim();
+    } else {
+      label = g.name;
+    }
+    return { label, count: g.count, hasQty: g.hasQty, key: (g.unit+'|'+g.name).toLowerCase(), shopCat: classifyShopItem(g.name), isManual: false };
+  });
+  const manualItems = (weekMenu.extraItems || []).map(it=>({
+    label: it.text, count: 1, hasQty: false, key: 'manual:'+it.id, shopCat: classifyShopItem(it.text), isManual: true, manualId: it.id,
+  }));
+  return recipeItems.concat(manualItems).sort((a,b)=>a.label.localeCompare(b.label,'sl'));
+}
+
+/* ============================= RENDER ============================= */
+
+function render(){
+  const app = document.getElementById('app');
+  const weekEnd = addDays(weekStart, 6);
+  const isRealCurrentWeek = isoDate(weekStart) === isoDate(getMonday(REAL_TODAY));
+
+  // ---- weekly menu table ----
+  let headCells = `<th>Dan</th>` + CATEGORIES.map(c=>`<th>${c.label}</th>`).join('');
+  let bodyRows = '';
+  for(let i=0;i<7;i++){
+    const d = addDays(weekStart, i);
+    const key = isoDate(d);
+    const isToday = key === isoDate(REAL_TODAY);
+    let cells = `<td class="day-cell">${DAY_NAMES[i]}${isToday?'<span class="today-badge">DANES</span>':''}<span class="date">${fmtShort(d)}</span></td>`;
+    CATEGORIES.forEach(cat=>{
+      const meals = mealsByCategory(cat.id);
+      const rawVal = (weekMenu.selections[key] && weekMenu.selections[key][cat.id]) || '';
+      const isCustom = rawVal.startsWith('~');
+      const customText = isCustom ? rawVal.slice(1) : '';
+      const selectedMealId = isCustom ? '' : rawVal;
+      const hasSelection = !!(selectedMealId && mealName(selectedMealId));
+      const isEmptyCell = !hasSelection && !isCustom;
+      let options = `<option value="">${hasSelection?'—':'+ dodaj obrok'}</option>`;
+      if(meals.length===0){
+        options += `<option value="" disabled>ni obrokov v bazi</option>`;
+      } else {
+        meals.forEach(m=>{
+          options += `<option value="${m.id}" ${selectedMealId===m.id?'selected':''}>${m.name}</option>`;
+        });
+      }
+      cells += `
+        <td data-label="${cat.label}">
+          <div class="cell-inner">
+            ${hasSelection && mealById(selectedMealId).image
+              ? `<img class="cell-thumb" src="${mealById(selectedMealId).image}" data-view-meal="${selectedMealId}" title="Poglej recept" alt="">`
+              : ''}
+            <select class="meal-select${hasSelection?` filled-${cat.id}`:(isEmptyCell?' empty-select':'')}" data-day="${key}" data-cat="${cat.id}" ${isCustom?'disabled':''}>
+              ${options}
+            </select>
+            ${hasSelection ? `<button class="view-recipe-btn" data-view-meal="${selectedMealId}" title="Poglej recept">📖</button>` : ''}
+          </div>
+          <input type="text" class="custom-entry" data-custom-day="${key}" data-custom-cat="${cat.id}" placeholder="ali vpiši ročno …" value="${customText.replace(/"/g,'&quot;')}">
+        </td>`;
+    });
+    bodyRows += `<tr class="day-row${isToday?' today':''}">${cells}</tr>`;
+  }
+
+  // ---- shopping list ----
+  const shopping = buildShoppingList();
+  let shopHtml;
+  if(shopping.length===0){
+    shopHtml = `<p class="shop-empty">Za ta teden še ni izbranih obrokov s sestavinami. Dodaj sestavine obrokom v bazi in jih izberi v jedilniku, ali pa spodaj dopiši kaj ročno.</p>`;
+  } else {
+    const shopGroups = {};
+    shopping.forEach(item=>{
+      if(!shopGroups[item.shopCat]) shopGroups[item.shopCat] = [];
+      shopGroups[item.shopCat].push(item);
+    });
+    const order = [...SHOP_CATEGORIES.map(c=>c.id), 'drugo'];
+    shopHtml = order.filter(id => shopGroups[id] && shopGroups[id].length).map(id=>{
+      const catDef = SHOP_CATEGORIES.find(c=>c.id===id);
+      const label = catDef ? `${catDef.emoji} ${catDef.label}` : 'Drugo';
+      const items = shopGroups[id];
+      const itemsHtml = items.map(item=>{
+        const checked = !!weekMenu.shoppingChecked[item.key];
+        return `
+          <li class="shop-item${checked?' checked':''}">
+            <input type="checkbox" data-shop-item="${item.key.replace(/"/g,'&quot;')}" ${checked?'checked':''}>
+            <span class="txt">${item.label}</span>
+            ${(!item.hasQty && item.count>1)?`<span class="count">×${item.count}</span>`:''}
+            ${item.isManual ? `<button class="shop-del-btn" data-del-manual="${item.manualId}" title="Odstrani">✕</button>` : ''}
+          </li>`;
+      }).join('');
+      return `
+        <div class="shop-cat-group">
+          <div class="shop-cat-heading">${label}</div>
+          <ul class="shop-list">${itemsHtml}</ul>
+        </div>`;
+    }).join('');
+  }
+
+  app.innerHTML = `
+    <header>
+      <div>
+        <p class="eyebrow">Tedenski pregled</p>
+        <div class="title-row">
+          <button class="nav-btn" id="prevWeekBtn" title="Prejšnji teden">‹</button>
+          <h1>Jedilnik</h1>
+          <button class="nav-btn" id="nextWeekBtn" title="Naslednji teden">›</button>
+          ${!isRealCurrentWeek ? `<button class="today-btn" id="todayBtn">Ta teden</button>` : ''}
+        </div>
+        <p class="week-range">${fmtShort(weekStart)} – ${fmtShort(weekEnd)} ${weekEnd.getFullYear()}</p>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <button class="db-open-btn generate-btn" id="generateWeekBtn">✨ Ustvari teden</button>
+      <button class="db-open-btn" id="openSearchBtn">🔎 Kaj skuhati?</button>
+      <button class="db-open-btn" id="openDbBtn">📚 Baza obrokov (${db.meals.length})</button>
+      <button class="db-open-btn install-app-btn" id="installAppBtn">📲 Namesti aplikacijo</button>
+    </div>
+
+    <section class="panel">
+      <h2>Tedenski meni</h2>
+      <p class="sub">Za vsak dan izberi obrok iz baze. Klikni 📖, da odpreš recept.</p>
+      <div class="table-scroll">
+        <table class="menu">
+          <thead><tr>${headCells}</tr></thead>
+          <tbody>${bodyRows}</tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Nakupovalni seznam</h2>
+      <p class="sub">Sestavljen iz sestavin vseh obrokov, izbranih v tedenskem meniju zgoraj — spodaj lahko dopišeš še kar koli ročno.</p>
+      <div class="shop-add-row">
+        <input type="text" id="shopAddInput" placeholder="Dopiši na seznam, npr. wc papir …" maxlength="80">
+        <button id="shopAddBtn">+ Dodaj</button>
+      </div>
+      ${shopHtml}
+    </section>
+
+    <footer>
+      <span>Podatki se shranjujejo samodejno in ostanejo samo tebi vidni.</span>
+      <button id="clearWeekBtn">Počisti ta teden</button>
+    </footer>
+
+    <div id="modalRoot"></div>
+  `;
+
+  bindMainEvents();
+  renderModal();
+}
+
+function bindMainEvents(){
+  document.getElementById('prevWeekBtn').addEventListener('click', ()=>changeWeek(-7));
+  document.getElementById('nextWeekBtn').addEventListener('click', ()=>changeWeek(7));
+  const todayBtn = document.getElementById('todayBtn');
+  if(todayBtn) todayBtn.addEventListener('click', ()=>goToWeek(getMonday(REAL_TODAY)));
+
+  document.getElementById('openDbBtn').addEventListener('click', ()=>{ openModal = 'db'; renderModal(); });
+  document.getElementById('openSearchBtn').addEventListener('click', ()=>{ openModal = 'search'; renderModal(); });
+  document.getElementById('generateWeekBtn').addEventListener('click', generateWeek);
+
+  document.querySelectorAll('.meal-select').forEach(sel=>{
+    sel.addEventListener('change', async ()=>{
+      const day = sel.getAttribute('data-day');
+      const cat = sel.getAttribute('data-cat');
+      if(!weekMenu.selections[day]) weekMenu.selections[day] = {};
+      if(sel.value) weekMenu.selections[day][cat] = sel.value;
+      else delete weekMenu.selections[day][cat];
+      await saveWeek();
+      render();
+    });
+  });
+
+  document.querySelectorAll('.custom-entry').forEach(inp=>{
+    inp.addEventListener('change', async ()=>{
+      const day = inp.getAttribute('data-custom-day');
+      const cat = inp.getAttribute('data-custom-cat');
+      const text = inp.value.trim();
+      if(!weekMenu.selections[day]) weekMenu.selections[day] = {};
+      if(text) weekMenu.selections[day][cat] = '~' + text;
+      else delete weekMenu.selections[day][cat];
+      await saveWeek();
+      render();
+    });
+  });
+
+  document.querySelectorAll('[data-view-meal]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      recipeModalMealId = btn.getAttribute('data-view-meal');
+      recipeModalIsNew = false;
+      openModal = 'recipe';
+      renderModal();
+    });
+  });
+
+  document.querySelectorAll('[data-shop-item]').forEach(cb=>{
+    cb.addEventListener('change', async ()=>{
+      const key = cb.getAttribute('data-shop-item');
+      if(cb.checked) weekMenu.shoppingChecked[key] = true;
+      else delete weekMenu.shoppingChecked[key];
+      await saveWeek();
+      render();
+    });
+  });
+
+  async function addShopItem(){
+    const input = document.getElementById('shopAddInput');
+    const text = input.value.trim();
+    if(!text) return;
+    if(!weekMenu.extraItems) weekMenu.extraItems = [];
+    weekMenu.extraItems.push({ id: 'x'+Date.now()+Math.floor(Math.random()*1000), text });
+    await saveWeek();
+    render();
+  }
+  document.getElementById('shopAddBtn').addEventListener('click', addShopItem);
+  document.getElementById('shopAddInput').addEventListener('keydown', (e)=>{
+    if(e.key==='Enter') addShopItem();
+  });
+
+  document.querySelectorAll('[data-del-manual]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const id = btn.getAttribute('data-del-manual');
+      weekMenu.extraItems = (weekMenu.extraItems||[]).filter(it=>it.id!==id);
+      delete weekMenu.shoppingChecked['manual:'+id];
+      await saveWeek();
+      render();
+    });
+  });
+
+  document.getElementById('clearWeekBtn').addEventListener('click', async ()=>{
+    const weekEnd = addDays(weekStart, 6);
+    if(!confirm(`Počistim izbrane obroke za teden ${fmtShort(weekStart)}–${fmtShort(weekEnd)}?`)) return;
+    weekMenu = { selections: {}, shoppingChecked: {}, extraItems: [] };
+    await saveWeek();
+    render();
+  });
+}
+
+async function goToWeek(monday){
+  document.getElementById('app').innerHTML = '<div class="loading">Nalagam jedilnik …</div>';
+  weekStart = monday;
+  await loadWeek();
+  await syncCookedHistory();
+  render();
+}
+function changeWeek(deltaDays){ goToWeek(addDays(weekStart, deltaDays)); }
+
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+// Fills the 7 days' "Kosilo" slot for the current week with a randomised
+// mix: 3 meat, 1 fish, 1 pasta, 1 soup, 1 vegetarian. Only overwrites days
+// that don't already have a Kosilo pick. Any type with nothing available in
+// the database is simply skipped (reported back to the caller).
+async function generateWeek(){
+ try{
+  // Search both Kosilo and Večerja for candidates — soups in particular are
+  // often filed under Večerja, so restricting to Kosilo alone can leave the
+  // "juha" slot permanently unfillable.
+  const kosiloMeals = db.meals.filter(m => m.category === 'kosilo' || m.category === 'vecerja');
+  const byType = { meso: [], riba: [], testenine: [], juha: [], vegetarijansko: [] };
+  kosiloMeals.forEach(m => byType[classifyMealType(m)].push(m));
+
+  const plan = [
+    ...shuffle(byType.meso).slice(0,3),
+    ...shuffle(byType.riba).slice(0,1),
+    ...shuffle(byType.testenine).slice(0,1),
+    ...shuffle(byType.juha).slice(0,1),
+    ...shuffle(byType.vegetarijansko).slice(0,1),
+  ];
+  const wanted = { meso:3, riba:1, testenine:1, juha:1, vegetarijansko:1 };
+  const gotCounts = { meso:0, riba:0, testenine:0, juha:0, vegetarijansko:0 };
+  plan.forEach(m=>gotCounts[classifyMealType(m)]++);
+  const missing = Object.keys(wanted).filter(t => gotCounts[t] < wanted[t]);
+
+  const shuffledPlan = shuffle(plan);
+  const emptyDayIndexes = [];
+  for(let i=0;i<7;i++){
+    const dayIso = isoDate(addDays(weekStart, i));
+    const already = weekMenu.selections[dayIso] && weekMenu.selections[dayIso]['kosilo'];
+    if(!already) emptyDayIndexes.push(i);
+  }
+  if(emptyDayIndexes.length === 0){
+    alert('Ves teden že ima izbrano kosilo za vsak dan. Če želiš nov predlog, najprej počisti teden ali ročno odstrani nekaj izbir.');
+    return;
+  }
+
+  shuffledPlan.slice(0, emptyDayIndexes.length).forEach((meal, idx)=>{
+    const dayIso = isoDate(addDays(weekStart, emptyDayIndexes[idx]));
+    if(!weekMenu.selections[dayIso]) weekMenu.selections[dayIso] = {};
+    weekMenu.selections[dayIso]['kosilo'] = meal.id;
+  });
+
+  await saveWeek();
+  render();
+
+  if(missing.length){
+    const labels = { meso:'mesnih', riba:'ribjih', testenine:'testeninskih', juha:'juh', vegetarijansko:'vegetarijanskih' };
+    alert(`Teden je ustvarjen, a v bazi ni bilo dovolj receptov za: ${missing.map(t=>labels[t]).join(', ')}. Dodaj še kakšen tak recept v bazo, pa bo naslednjič polneje.`);
+  }
+ }catch(e){
+  console.error('Ustvarjanje tedna ni uspelo', e);
+  alert('Ustvarjanje tedna ni uspelo zaradi nepričakovane napake. Poskusi znova — če se ponovi, sporoči mi natančno sporočilo iz konzole brskalnika, če ga vidiš.');
+ }
+}
+
+/* ============================= MODALS ============================= */
+
+function renderModal(){
+  const root = document.getElementById('modalRoot');
+  if(!root) return;
+  if(openModal === 'db'){
+    root.innerHTML = dbModalHtml();
+    bindDbModalEvents();
+  } else if(openModal === 'recipe'){
+    root.innerHTML = recipeModalHtml();
+    bindRecipeModalEvents();
+  } else if(openModal === 'search'){
+    root.innerHTML = searchModalHtml();
+    bindSearchModalEvents();
+  } else {
+    root.innerHTML = '';
+  }
+}
+
+function closeModal(){
+  openModal = null;
+  recipeModalMealId = null;
+  recipeModalIsNew = false;
+  searchExpandedMealId = null;
+  dbSearchText = '';
+  renderModal();
+}
+
+/* ---- Search-by-ingredients modal ---- */
+function searchModalHtml(){
+  const { terms, results } = searchQueryText.trim() ? searchMealsByIngredients(searchQueryText) : { terms: [], results: [] };
+  const days = [0,1,2,3,4,5,6].map(i=>addDays(weekStart, i));
+
+  let resultsHtml;
+  if(!searchQueryText.trim()){
+    resultsHtml = `<p class="sub">Vpiši nekaj sestavin, ki jih imaš/želiš uporabiti (ločene z vejico), npr. "piščanec, riž, čebula".</p>`;
+  } else if(results.length === 0){
+    resultsHtml = `<p class="shop-empty">Nobenega obroka v bazi ne vsebuje nič od vpisanega.</p>`;
+  } else {
+    resultsHtml = `<div class="search-results">` + results.map(r=>{
+      const m = r.meal;
+      const isExpanded = searchExpandedMealId === m.id;
+      const dayPicker = isExpanded ? `
+        <div class="day-picker">
+          ${days.map(d=>{
+            const key = isoDate(d);
+            const already = weekMenu.selections[key] && weekMenu.selections[key][m.category] === m.id;
+            return `<button class="day-pick-btn${already?' picked':''}" data-assign-day="${key}" data-assign-meal="${m.id}">${DAY_NAMES[(d.getDay()+6)%7].slice(0,3)}<span>${fmtShort(d)}</span></button>`;
+          }).join('')}
+        </div>` : '';
+      return `
+        <div class="search-card">
+          <div class="search-card-row" data-open-result="${m.id}">
+            ${m.image ? `<img class="search-thumb" src="${m.image}" alt="">` : `<div class="search-thumb search-thumb-empty"></div>`}
+            <div class="search-card-body">
+              <div class="search-card-top">
+                <span class="search-card-name">${m.name}</span>
+                <span class="search-card-cat" style="color:${(CATEGORIES.find(c=>c.id===m.category)||{}).dot||'var(--muted)'}">${catLabel(m.category)}</span>
+              </div>
+              <div class="search-card-match">Ujema se: ${r.matchedTerms.length}/${terms.length} sestavin (${r.matchedTerms.join(', ')})</div>
+            </div>
+          </div>
+          <div class="search-card-actions">
+            <button class="search-action-btn" data-open-result="${m.id}">📖 Recept</button>
+            <button class="search-action-btn${isExpanded?' active':''}" data-toggle-add="${m.id}">+ Dodaj v teden</button>
+          </div>
+          ${dayPicker}
+        </div>`;
+    }).join('') + `</div>`;
+  }
+
+  return `
+    <div class="modal-backdrop" id="searchBackdrop">
+      <div class="modal-box narrow">
+        <div class="modal-head">
+          <h2>Kaj skuhati?</h2>
+          <button class="modal-close" id="searchCloseBtn">✕</button>
+        </div>
+        <p class="sub">Poišče recepte iz baze, ki vsebujejo vpisane sestavine.</p>
+        <div class="search-input-row">
+          <input type="text" id="searchInput" placeholder="npr. piščanec, riž, čebula" value="${searchQueryText.replace(/"/g,'&quot;')}">
+          <button id="searchGoBtn">Poišči</button>
+        </div>
+        ${resultsHtml}
+      </div>
+    </div>`;
+}
+
+function bindSearchModalEvents(){
+  const backdrop = document.getElementById('searchBackdrop');
+  document.getElementById('searchCloseBtn').addEventListener('click', closeModal);
+  backdrop.addEventListener('click', (e)=>{ if(e.target.id === 'searchBackdrop') closeModal(); });
+
+  const input = document.getElementById('searchInput');
+  function runSearch(){
+    searchQueryText = input.value;
+    renderModal();
+  }
+  document.getElementById('searchGoBtn').addEventListener('click', runSearch);
+  input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') runSearch(); });
+  input.focus();
+  input.selectionStart = input.selectionEnd = input.value.length;
+
+  document.querySelectorAll('[data-open-result]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      recipeModalMealId = el.getAttribute('data-open-result');
+      recipeModalIsNew = false;
+      openModal = 'recipe';
+      renderModal();
+    });
+  });
+
+  document.querySelectorAll('[data-toggle-add]').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      const id = btn.getAttribute('data-toggle-add');
+      searchExpandedMealId = (searchExpandedMealId === id) ? null : id;
+      renderModal();
+    });
+  });
+
+  document.querySelectorAll('[data-assign-day]').forEach(btn=>{
+    btn.addEventListener('click', async (e)=>{
+      e.stopPropagation();
+      const day = btn.getAttribute('data-assign-day');
+      const mealId = btn.getAttribute('data-assign-meal');
+      const meal = mealById(mealId);
+      if(!meal) return;
+      if(!weekMenu.selections[day]) weekMenu.selections[day] = {};
+      weekMenu.selections[day][meal.category] = mealId;
+      await saveWeek();
+      render();
+    });
+  });
+}
+
+/* ---- Database modal ---- */
+function dbModalHtml(){
+  const filterNorm = normalizeText(dbSearchText || '');
+  let dbCols = '';
+  CATEGORIES.forEach(cat=>{
+    const allMeals = mealsByCategory(cat.id).slice().sort((a,b)=>a.name.localeCompare(b.name,'sl'));
+    const meals = filterNorm ? allMeals.filter(m => normalizeText(m.name).includes(filterNorm)) : allMeals;
+    const items = meals.length
+      ? meals.map(m => `
+          <li class="meal-item" data-open-meal="${m.id}">
+            <span class="meal-name">${m.image?`<img class="meal-thumb" src="${m.image}" alt="">`:''}${hasRecipeData(m)?'<span class="recipe-dot" title="Ima recept"></span>':''}${m.name}</span>
+            <button class="del-btn" data-del-meal="${m.id}" title="Izbriši obrok">✕</button>
+          </li>`).join('')
+      : `<li class="cat-empty">${filterNorm ? 'Ni ujemanj.' : 'Še ni obrokov.'}</li>`;
+    dbCols += `
+      <div class="cat-col">
+        <div class="cat-head">
+          <span class="cat-dot" style="background:${cat.dot}"></span>
+          ${cat.label}
+          <span class="cat-count">${filterNorm ? `${meals.length}/${allMeals.length}` : allMeals.length}</span>
+        </div>
+        <ul class="meal-list">${items}</ul>
+        <div class="cat-add">
+          <input type="text" placeholder="Nov obrok …" data-add-input="${cat.id}" maxlength="60">
+          <button data-add-btn="${cat.id}">+</button>
+        </div>
+      </div>`;
+  });
+
+  return `
+    <div class="modal-backdrop" id="dbBackdrop">
+      <div class="modal-box">
+        <div class="modal-head">
+          <h2>Baza obrokov</h2>
+          <button class="modal-close" id="dbCloseBtn">✕</button>
+        </div>
+        <p class="sub">Dodaj obroke v ustrezno kategorijo. Klikni na obrok, da vpišeš sestavine, kalorije in recept.</p>
+        <div class="db-search-row">
+          <input type="text" id="dbSearchInput" placeholder="🔍 Išči po imenu obroka …" value="${dbSearchText.replace(/"/g,'&quot;')}">
+          ${dbSearchText ? `<button id="dbSearchClearBtn" title="Počisti iskanje">✕</button>` : ''}
+        </div>
+        <div class="db-grid">${dbCols}</div>
+        <div class="db-footer">
+          <div class="db-footer-head">
+            <span class="lbl">Uvoz / izvoz baze (JSON)</span>
+            <button id="exportBtn">Izvozi trenutno bazo</button>
+            <label class="upload-btn" for="importFileInput">📁 Uvozi iz datoteke</label>
+            <input type="file" id="importFileInput" accept="application/json,.json" style="display:none">
+          </div>
+          <p class="io-note" style="margin-bottom:8px;">Priporočeno za večje datoteke (npr. s slikami) — izberi .json datoteko neposredno, brez lepljenja.</p>
+          <div class="db-footer-head">
+            <span class="lbl">…ali prilepi ročno:</span>
+            <button id="importBtn">Uvozi iz spodnjega polja</button>
+          </div>
+          <textarea class="io-box" id="ioBox" placeholder='[{"name":"Ovsena kaša","category":"zajtrk","ingredients":["Ovseni kosmiči","Mleko"],"recipe":"...","kcal":320,"carbs":45,"protein":12,"fat":8}]'></textarea>
+          <p class="io-note">Sem prilepi seznam obrokov v JSON obliki in klikni "Uvozi" — dodajo se k obstoječi bazi.</p>
+        </div>
+        <div class="modal-actions">
+          <button class="danger-btn" id="clearDbBtn">Počisti celotno bazo obrokov</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function bindDbModalEvents(){
+  document.getElementById('dbCloseBtn').addEventListener('click', closeModal);
+  document.getElementById('dbBackdrop').addEventListener('click', (e)=>{
+    if(e.target.id === 'dbBackdrop') closeModal();
+  });
+
+  const searchInput = document.getElementById('dbSearchInput');
+  searchInput.addEventListener('input', ()=>{
+    dbSearchText = searchInput.value;
+    renderModal();
+  });
+  // keep focus + cursor position after each re-render while typing
+  searchInput.focus();
+  searchInput.selectionStart = searchInput.selectionEnd = searchInput.value.length;
+  const clearBtn = document.getElementById('dbSearchClearBtn');
+  if(clearBtn) clearBtn.addEventListener('click', ()=>{ dbSearchText=''; renderModal(); });
+
+  document.querySelectorAll('[data-add-btn]').forEach(btn=>{
+    btn.addEventListener('click', ()=>addMeal(btn.getAttribute('data-add-btn')));
+  });
+  document.querySelectorAll('[data-add-input]').forEach(inp=>{
+    inp.addEventListener('keydown', (e)=>{ if(e.key==='Enter') addMeal(inp.getAttribute('data-add-input')); });
+  });
+  async function addMeal(catId){
+    const input = document.querySelector(`[data-add-input="${catId}"]`);
+    const name = input.value.trim();
+    if(!name) return;
+    const id = 'm'+Date.now()+Math.floor(Math.random()*1000);
+    const meal = { id, name, category: catId, ingredients: [], recipe: '', kcal:'', carbs:'', protein:'', fat:'', image: '', lastCooked: '', rating: 0, prepTime: '', servings: '' };
+    db.meals.push(meal);
+    await saveMeal(meal);
+    renderModal();
+    render();
+  }
+
+  document.querySelectorAll('[data-open-meal]').forEach(row=>{
+    row.addEventListener('click', (e)=>{
+      if(e.target.closest('.del-btn')) return;
+      recipeModalMealId = row.getAttribute('data-open-meal');
+      recipeModalIsNew = false;
+      openModal = 'recipe';
+      renderModal();
+    });
+  });
+
+  document.querySelectorAll('[data-del-meal]').forEach(btn=>{
+    btn.addEventListener('click', async (e)=>{
+      e.stopPropagation();
+      const id = btn.getAttribute('data-del-meal');
+      db.meals = db.meals.filter(m=>m.id!==id);
+      await deleteMealDoc(id);
+      Object.keys(weekMenu.selections).forEach(day=>{
+        Object.keys(weekMenu.selections[day]).forEach(cat=>{
+          if(weekMenu.selections[day][cat]===id) delete weekMenu.selections[day][cat];
+        });
+      });
+      await saveWeek();
+      renderModal();
+      render();
+    });
+  });
+
+  document.getElementById('exportBtn').addEventListener('click', ()=>{
+    document.getElementById('ioBox').value = JSON.stringify(db.meals, null, 2);
+  });
+
+  async function runImport(raw){
+    if(!raw || !raw.trim()) return;
+    let parsed;
+    try{ parsed = JSON.parse(raw); }
+    catch(e){ alert('JSON ni veljaven — datoteka/besedilo je morda okrnjeno (prekinjeno lepljenje ali nalaganje). Poskusi uvoz iz datoteke namesto lepljenja.'); return; }
+    if(!Array.isArray(parsed)){ alert('Pričakovan je seznam obrokov v [ ] oklepajih.'); return; }
+    const validCats = CATEGORIES.map(c=>c.id);
+    let added = 0, updated = 0, skipped = 0;
+    const toSave = [];
+    parsed.forEach(item=>{
+      if(!item || !item.name){ skipped++; return; }
+      const nameNorm = String(item.name).trim().toLowerCase();
+      const existing = db.meals.find(m => m.name.trim().toLowerCase() === nameNorm);
+      if(existing){
+        // Update only the fields present in this import item (e.g. an
+        // "images only" JSON just adds photos to already-imported recipes).
+        if(item.category != null && validCats.includes(item.category)) existing.category = item.category;
+        if(Array.isArray(item.ingredients)) existing.ingredients = item.ingredients.map(String);
+        if(item.recipe != null) existing.recipe = String(item.recipe);
+        if(item.kcal != null) existing.kcal = String(item.kcal);
+        if(item.carbs != null) existing.carbs = String(item.carbs);
+        if(item.protein != null) existing.protein = String(item.protein);
+        if(item.fat != null) existing.fat = String(item.fat);
+        if(item.image) existing.image = String(item.image);
+        if(item.prepTime != null) existing.prepTime = String(item.prepTime);
+        if(item.servings != null) existing.servings = String(item.servings);
+        toSave.push(existing);
+        updated++;
+      } else if(validCats.includes(item.category)){
+        const meal = {
+          id: 'm'+Date.now()+Math.floor(Math.random()*10000)+added,
+          name: String(item.name).slice(0,120),
+          category: item.category,
+          ingredients: Array.isArray(item.ingredients) ? item.ingredients.map(String) : [],
+          recipe: item.recipe ? String(item.recipe) : '',
+          kcal: item.kcal!=null ? String(item.kcal) : '',
+          carbs: item.carbs!=null ? String(item.carbs) : '',
+          protein: item.protein!=null ? String(item.protein) : '',
+          fat: item.fat!=null ? String(item.fat) : '',
+          image: item.image ? String(item.image) : '',
+          prepTime: item.prepTime ? String(item.prepTime) : '',
+          servings: item.servings ? String(item.servings) : '',
+        };
+        db.meals.push(meal);
+        toSave.push(meal);
+        added++;
+      } else {
+        skipped++; // no matching existing meal, and no valid category to create a new one
+      }
+    });
+    const ok = await saveMealsInChunks(toSave);
+    const ioBox = document.getElementById('ioBox');
+    if(ioBox) ioBox.value = '';
+    renderModal();
+    render();
+    if(!ok){
+      alert('Shranjevanje ni uspelo v celoti. Poskusi znova — obroki, ki so se že shranili, ostanejo, ostale lahko uvoziš še enkrat.');
+    } else if(skipped>0 || updated>0){
+      alert(`Dodanih ${added}, posodobljenih ${updated} obrokov. Preskočenih ${skipped} (ni ujemanja po imenu in manjka/napačna kategorija).`);
+    } else if(added>0){
+      alert(`Dodanih ${added} obrokov.`);
+    }
+  }
+
+  document.getElementById('importBtn').addEventListener('click', ()=>{
+    runImport(document.getElementById('ioBox').value.trim());
+  });
+
+  document.getElementById('importFileInput').addEventListener('change', (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onerror = () => alert('Datoteke ni bilo mogoče prebrati.');
+    reader.onload = () => runImport(String(reader.result));
+    reader.readAsText(file);
+    e.target.value = ''; // allow re-selecting the same file later
+  });
+
+  document.getElementById('clearDbBtn').addEventListener('click', async ()=>{
+    if(!confirm('Počistim celotno bazo obrokov? To izbriše vse shranjene obroke v vseh kategorijah.')) return;
+    await deleteAllMeals();
+    db = { meals: [] };
+    closeModal();
+    render();
+  });
+}
+
+/* ---- Recipe modal ---- */
+function recipeModalHtml(){
+  const m = mealById(recipeModalMealId);
+  if(!m) return '';
+  const catOptions = CATEGORIES.map(c=>`<option value="${c.id}" ${c.id===m.category?'selected':''}>${c.label}</option>`).join('');
+  return `
+    <div class="modal-backdrop" id="recipeBackdrop">
+      <div class="modal-box narrow">
+        <div class="modal-head">
+          <div style="flex:1">
+            <input class="recipe-name-input" id="mealNameInput" value="${m.name.replace(/"/g,'&quot;')}">
+          </div>
+          <button class="modal-close" id="recipeCloseBtn">✕</button>
+        </div>
+        <div class="recipe-topline">
+          <select class="cat-select" id="mealCatSelect">${catOptions}</select>
+          <div class="prep-time-field">
+            <span class="prep-time-icon">⏱</span>
+            <input type="text" id="mealPrepTime" value="${(m.prepTime||'').replace(/"/g,'&quot;')}" placeholder="čas priprave, npr. 30 min">
+          </div>
+          <div class="prep-time-field">
+            <span class="prep-time-icon">🍽</span>
+            <input type="text" id="mealServings" value="${(m.servings||'').replace(/"/g,'&quot;')}" placeholder="za koliko oseb, npr. 4 porcije">
+          </div>
+          <div class="star-rating" id="starRating">
+            ${[1,2,3,4,5].map(n=>`<span class="star${n<=(m.rating||0)?' on':''}" data-star="${n}">★</span>`).join('')}
+          </div>
+          ${m.lastCooked ? `<span class="last-cooked">Nazadnje: ${daysAgoLabel(m.lastCooked)}</span>` : `<span class="last-cooked muted">Še ni bil na jedilniku</span>`}
+        </div>
+        <div class="image-row">
+          ${m.image
+            ? `<img class="meal-photo-preview" id="mealPhotoPreview" src="${m.image}" alt="">`
+            : `<div class="meal-photo-placeholder" id="mealPhotoPreview">brez slike</div>`}
+          <div class="image-row-actions">
+            <label class="upload-btn" for="mealImageInput">${m.image?'Zamenjaj sliko':'Dodaj sliko'}</label>
+            <input type="file" id="mealImageInput" accept="image/*" style="display:none">
+            ${m.image?`<button class="danger-btn" id="removeImageBtn">Odstrani sliko</button>`:''}
+          </div>
+        </div>
+        <div class="macro-row">
+          <div class="macro-field"><label>Kcal</label><input type="number" min="0" id="macroKcal" value="${m.kcal||''}"></div>
+          <div class="macro-field"><label>OH (g)</label><input type="number" min="0" id="macroCarbs" value="${m.carbs||''}"></div>
+          <div class="macro-field"><label>Beljakovine (g)</label><input type="number" min="0" id="macroProtein" value="${m.protein||''}"></div>
+          <div class="macro-field"><label>Maščobe (g)</label><input type="number" min="0" id="macroFat" value="${m.fat||''}"></div>
+        </div>
+        <div class="modal-grid">
+          <div>
+            <label>Sestavine (ena na vrstico)</label>
+            <textarea id="mealIngredients" placeholder="npr.&#10;2 jajci&#10;200 g moke">${(m.ingredients||[]).join('\n')}</textarea>
+          </div>
+          <div>
+            <label>Recept / postopek priprave</label>
+            <textarea id="mealRecipe" placeholder="Kratek opis priprave …">${m.recipe||''}</textarea>
+          </div>
+        </div>
+        <div class="modal-actions">
+          <button class="danger-btn" id="deleteMealBtn">Izbriši obrok</button>
+          <span class="save-note">Spremembe se shranijo samodejno</span>
+        </div>
+      </div>
+    </div>`;
+}
+
+function bindRecipeModalEvents(){
+  const backdrop = document.getElementById('recipeBackdrop');
+  document.getElementById('recipeCloseBtn').addEventListener('click', closeModal);
+  backdrop.addEventListener('click', (e)=>{ if(e.target.id === 'recipeBackdrop') closeModal(); });
+
+  async function persistMealField(field, value){
+    const m = mealById(recipeModalMealId);
+    if(!m) return false;
+    const prev = m[field];
+    m[field] = value;
+    const ok = await saveMeal(m);
+    if(!ok) m[field] = prev; // revert local change if it couldn't be saved (e.g. too large)
+    return ok;
+  }
+
+  function resizeImageToDataUrl(file){
+    return new Promise((resolve, reject)=>{
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Branje datoteke ni uspelo'));
+      reader.onload = () => {
+        const img = new Image();
+        img.onerror = () => reject(new Error('Slike ni bilo mogoče naložiti'));
+        img.onload = () => {
+          const MAX_DIM = 260;
+          let { width, height } = img;
+          if(width > height && width > MAX_DIM){ height = Math.round(height * MAX_DIM/width); width = MAX_DIM; }
+          else if(height > MAX_DIM){ width = Math.round(width * MAX_DIM/height); height = MAX_DIM; }
+          const canvas = document.createElement('canvas');
+          canvas.width = width; canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', 0.6));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  document.getElementById('mealImageInput').addEventListener('change', async (e)=>{
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    let dataUrl;
+    try{ dataUrl = await resizeImageToDataUrl(file); }
+    catch(err){ alert('Slike ni bilo mogoče obdelati. Poskusi drugo datoteko.'); return; }
+    const ok = await persistMealField('image', dataUrl);
+    if(!ok){
+      alert('Slika je prevelika za shrambo (skupna baza obrokov ima omejitev prostora). Poskusi manjšo/bolj stisnjeno sliko ali odstrani kakšno drugo sliko iz baze.');
+      return;
+    }
+    render();
+  });
+  const removeImageBtn = document.getElementById('removeImageBtn');
+  if(removeImageBtn){
+    removeImageBtn.addEventListener('click', async ()=>{
+      await persistMealField('image', '');
+      render();
+    });
+  }
+
+  document.getElementById('mealNameInput').addEventListener('change', async (e)=>{
+    const v = e.target.value.trim();
+    if(v) await persistMealField('name', v);
+    render();
+  });
+  document.getElementById('mealCatSelect').addEventListener('change', async (e)=>{
+    await persistMealField('category', e.target.value);
+    render();
+  });
+  document.getElementById('mealPrepTime').addEventListener('change', (e)=>{
+    persistMealField('prepTime', e.target.value.trim());
+  });
+  document.getElementById('mealServings').addEventListener('change', (e)=>{
+    persistMealField('servings', e.target.value.trim());
+  });
+  document.querySelectorAll('#starRating .star').forEach(starEl=>{
+    starEl.addEventListener('click', async ()=>{
+      const n = parseInt(starEl.getAttribute('data-star'), 10);
+      const m = mealById(recipeModalMealId);
+      const newRating = (m && m.rating === n) ? 0 : n; // clicking the same star again clears it
+      await persistMealField('rating', newRating);
+      renderModal();
+    });
+  });
+  ['macroKcal:kcal','macroCarbs:carbs','macroProtein:protein','macroFat:fat'].forEach(pair=>{
+    const [elId, field] = pair.split(':');
+    document.getElementById(elId).addEventListener('change', (e)=>persistMealField(field, e.target.value));
+  });
+  document.getElementById('mealIngredients').addEventListener('change', async (e)=>{
+    const list = e.target.value.split('\n').map(s=>s.trim()).filter(Boolean);
+    await persistMealField('ingredients', list);
+    render();
+  });
+  document.getElementById('mealRecipe').addEventListener('change', (e)=>persistMealField('recipe', e.target.value));
+
+  document.getElementById('deleteMealBtn').addEventListener('click', async ()=>{
+    if(!confirm('Izbrišem ta obrok iz baze?')) return;
+    const id = recipeModalMealId;
+    db.meals = db.meals.filter(m=>m.id!==id);
+    await deleteMealDoc(id);
+    Object.keys(weekMenu.selections).forEach(day=>{
+      Object.keys(weekMenu.selections[day]).forEach(cat=>{
+        if(weekMenu.selections[day][cat]===id) delete weekMenu.selections[day][cat];
+      });
+    });
+    await saveWeek();
+    closeModal();
+    render();
+  });
+}
+
+(async function init(){
+  // PWA features are active once this file is served from HTTPS (or localhost).
+  // They are intentionally harmless when the HTML is opened directly as a file.
+  if('serviceWorker' in navigator && location.protocol !== 'file:'){
+    navigator.serviceWorker.register('./sw.js').catch(e => console.warn('Offline način ni na voljo', e));
+  }
+  let deferredInstallPrompt = null;
+  window.addEventListener('beforeinstallprompt', e=>{
+    e.preventDefault();
+    deferredInstallPrompt = e;
+    const installBtn = document.getElementById('installAppBtn');
+    if(installBtn) installBtn.classList.add('visible');
+  });
+  window.addEventListener('appinstalled', ()=>{
+    deferredInstallPrompt = null;
+    const installBtn = document.getElementById('installAppBtn');
+    if(installBtn) installBtn.classList.remove('visible');
+  });
+  document.addEventListener('click', async e=>{
+    if(!e.target.closest('#installAppBtn') || !deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    e.target.closest('#installAppBtn').classList.remove('visible');
+  });
+  if(!CONFIG_READY){
+    document.getElementById('app').innerHTML = `
+      <div class="panel" style="max-width:560px;margin:40px auto;text-align:center;">
+        <h2>Nastavitev shranjevanja manjka</h2>
+        <p class="sub" style="margin-bottom:14px;">
+          V datoteko (na začetku &lt;script&gt; oznake, iskati "firebaseConfig") je treba prilepiti
+          podatke iz tvojega brezplačnega Firebase projekta, da bo jedilnik deloval in se
+          sinhroniziral med napravami.
+        </p>
+      </div>`;
+    return;
+  }
+  await loadDb();
+  await loadWeek();
+  await syncCookedHistory();
+  render();
+})();
+</script>
+</body>
+</html>
