@@ -119,6 +119,8 @@
   .generate-btn:hover{ background: #1B4132; }
   .install-app-btn{ display:none; }
   .install-app-btn.visible{ display:flex; }
+  .secondary-action{ background: var(--primary-light); color: var(--primary); border-color: var(--primary-mid); }
+  .secondary-action:hover{ background: var(--primary-mid); color: var(--ink); }
 
   .panel{
     background: var(--surface);
@@ -209,12 +211,16 @@
       text-transform: uppercase; letter-spacing:0.06em; margin-bottom: 6px;
     }
     .cell-inner{ gap: 10px; }
+    .toolbar{ justify-content:stretch; gap:8px; }
+    .toolbar .db-open-btn{ flex:1 1 calc(50% - 8px); justify-content:center; min-height:50px; padding:12px 13px; }
+    .nav-btn{ width:52px; height:52px; font-size:22px; }
+    .today-btn{ min-height:44px; padding:9px 15px; }
     select.meal-select{
       max-width: none; font-size: 15px; padding: 12px 10px; min-height: 46px;
     }
     input.custom-entry{ font-size: 13.5px; padding: 8px 9px; margin-top: 6px; }
     .cell-thumb{ width: 42px; height: 42px; border-radius: 9px; }
-    .view-recipe-btn{ width: 42px; height: 42px; font-size: 18px; border-radius: 10px; }
+    .view-recipe-btn{ width: 48px; height: 48px; font-size: 20px; border-radius: 11px; }
   }
   .today-badge{
     display:inline-block;
@@ -250,7 +256,7 @@
   select.meal-select.filled-vecerja{ border-color: var(--cat-vecerja); background: var(--cat-vecerja-bg); }
   .view-recipe-btn{
     flex: none;
-    width: 36px; height: 36px;
+     width: 42px; height: 42px;
     border-radius: 8px;
     border: 1.5px solid var(--border);
     background: var(--surface);
@@ -261,7 +267,7 @@
   .view-recipe-btn:hover{ background: var(--primary-light); }
   .cell-thumb{
     flex: none;
-    width: 36px; height: 36px;
+     width: 42px; height: 42px;
     border-radius: 8px;
     object-fit: cover;
     cursor: pointer;
@@ -295,7 +301,7 @@
   .shop-list{ list-style:none; margin:0; padding:0; columns: 2; column-gap: 24px; }
   @media (max-width: 640px){ .shop-list{ columns: 1; } }
   .shop-item{ display:flex; align-items:center; gap: 9px; padding: 6px 0; break-inside: avoid; font-size: 14px; }
-  .shop-item input[type=checkbox]{ width: 22px; height: 22px; accent-color: var(--primary); flex: none; cursor: pointer; }
+  .shop-item input[type=checkbox]{ width: 28px; height: 28px; accent-color: var(--primary); flex: none; cursor: pointer; }
   .shop-item.checked span.txt{ color: var(--muted); text-decoration: line-through; }
   .shop-item .count{ font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted); }
   .shop-item .txt{ flex:1; }
@@ -319,6 +325,13 @@
     background: var(--primary); color: #fff; cursor:pointer; flex:none;
   }
   .shop-add-row button:hover{ background:#1B4132; }
+  .shop-tools{ display:flex; gap:8px; flex-wrap:wrap; margin:-8px 0 16px; }
+  .shop-tool-btn{
+    font-family:'IBM Plex Sans', sans-serif; font-size:13px; font-weight:600;
+    padding:9px 13px; border-radius:9px; border:1px solid var(--border);
+    background:var(--surface); color:var(--primary); cursor:pointer;
+  }
+  .shop-tool-btn:hover{ background:var(--primary-light); }
   .shop-empty{ color: var(--muted); font-size: 14px; }
 
   /* ---------- Search-by-ingredients modal ---------- */
@@ -628,6 +641,7 @@ const REAL_TODAY = new Date();
 
 let db = { meals: [] };
 let weekMenu = { selections: {}, shoppingChecked: {}, extraItems: [] };
+let hideCheckedShopping = false;
 let weekStart = getMonday(REAL_TODAY);
 let openModal = null; // null | 'db' | 'recipe' | 'search'
 let recipeModalMealId = null;
@@ -723,6 +737,30 @@ async function saveWeek(){
   const key = weekKey(weekStart);
   try{ await setDoc(doc(dbFs, 'mealplan', key), weekMenu); }
   catch(e){ console.error('Teden se ni shranil', e); }
+}
+
+async function copyPreviousWeek(){
+  const previousKey = weekKey(addDays(weekStart, -7));
+  try{
+    const snap = await getDoc(doc(dbFs, 'mealplan', previousKey));
+    if(!snap.exists() || !snap.data().selections){
+      alert('Prejšnji teden še nima shranjenega jedilnika.');
+      return;
+    }
+    const currentHasMeals = Object.values(weekMenu.selections || {}).some(day => Object.keys(day || {}).length);
+    if(currentHasMeals && !confirm('Ta teden že vsebuje izbire. Prepišem ga z jedilnikom prejšnjega tedna?')) return;
+    const d = snap.data();
+    weekMenu = {
+      selections: JSON.parse(JSON.stringify(d.selections || {})),
+      shoppingChecked: {},
+      extraItems: (d.extraItems || []).map(item => ({...item, id: 'x'+Date.now()+Math.floor(Math.random()*1000)}))
+    };
+    await saveWeek();
+    render();
+  }catch(e){
+    console.error('Kopiranje tedna ni uspelo', e);
+    alert('Prejšnjega tedna ni bilo mogoče kopirati.');
+  }
 }
 
 function mealsByCategory(catId){ return db.meals.filter(m => m.category === catId); }
@@ -1012,10 +1050,10 @@ function render(){
   const shopping = buildShoppingList();
   let shopHtml;
   if(shopping.length===0){
-    shopHtml = `<p class="shop-empty">Za ta teden še ni izbranih obrokov s sestavinami. Dodaj sestavine obrokom v bazi in jih izberi v jedilniku, ali pa spodaj dopiši kaj ročno.</p>`;
+    shopHtml = `<p class="shop-empty">${shopping.length ? 'Vse je označeno kot kupljeno.' : 'Za ta teden še ni izbranih obrokov s sestavinami.'} Dodaj sestavine obrokom v bazi ali spodaj dopiši še kaj ročno.</p>`;
   } else {
     const shopGroups = {};
-    shopping.forEach(item=>{
+    shopping.filter(item => !hideCheckedShopping || !weekMenu.shoppingChecked[item.key]).forEach(item=>{
       if(!shopGroups[item.shopCat]) shopGroups[item.shopCat] = [];
       shopGroups[item.shopCat].push(item);
     });
@@ -1060,6 +1098,7 @@ function render(){
       <button class="db-open-btn generate-btn" id="generateWeekBtn">✨ Ustvari teden</button>
       <button class="db-open-btn" id="openSearchBtn">🔎 Kaj skuhati?</button>
       <button class="db-open-btn" id="openDbBtn">📚 Baza obrokov (${db.meals.length})</button>
+      <button class="db-open-btn secondary-action" id="copyPreviousWeekBtn">↶ Kopiraj prejšnji teden</button>
       <button class="db-open-btn install-app-btn" id="installAppBtn">📲 Namesti aplikacijo</button>
     </div>
 
@@ -1081,11 +1120,15 @@ function render(){
         <input type="text" id="shopAddInput" placeholder="Dopiši na seznam, npr. wc papir …" maxlength="80">
         <button id="shopAddBtn">+ Dodaj</button>
       </div>
+      <div class="shop-tools">
+        <button class="shop-tool-btn" id="toggleCheckedBtn">${hideCheckedShopping?'👁 Pokaži kupljeno':'✓ Skrij kupljeno'}</button>
+        <button class="shop-tool-btn" id="shareShoppingBtn">↗ Deli seznam</button>
+      </div>
       ${shopHtml}
     </section>
 
     <footer>
-      <span>Podatki se shranjujejo samodejno in ostanejo samo tebi vidni.</span>
+      <span>Podatki se shranjujejo samodejno v tvojo Firebase bazo.</span>
       <button id="clearWeekBtn">Počisti ta teden</button>
     </footer>
 
@@ -1105,6 +1148,12 @@ function bindMainEvents(){
   document.getElementById('openDbBtn').addEventListener('click', ()=>{ openModal = 'db'; renderModal(); });
   document.getElementById('openSearchBtn').addEventListener('click', ()=>{ openModal = 'search'; renderModal(); });
   document.getElementById('generateWeekBtn').addEventListener('click', generateWeek);
+  document.getElementById('copyPreviousWeekBtn').addEventListener('click', copyPreviousWeek);
+  document.getElementById('toggleCheckedBtn').addEventListener('click', ()=>{
+    hideCheckedShopping = !hideCheckedShopping;
+    render();
+  });
+  document.getElementById('shareShoppingBtn').addEventListener('click', shareShoppingList);
 
   document.querySelectorAll('.meal-select').forEach(sel=>{
     sel.addEventListener('change', async ()=>{
@@ -1191,6 +1240,24 @@ async function goToWeek(monday){
   render();
 }
 function changeWeek(deltaDays){ goToWeek(addDays(weekStart, deltaDays)); }
+
+async function shareShoppingList(){
+  const items = buildShoppingList();
+  const text = `Nakupovalni seznam — ${fmtShort(weekStart)}–${fmtShort(addDays(weekStart,6))}\n\n` +
+    items.map(item => `${weekMenu.shoppingChecked[item.key] ? '✓' : '□'} ${item.label}`).join('\n');
+  try{
+    if(navigator.share){
+      await navigator.share({ title: 'Nakupovalni seznam', text });
+    } else if(navigator.clipboard){
+      await navigator.clipboard.writeText(text);
+      alert('Nakupovalni seznam je kopiran. Prilepi ga lahko v sporočilo.');
+    } else {
+      prompt('Kopiraj nakupovalni seznam:', text);
+    }
+  }catch(e){
+    if(e.name !== 'AbortError') alert('Seznama ni bilo mogoče deliti.');
+  }
+}
 
 function shuffle(arr){
   const a = arr.slice();
@@ -1667,7 +1734,10 @@ function recipeModalHtml(){
         </div>
         <div class="modal-actions">
           <button class="danger-btn" id="deleteMealBtn">Izbriši obrok</button>
-          <span class="save-note">Spremembe se shranijo samodejno</span>
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+            <button class="shop-tool-btn" id="cookedTodayBtn">✅ Skuhano danes</button>
+            <span class="save-note">Spremembe se shranijo samodejno</span>
+          </div>
         </div>
       </div>
     </div>`;
@@ -1766,6 +1836,11 @@ function bindRecipeModalEvents(){
     render();
   });
   document.getElementById('mealRecipe').addEventListener('change', (e)=>persistMealField('recipe', e.target.value));
+
+  document.getElementById('cookedTodayBtn').addEventListener('click', async ()=>{
+    await persistMealField('lastCooked', isoDate(REAL_TODAY));
+    renderModal();
+  });
 
   document.getElementById('deleteMealBtn').addEventListener('click', async ()=>{
     if(!confirm('Izbrišem ta obrok iz baze?')) return;
