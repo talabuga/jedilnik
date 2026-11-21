@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="sl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Polmaraton pod 2 h</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
+<style>
+/* Layout: one narrow column built for a phone. Summary card first, then one collapsible block per training phase; each week is a two-line row with tick boxes. */
+:root {
+  --bg: #F2F4F1;
+  --surface: #FFFFFF;
+  --fg: #14211D;
+  --muted: #5B6B65;
+  --line: #D9DFDA;
+  --accent: #0E6B58;
+  --accent-fg: #FFFFFF;
+  --soft: #E3EFEA;
+  --test: #A8460A;
+  --test-bg: #FBEBDD;
+  --display: "Space Grotesk", system-ui, sans-serif;
+  --body: "Inter", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0F1715; --surface: #18231F; --fg: #E8EFEB; --muted: #9AABA4; --line: #2A3A34;
+    --accent: #4FC3A5; --accent-fg: #06201A; --soft: #1D2E28; --test: #F0A068; --test-bg: #3A2616;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0F1715; --surface: #18231F; --fg: #E8EFEB; --muted: #9AABA4; --line: #2A3A34;
+  --accent: #4FC3A5; --accent-fg: #06201A; --soft: #1D2E28; --test: #F0A068; --test-bg: #3A2616;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font: 16px/1.5 var(--body);
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px; }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h1 { font-size: 1.75rem; line-height: 1.15; }
+.sub { color: var(--muted); margin: 4px 0 0; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+.now { border-color: var(--accent); }
+.eyebrow { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.now h2 { font-size: 1.25rem; margin: 4px 0 10px; }
+.line { display: flex; gap: 10px; margin: 6px 0; min-width: 0; }
+.tag { flex: none; width: 26px; height: 26px; border-radius: 6px; background: var(--soft); color: var(--accent); font: 700 .85rem/26px var(--display); text-align: center; }
+.line span:last-child { min-width: 0; }
+button {
+  font: 600 .95rem var(--body); color: var(--accent-fg); background: var(--accent);
+  border: 0; border-radius: 8px; min-height: 44px; padding: 0 16px; margin-top: 8px;
+}
+button:focus-visible, summary:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.bar { height: 8px; border-radius: 4px; background: var(--soft); overflow: hidden; margin: 10px 0 6px; }
+.bar i { display: block; height: 100%; background: var(--accent); width: 0; }
+.stat { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: .9rem; font-variant-numeric: tabular-nums; }
+details.phase { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+details.phase > summary { list-style: none; cursor: pointer; padding: 14px 16px; min-height: 56px; display: flex; flex-direction: column; gap: 2px; }
+details.phase > summary::-webkit-details-marker { display: none; }
+summary h3 { font-size: 1.05rem; }
+summary .meta { color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
+.pnote { margin: 0; padding: 0 16px 8px; color: var(--muted); font-size: .9rem; }
+.week { border-top: 1px solid var(--line); padding: 12px 16px; }
+.week.cur { background: var(--soft); }
+.week.test { background: var(--test-bg); }
+.whead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 4px; }
+.whead b { font-family: var(--display); font-variant-numeric: tabular-nums; }
+.whead span { color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
+.badge { font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--test); }
+label.row { display: flex; gap: 12px; align-items: flex-start; min-height: 44px; padding: 6px 0; cursor: pointer; }
+label.row input { flex: none; width: 24px; height: 24px; margin: 2px 0 0; accent-color: var(--accent); }
+label.row .txt { min-width: 0; }
+label.row small { display: block; color: var(--muted); font-size: .85rem; }
+input:checked + .txt { opacity: .55; }
+ul.rules { margin: 8px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.pace { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: .9rem; font-variant-numeric: tabular-nums; }
+.pace td { padding: 6px 0; border-top: 1px solid var(--line); }
+.pace td:last-child { text-align: right; font-weight: 600; }
+@media (prefers-reduced-motion: no-preference) { .bar i { transition: width .3s; } }
+</style>
+
+<main>
+  <header>
+    <h1>Polmaraton pod 2 h</h1>
+    <p class="sub">21 km v 5:41/km. 44 tednov, 2 teka na teden.</p>
+  </header>
+
+  <section class="card now" id="now"></section>
+
+  <section class="card">
+    <div class="eyebrow">Napredek</div>
+    <div class="bar"><i id="barfill"></i></div>
+    <div class="stat"><span id="done">0 od 88 tekov</span><span id="pct">0 %</span></div>
+  </section>
+
+  <div id="phases" style="display:flex;flex-direction:column;gap:12px"></div>
+
+  <section class="card">
+    <h2 style="font-size:1.1rem">Tempi</h2>
+    <table class="pace">
+      <tr><td>Lahko (pogovorni tempo)</td><td>~7:15 → 6:50</td></tr>
+      <tr><td>Intervali (marec–april)</td><td>~6:15</td></tr>
+      <tr><td>Tempo (maj–junij)</td><td>~6:00</td></tr>
+      <tr><td>Tempo (poletje)</td><td>~5:50</td></tr>
+      <tr><td>Ciljni tempo</td><td>5:41</td></tr>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2 style="font-size:1.1rem">Pravila</h2>
+    <ul class="rules">
+      <li>Dolgi tek je vedno počasen. Če ne moreš govoriti, upočasni.</li>
+      <li>Vsak 4. teden je lažji, da se telo odpočije.</li>
+      <li>Bolečina v kolenih ali golenicah: teden lažje, ne forsiraj.</li>
+      <li>Izpuščen teden: nadaljuj naprej, ne dohajaj. Pri 2 ali več izpuščenih tednih ponovi zadnji teden.</li>
+      <li>Če po testu v 22. tednu 5 km ni pod ~32:30, ciljaj 2:05–2:10.</li>
+      <li>Ljubljanski maraton je običajno konec oktobra, torej imaš po 44. tednu še rezervo.</li>
+    </ul>
+  </section>
+</main>
+
+<script>
+var START = new Date(2026, 10, 23);
+var B = [8, 8.5, 9, 7, 9.5, 10, 10.5, 8, 11, 11.5, 12, 9, 12.5, 10, 13, 10, 13.5, 14, 14.5, 11, 15, 11,
+         15.5, 12, 16, 16.5, 17, 13, 17, 12, 17.5, 14, 18, 18.5, 19, 15, 19, 19.5, 20, 14, 17, 12, 8, 21];
+var TESTS = {14: "Test: 5 km čim hitreje, cilj do 33:00", 22: "Test: 5 km čim hitreje, cilj do 30:30",
+             30: "Test: 10 km, cilj do 1:01", 44: "Poskus: 21 km, cilj pod 2:00"};
+var DOWN = [4, 8, 12, 16, 20, 24, 28, 32, 36, 40];
+var PHASES = [
+  {n: "Osnova", a: 1, b: 6, t: "Lahek tempo, brez hitrosti. Telo se privaja na redno tekanje."},
+  {n: "Gradnja", a: 7, b: 14, t: "Daljši dolgi tek in prvi kratki pospeški."},
+  {n: "Hitrost", a: 15, b: 22, t: "Intervali v tempu, hitrejšem od ciljnega."},
+  {n: "Moč tempa", a: 23, b: 30, t: "Daljše serije v tempu."},
+  {n: "Dolge razdalje", a: 31, b: 40, t: "Dolgi tek z delom v ciljnem tempu."},
+  {n: "Cilj", a: 41, b: 44, t: "Zadnji ostri tek, umirjanje in poskus 21 km."}
+];
+
+function span(w) {
+  var s = new Date(START); s.setDate(s.getDate() + (w - 1) * 7);
+  var e = new Date(s); e.setDate(e.getDate() + 6);
+  return [s, e];
+}
+function fmt(d) { return d.getDate() + ". " + (d.getMonth() + 1) + "."; }
+function km(x) { return String(x).replace(".", ",") + " km"; }
+
+function runA(w) {
+  if (TESTS[w] && w !== 44) return TESTS[w] + " (10 min ogrevanja)";
+  if (w === 44) return "20 min zelo lahko";
+  if (DOWN.indexOf(w) >= 0) return "30 min lahko";
+  if (w <= 6) return "35 min lahko";
+  if (w <= 14) return "35 min lahko + 6 × 20 s pospeški";
+  if (w <= 18) return "4 × 4 min v ~6:15, 2 min počitka vmes";
+  if (w <= 21) return "5 × 4 min v ~6:15, 2 min počitka vmes";
+  if (w <= 26) return "2 × 8 min v ~6:00, 3 min počitka vmes";
+  if (w <= 29) return "2 × 10 min v ~6:00, 3 min počitka vmes";
+  if (w <= 34) return "20 min tempo v ~5:50";
+  if (w <= 39) return "25 min tempo v ~5:50";
+  if (w === 41) return "3 × 8 min v ~5:45, 2 min počitka vmes";
+  if (w === 42) return "30 min lahko + 4 pospeški";
+  return "20 min lahko";
+}
+function runB(w) {
+  var d = B[w - 1];
+  if (w === 44) return "21 km, cilj pod 2:00 (5:41/km)";
+  if (TESTS[w]) return km(d) + " lahko";
+  var tail = {33: 3, 34: 3, 35: 4, 37: 5, 38: 5, 39: 5, 41: 6}[w];
+  if (tail) return km(d) + ", zadnjih " + tail + " km v ~5:40";
+  return km(d) + " lahko";
+}
+function sessionCount() { return 88; }
+
+var store = {};
+try { store = JSON.parse(localStorage.getItem("polmaraton-nacrt-v1") || "{}"); } catch (e) { store = {}; }
+function save() { try { localStorage.setItem("polmaraton-nacrt-v1", JSON.stringify(store)); } catch (e) {} }
+
+function curWeek() {
+  var w = Math.floor((new Date() - START) / (7 * 864e5)) + 1;
+  return Math.max(1, Math.min(44, w));
+}
+var CUR = curWeek();
+var started = new Date() >= START;
+
+function weekEl(w) {
+  var sp = span(w), div = document.createElement("div");
+  div.className = "week" + (TESTS[w] ? " test" : "") + (w === CUR ? " cur" : "");
+  div.id = "week" + w;
+  var tb = TESTS[w] ? '<span class="badge">Test</span>' : "";
+  div.innerHTML = '<div class="whead"><b>' + w + '. teden ' + tb + '</b><span>' + fmt(sp[0]) + ' – ' + fmt(sp[1]) + '</span></div>' +
+    '<label class="row"><input type="checkbox" id="w' + w + 'a"><span class="txt"><b>A</b> med tednom<small>' + runA(w) + '</small></span></label>' +
+    '<label class="row"><input type="checkbox" id="w' + w + 'b"><span class="txt"><b>B</b> vikend<small>' + runB(w) + '</small></span></label>';
+  return div;
+}
+
+var host = document.getElementById("phases");
+PHASES.forEach(function (p) {
+  var d = document.createElement("details");
+  d.className = "phase"; d.id = "phase" + p.a;
+  if (CUR >= p.a && CUR <= p.b) d.open = true;
+  var s1 = span(p.a)[0], s2 = span(p.b)[1];
+  d.innerHTML = '<summary><h3>' + p.n + '</h3><span class="meta">' + p.a + '–' + p.b + '. teden · ' + fmt(s1) + ' – ' + fmt(s2) + '</span></summary><p class="pnote">' + p.t + '</p>';
+  for (var w = p.a; w <= p.b; w++) d.appendChild(weekEl(w));
+  host.appendChild(d);
+});
+
+function refresh() {
+  var n = 0;
+  document.querySelectorAll('input[type="checkbox"]').forEach(function (c) { if (c.checked) n++; });
+  var t = sessionCount();
+  document.getElementById("done").textContent = n + " od " + t + " tekov";
+  var pct = Math.round(n / t * 100);
+  document.getElementById("pct").textContent = pct + " %";
+  document.getElementById("barfill").style.width = pct + "%";
+}
+document.querySelectorAll('input[type="checkbox"]').forEach(function (c) {
+  c.checked = !!store[c.id];
+  c.addEventListener("change", function () { store[c.id] = c.checked; save(); refresh(); });
+});
+refresh();
+
+var sp = span(CUR);
+var head = started ? CUR + ". teden" : "Začetek v ponedeljek, " + fmt(START);
+var now = document.getElementById("now");
+now.innerHTML = '<div class="eyebrow">' + (started ? "Ta teden" : "Prvi teden") + '</div>' +
+  '<h2>' + head + ' · ' + fmt(sp[0]) + ' – ' + fmt(sp[1]) + '</h2>' +
+  '<div class="line"><span class="tag">A</span><span>' + runA(CUR) + '</span></div>' +
+  '<div class="line"><span class="tag">B</span><span>' + runB(CUR) + '</span></div>' +
+  '<button type="button" id="goto">Pokaži v seznamu</button>';
+document.getElementById("goto").addEventListener("click", function () {
+  var el = document.getElementById("week" + CUR);
+  var d = el.closest("details"); if (d) d.open = true;
+  el.scrollIntoView({block: "center"});
+});
+</script>
+
+</html>
