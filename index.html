@@ -13,7 +13,7 @@
 <link rel="icon" href="./icon.svg">
 <style>
 :root{--bg:#fff;--ink:#1d201e;--mut:#6a716d;--line:#e8ebe8;--soft:#f4f6f4;--acc:#24543F;--acc2:#e6f0ea;--warn:#b3261e;--r:14px;--tab:62px;
-  --c-zajtrk:#fdf1d9;--c-kosilo:#e3efe7;--c-vecerja:#e6e9f6;--c-malica:#f9e5ec}
+  --c-zajtrk:#fdf1d9;--c-kosilo:#e3efe7;--c-vecerja:#e6e9f6;--c-malica:#f9e5ec;--c-otroci:#e4f1fb}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{-webkit-text-size-adjust:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif}
@@ -57,7 +57,7 @@ h2{font-size:19px;margin:26px 0 10px;font-weight:700}
 .ph img{width:100%;height:100%;object-fit:cover;display:block}
 .ph.none{display:grid;place-items:center;font-size:36px}
 .ph.c-zajtrk,.hero.c-zajtrk{background:var(--c-zajtrk)}.ph.c-kosilo,.hero.c-kosilo{background:var(--c-kosilo)}
-.ph.c-vecerja,.hero.c-vecerja{background:var(--c-vecerja)}.ph.c-malica,.hero.c-malica{background:var(--c-malica)}
+.ph.c-otroci,.hero.c-otroci{background:var(--c-otroci)}.ph.c-vecerja,.hero.c-vecerja{background:var(--c-vecerja)}.ph.c-malica,.hero.c-malica{background:var(--c-malica)}
 .ct{font-weight:600;font-size:15px;line-height:1.25;margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .cm{color:var(--mut);font-size:13px;margin-top:2px}
 .fav{position:absolute;top:0;right:0;width:46px;height:46px;display:grid;place-items:center}
@@ -175,7 +175,7 @@ ol.steps li::before{content:counter(s);flex:none;width:32px;height:32px;border-r
 </nav>
 <div id="sheet" hidden></div>
 <div id="toast" hidden></div>
-<input type="file" id="impFile" accept=".json,application/json" hidden>
+<input type="file" id="impFile" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -216,7 +216,23 @@ const CATEGORIES = [
   { id: 'kosilo',  label: 'Kosilo',  emoji: '🍲' },
   { id: 'vecerja', label: 'Večerja', emoji: '🥗' },
   { id: 'malica',  label: 'Sladice', emoji: '🍰' },
+  { id: 'otroci',  label: 'Za otroke', emoji: '🧒' },
 ];
+const FOOD_EMOJI = [
+  ['juh','🍲'],['palacink','🥞'],['omlet','🍳'],['jajc','🥚'],['jajk','🥚'],['banan','🍌'],['jabolk','🍎'],['jagod','🍓'],['borovnic','🫐'],
+  ['malin','🍓'],['hrusk','🍐'],['breskv','🍑'],['pomaranc','🍊'],['limon','🍋'],['avokad','🥑'],['kruh','🍞'],['toast','🍞'],['sendvic','🥪'],
+  ['pizz','🍕'],['burger','🍔'],['testenin','🍝'],['spaget','🍝'],['njok','🍝'],['rizot','🍚'],['riz','🍚'],['losos','🐟'],['riba','🐟'],['tun','🐟'],
+  ['piscan','🍗'],['puran','🍗'],['goved','🥩'],['svinjin','🥩'],['klobas','🌭'],['krompir','🥔'],['korenj','🥕'],['bucki','🥒'],['paradiznik','🍅'],
+  ['brokol','🥦'],['spinac','🥬'],['solat','🥗'],['paprik','🫑'],['kos','🥣'],['kasa','🥣'],['kosmic','🥣'],['jogurt','🥣'],['skut','🥣'],
+  ['cokolad','🍫'],['torta','🍰'],['kolac','🧁'],['mufin','🧁'],['piskot','🍪'],['ploscic','🍫'],['smoothie','🥤'],['sladoled','🍨'],['vafelj','🧇'],
+];
+function foodEmoji(m){
+  const name = normalizeText(m.name || '');
+  const all = name + ' ' + normalizeText((m.ingredients||[]).join(' '));
+  for(const [k,e] of FOOD_EMOJI) if(name.includes(k)) return e;
+  for(const [k,e] of FOOD_EMOJI) if(all.includes(k)) return e;
+  const c = CATEGORIES.find(c=>c.id===m.category); return c ? c.emoji : '🍽';
+}
 const REAL_TODAY = new Date();
 let db = { meals: [] };
 let weekMenu = { selections: {}, shoppingChecked: {}, extraItems: [] };
@@ -817,7 +833,7 @@ function cardHtml(m){
   const meta = [m.prepTime && String(m.prepTime).trim(), m.kcal && (m.kcal + ' kcal')].filter(Boolean).join(' · ');
   const img = m.image
     ? `<div class="ph"><img src="${m.image}" alt="" loading="lazy" decoding="async"></div>`
-    : `<div class="ph none c-${m.category}">${cat ? cat.emoji : '🍽'}</div>`;
+    : `<div class="ph none c-${m.category}">${foodEmoji(m)}</div>`;
   return `<article class="card" data-id="${esc(m.id)}" role="link" tabindex="0">${img}
     <button class="fav" aria-label="Priljubljen"><span>${IC.heart(isFav(m))}</span></button>
     <div class="ct">${esc(m.name)}</div>${meta ? `<div class="cm">${esc(meta)}</div>` : ''}</article>`;
@@ -883,7 +899,7 @@ function openRead(id){
   const macros = [['kcal','kcal'],['carbs','OH'],['protein','Bel.'],['fat','Mašč.']].filter(([k])=>m[k]!=='' && m[k]!=null);
   $('#vSub').innerHTML = `
     <div class="hero${m.image?'':' none c-'+m.category}">
-      ${m.image ? `<img src="${m.image}" alt="">` : (cat?cat.emoji:'🍽')}
+      ${m.image ? `<img src="${m.image}" alt="">` : foodEmoji(m)}
       <div class="htop"><button class="rb" id="rBack" aria-label="Nazaj">${IC.back}</button>
         <div class="r"><button class="rb" id="favBtn" aria-label="Priljubljen">${IC.heart(isFav(m))}</button>
         <button class="rb" id="rEdit" aria-label="Uredi">${IC.edit}</button></div></div>
@@ -1112,7 +1128,7 @@ function renderIng(){
   if(!results.length){ box.innerHTML = '<div class="empty">Ni ujemanj.</div>'; return; }
   box.innerHTML = results.slice(0, 40).map(({meal:m, matchCount, matchedTerms}) => {
     const cat = CATEGORIES.find(c=>c.id===m.category);
-    return `<div class="res" data-id="${esc(m.id)}"><div class="t">${m.image?`<img src="${m.image}" alt="" loading="lazy">`:(cat?cat.emoji:'🍽')}</div>
+    return `<div class="res" data-id="${esc(m.id)}"><div class="t">${m.image?`<img src="${m.image}" alt="" loading="lazy">`:foodEmoji(m)}</div>
       <div><b>${esc(m.name)}</b><small>${cat?cat.label:''} · ujema ${matchCount} od ${terms.length}: ${esc(matchedTerms.join(', '))}</small></div></div>`;
   }).join('');
 }
