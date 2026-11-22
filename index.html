@@ -2,625 +2,180 @@
 <html lang="sl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tedenski jedilnik</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Recepti</title>
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#24543F">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Jedilnik">
 <link rel="apple-touch-icon" href="./icon.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="icon" href="./icon.svg">
 <style>
-  :root{
-    --bg: #F3F5F0;
-    --surface: #FFFFFF;
-    --ink: #1C2621;
-    --muted: #75847B;
-    --primary: #24543F;
-    --primary-light: #DDEAE1;
-    --primary-mid: #9CC1AC;
-    --accent: #C68A2E;
-    --accent-light: #F3E3C4;
-    --border: #E1E6DD;
-    --radius: 19px;
-
-    --cat-zajtrk: #C68A2E;
-    --cat-zajtrk-bg: #F3E3C4;
-    --cat-malica: #C15B6E;
-    --cat-malica-bg: #F5DFE2;
-    --cat-kosilo: #24543F;
-    --cat-kosilo-bg: #DDEAE1;
-    --cat-vecerja: #8B4F6B;
-    --cat-vecerja-bg: #ECDDE4;
-  }
-  *{ box-sizing: border-box; }
-  body{
-    margin:0;
-    background: var(--bg);
-    color: var(--ink);
-    font-family: 'IBM Plex Sans', sans-serif;
-    padding: 28px 20px 70px;
-  }
-  .wrap{ max-width: 1180px; margin: 0 auto; }
-
-  header{
-    display:flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 14px;
-    margin-bottom: 14px;
-  }
-  .eyebrow{
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12.5px;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin: 0 0 4px;
-  }
-  h1{
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 36px;
-    margin: 0;
-    line-height: 1.05;
-  }
-  .title-row{ display:flex; align-items:center; gap: 10px; flex-wrap: wrap; }
-  .nav-btn{
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--primary);
-    font-size: 17px;
-    cursor: pointer;
-    display:flex; align-items:center; justify-content:center;
-    flex: none;
-  }
-  .nav-btn:hover{ background: var(--primary-light); }
-  .week-range{
-    font-family:'IBM Plex Mono', monospace;
-    font-size: 13px;
-    color: var(--muted);
-    margin-top: 4px;
-  }
-  .today-btn{
-    font-family:'IBM Plex Sans', sans-serif;
-    font-size: 12.5px;
-    color: var(--muted);
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 6px 14px;
-    cursor: pointer;
-  }
-  .today-btn:hover{ color: var(--ink); border-color: var(--muted); }
-
-  .toolbar{
-    display:flex; justify-content:flex-end; gap: 10px; flex-wrap: wrap;
-    margin-bottom: 18px;
-  }
-  .db-open-btn{
-    display:flex; align-items:center; gap:8px;
-    font-family:'IBM Plex Sans', sans-serif;
-    font-weight:600; font-size: 14px;
-    padding: 10px 18px;
-    border-radius: 999px;
-    border: 1px solid var(--border);
-    background: var(--surface);
-    color: var(--primary);
-    cursor: pointer;
-  }
-  .db-open-btn:hover{ background: var(--primary-light); }
-  .generate-btn{ background: var(--primary); color: #fff; border-color: var(--primary); }
-  .generate-btn:hover{ background: #1B4132; }
-  .install-app-btn{ display:none; }
-  .install-app-btn.visible{ display:flex; }
-  .secondary-action{ background: var(--primary-light); color: var(--primary); border-color: var(--primary-mid); }
-  .secondary-action:hover{ background: var(--primary-mid); color: var(--ink); }
-  .quick-nav{
-    position:sticky; top:10px; z-index:20; display:flex; gap:8px;
-    margin:0 0 16px; padding:7px; border:1px solid var(--border);
-    border-radius:14px; background:rgba(255,255,255,.92);
-    backdrop-filter:blur(10px); box-shadow:0 4px 16px rgba(28,38,33,.06);
-  }
-  .quick-nav button{
-    flex:1; min-height:42px; border:1px solid transparent; border-radius:9px;
-    background:transparent; color:var(--muted); cursor:pointer;
-    font-family:'IBM Plex Sans',sans-serif; font-size:13px; font-weight:600;
-  }
-  .quick-nav button:hover,.quick-nav button.active{ background:var(--primary-light); color:var(--primary); }
-  #weekPanel,#shoppingPanel{ scroll-margin-top:76px; }
-
-  .panel{
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 28px 26px 30px;
-    margin-bottom: 28px;
-  }
-  .panel h2{
-    font-family:'Fraunces', serif;
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0 0 6px;
-  }
-  .panel .sub{
-    font-size: 13px;
-    color: var(--muted);
-    margin: 0 0 20px;
-  }
-
-  /* ---------- Weekly menu table ---------- */
-  .table-scroll{ overflow-x:auto; padding-bottom: 4px; }
-  table.menu{
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-    min-width: 640px;
-  }
-  table.menu th{
-    text-align:left;
-    font-family:'IBM Plex Mono', monospace;
-    font-size: 12px;
-    letter-spacing: 0.04em;
-    color: var(--muted);
-    padding: 0 8px 8px;
-    text-transform: uppercase;
-  }
-  table.menu td{
-    padding: 5px 8px 5px 0;
-    vertical-align: middle;
-  }
-  .day-cell{
-    font-family:'Fraunces', serif;
-    font-weight: 600;
-    font-size: 14.5px;
-    padding-right: 12px !important;
-    white-space: nowrap;
-  }
-  .day-cell .date{
-    display:block;
-    font-family:'IBM Plex Mono', monospace;
-    font-weight: 400;
-    font-size: 11px;
-    color: var(--muted);
-  }
-  tr.day-row.today td.day-cell{ color: var(--primary); }
-  tr.day-row.today{ background: var(--primary-light); }
-  tr.day-row.today td{ border-radius: 0; }
-
-  /* Card-per-day layout on narrow screens instead of a horizontally
-     scrolling table — much easier to use one-handed on a phone. */
-  @media (max-width: 700px){
-    .table-scroll{ overflow-x: visible; }
-    table.menu{ min-width: 0; }
-    table.menu, table.menu thead, table.menu tbody, table.menu tr, table.menu td, table.menu th{
-      display: block; width: 100%;
-    }
-    table.menu thead{ display: none; }
-    tr.day-row{
-      border: 1px solid var(--border); border-radius: 20px;
-      padding: 18px 18px 10px; margin-bottom: 18px; background: var(--surface);
-    }
-    tr.day-row.today{ border-color: var(--primary); border-width: 2px; background: var(--primary-light); }
-    table.menu td{ padding: 10px 0; }
-    .day-cell{
-      padding-bottom: 12px !important;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 8px;
-      display:flex !important; align-items:baseline; gap: 10px;
-      font-size: 18px;
-    }
-    .day-cell .date{ display:inline; font-size: 13px; }
-    .today-badge{ font-size: 10.5px; padding: 3px 8px; }
-    table.menu td:not(.day-cell)::before{
-      content: attr(data-label);
-      display:block;
-      font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted);
-      text-transform: uppercase; letter-spacing:0.06em; margin-bottom: 6px;
-    }
-    .cell-inner{ gap: 10px; }
-    .toolbar{ justify-content:stretch; gap:8px; }
-    .toolbar .db-open-btn{ flex:1 1 calc(50% - 8px); justify-content:center; min-height:50px; padding:12px 13px; }
-    .nav-btn{ width:52px; height:52px; font-size:22px; }
-    .today-btn{ min-height:44px; padding:9px 15px; }
-    select.meal-select{
-      max-width: none; font-size: 15px; padding: 12px 10px; min-height: 46px;
-    }
-    input.custom-entry{ font-size: 13.5px; padding: 8px 9px; margin-top: 6px; }
-    .cell-thumb{ width: 42px; height: 42px; border-radius: 9px; }
-    .view-recipe-btn{ width: 48px; height: 48px; font-size: 20px; border-radius: 11px; }
-  }
-  .today-badge{
-    display:inline-block;
-    font-family:'IBM Plex Mono', monospace;
-    font-size: 9px; font-weight: 600; letter-spacing: 0.06em;
-    background: var(--primary); color: #fff;
-    padding: 2px 6px; border-radius: 999px;
-    margin-left: 6px; vertical-align: middle;
-  }
-  .cell-inner{ display:flex; align-items:center; gap: 6px; }
-  select.meal-select{
-    flex: 1;
-    min-width: 0;
-    font-family:'IBM Plex Sans', sans-serif;
-    font-size: 13px;
-    padding: 8px 8px;
-    border-radius: 8px;
-    border: 1.5px solid var(--border);
-    background: var(--surface);
-    color: var(--ink);
-    max-width: 190px;
-  }
-  select.meal-select.empty-select{
-    border-style: dashed;
-    border-color: var(--primary-mid);
-    background: var(--bg);
-    color: var(--muted);
-  }
-  select.meal-select:disabled{ color: var(--muted); background: var(--bg); }
-  select.meal-select.filled-zajtrk{ border-color: var(--cat-zajtrk); background: var(--cat-zajtrk-bg); }
-  select.meal-select.filled-malica{ border-color: var(--cat-malica); background: var(--cat-malica-bg); }
-  select.meal-select.filled-kosilo{ border-color: var(--cat-kosilo); background: var(--cat-kosilo-bg); }
-  select.meal-select.filled-vecerja{ border-color: var(--cat-vecerja); background: var(--cat-vecerja-bg); }
-  .view-recipe-btn{
-    flex: none;
-     width: 42px; height: 42px;
-    border-radius: 8px;
-    border: 1.5px solid var(--border);
-    background: var(--surface);
-    cursor: pointer;
-    font-size: 15px;
-    display:flex; align-items:center; justify-content:center;
-  }
-  .view-recipe-btn:hover{ background: var(--primary-light); }
-  .cell-thumb{
-    flex: none;
-     width: 42px; height: 42px;
-    border-radius: 8px;
-    object-fit: cover;
-    cursor: pointer;
-    border: 1.5px solid var(--border);
-  }
-  .cell-thumb:hover{ border-color: var(--primary-mid); }
-  input.custom-entry{
-    width: 100%;
-    margin-top: 4px;
-    font-family:'IBM Plex Sans', sans-serif;
-    font-size: 12px;
-    font-style: italic;
-    padding: 5px 7px;
-    border-radius: 6px;
-    border: 1px dashed var(--border);
-    background: transparent;
-    color: var(--ink);
-    max-width: 190px;
-  }
-  input.custom-entry:focus{ outline: 2px solid var(--primary-mid); outline-offset: 1px; font-style: normal; }
-  input.custom-entry:not(:placeholder-shown){ border-style: solid; background: var(--bg); }
-
-  /* ---------- Shopping list ---------- */
-  .shop-cat-group{ margin-bottom: 18px; }
-  .shop-cat-group:last-child{ margin-bottom: 0; }
-  .shop-cat-heading{
-    font-family:'Fraunces', serif; font-weight: 600; font-size: 15px;
-    color: var(--ink); margin-bottom: 6px;
-    padding-bottom: 6px; border-bottom: 1px solid var(--border);
-  }
-  .shop-list{ list-style:none; margin:0; padding:0; columns: 2; column-gap: 24px; }
-  @media (max-width: 640px){ .shop-list{ columns: 1; } }
-  .shop-item{ display:flex; align-items:center; gap: 9px; padding: 6px 0; break-inside: avoid; font-size: 14px; }
-  .shop-item input[type=checkbox]{ width: 28px; height: 28px; accent-color: var(--primary); flex: none; cursor: pointer; }
-  .shop-item.checked span.txt{ color: var(--muted); text-decoration: line-through; }
-  .shop-item .count{ font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted); }
-  .shop-item .txt{ flex:1; }
-  .shop-del-btn{
-    border:none; background:none; color: var(--muted); cursor:pointer;
-    font-size: 13px; padding: 9px 8px; margin: -9px -8px -9px 0; flex: none;
-    line-height: 1; border-radius: 6px;
-  }
-  .shop-del-btn:hover{ color: var(--ink); }
-  .shop-add-row{ display:flex; gap: 8px; margin-bottom: 18px; }
-  .shop-add-row input{
-    flex: 1; min-width: 0;
-    font-family:'IBM Plex Sans', sans-serif; font-size: 14px;
-    padding: 10px 12px; border-radius: 9px; border: 1px solid var(--border);
-    background: var(--bg); color: var(--ink);
-  }
-  .shop-add-row input:focus{ outline: 2px solid var(--primary-mid); outline-offset: 1px; }
-  .shop-add-row button{
-    font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size: 14px;
-    padding: 10px 16px; border-radius: 9px; border: none;
-    background: var(--primary); color: #fff; cursor:pointer; flex:none;
-  }
-  .shop-add-row button:hover{ background:#1B4132; }
-  .shop-tools{ display:flex; gap:8px; flex-wrap:wrap; margin:-8px 0 16px; }
-  .shop-tool-btn{
-    font-family:'IBM Plex Sans', sans-serif; font-size:13px; font-weight:600;
-    padding:9px 13px; border-radius:9px; border:1px solid var(--border);
-    background:var(--surface); color:var(--primary); cursor:pointer;
-  }
-  .shop-tool-btn:hover{ background:var(--primary-light); }
-  .shop-empty{ color: var(--muted); font-size: 14px; }
-
-  /* ---------- Search-by-ingredients modal ---------- */
-  .search-input-row{ display:flex; gap: 8px; margin-bottom: 16px; }
-  .search-input-row input{
-    flex:1; min-width:0;
-    font-family:'IBM Plex Sans', sans-serif; font-size: 14px;
-    padding: 10px 12px; border-radius: 9px; border: 1px solid var(--border);
-    background: var(--bg); color: var(--ink);
-  }
-  .search-input-row input:focus{ outline: 2px solid var(--primary-mid); outline-offset: 1px; }
-  .search-input-row button{
-    font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size: 14px;
-    padding: 10px 16px; border-radius: 9px; border: none;
-    background: var(--primary); color: #fff; cursor:pointer; flex:none;
-  }
-  .search-input-row button:hover{ background:#1B4132; }
-  .search-results{ display:flex; flex-direction:column; gap: 8px; }
-  .search-card{
-    border: 1px solid var(--border); border-radius: 18px;
-    padding: 12px 14px; background: var(--surface);
-  }
-  .search-card-row{ display:flex; gap: 10px; align-items:center; cursor: pointer; }
-  .search-card-row:hover{ opacity: 0.85; }
-  .search-thumb{ width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex:none; }
-  .search-thumb-empty{ background: var(--bg); border: 1px dashed var(--border); }
-  .search-card-body{ flex:1; min-width:0; }
-  .search-card-top{ display:flex; align-items:center; justify-content:space-between; gap: 8px; }
-  .search-card-name{ font-family:'Fraunces', serif; font-weight:600; font-size: 14.5px; }
-  .search-card-cat{ font-family:'IBM Plex Mono', monospace; font-size: 11px; flex:none; }
-  .search-card-match{ font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .search-card-actions{ display:flex; gap: 8px; margin-top: 8px; }
-  .search-action-btn{
-    font-family:'IBM Plex Sans', sans-serif; font-size: 12.5px; font-weight:600;
-    padding: 6px 12px; border-radius: 7px; border: 1px solid var(--border);
-    background: var(--bg); color: var(--ink); cursor: pointer;
-  }
-  .search-action-btn:hover{ background: var(--primary-light); }
-  .search-action-btn.active{ background: var(--primary); color: #fff; border-color: var(--primary); }
-  .day-picker{
-    display:flex; gap: 6px; flex-wrap: wrap; margin-top: 10px;
-    padding-top: 10px; border-top: 1px dashed var(--border);
-  }
-  .day-pick-btn{
-    display:flex; flex-direction:column; align-items:center; gap:1px;
-    font-family:'IBM Plex Sans', sans-serif; font-size: 11.5px; font-weight:600;
-    padding: 6px 9px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--surface); color: var(--ink); cursor: pointer;
-  }
-  .day-pick-btn span{ font-family:'IBM Plex Mono', monospace; font-weight:400; font-size: 10px; color: var(--muted); }
-  .day-pick-btn:hover{ background: var(--primary-light); }
-  .day-pick-btn.picked{ background: var(--primary); color: #fff; }
-  .day-pick-btn.picked span{ color: #fff; opacity:.8; }
-
-  footer{
-    display:flex; justify-content: space-between; align-items:center;
-    margin-top: 6px; font-size: 12px; color: var(--muted);
-    flex-wrap: wrap; gap: 10px;
-  }
-  footer button{
-    font-family:'IBM Plex Sans', sans-serif; font-size: 12.5px; color: var(--muted);
-    background: none; border: 1px solid var(--border); border-radius: 7px;
-    padding: 6px 12px; cursor: pointer;
-  }
-  footer button:hover{ color: var(--ink); border-color: var(--muted); }
-
-  .loading{ text-align:center; color: var(--muted); font-size: 13px; padding: 30px 0; }
-
-  /* ---------- Modals ---------- */
-  .modal-backdrop{
-    position: fixed; inset: 0;
-    background: rgba(28,38,33,0.45);
-    display:flex; align-items:flex-start; justify-content:center;
-    padding: 24px 14px;
-    overflow-y: auto;
-    z-index: 100;
-  }
-  .modal-box{
-    background: var(--surface);
-    border-radius: 20px;
-    max-width: 900px;
-    width: 100%;
-    padding: 28px 26px 30px;
-    margin: auto;
-    max-height: calc(100vh - 48px);
-    overflow-y: auto;
-  }
-  .modal-box.narrow{ max-width: 560px; }
-  .modal-head{
-    display:flex; align-items:flex-start; justify-content:space-between;
-    gap: 12px; margin-bottom: 18px;
-  }
-  .modal-head h2{
-    font-family:'Fraunces', serif; font-size: 24px; font-weight:600; margin:0;
-  }
-  @media (max-width: 640px){
-    .modal-backdrop{ padding: 0; align-items: stretch; }
-    .modal-box{
-      border-radius: 0;
-      max-width: none;
-      min-height: 100%;
-      max-height: none;
-      padding: 20px 16px 24px;
-    }
-    .modal-box.narrow{ max-width: none; }
-    .modal-head h2{ font-size: 21px; }
-  }
-  .modal-close{
-    flex: none;
-    width: 44px; height:44px; border-radius:50%;
-    border:1px solid var(--border); background: var(--bg);
-    cursor:pointer; font-size:17px; color: var(--muted);
-  }
-  .modal-close:hover{ color: var(--ink); }
-
-  /* recipe modal specifics */
-  .recipe-topline{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom: 14px; }
-  .prep-time-field{
-    display:flex; align-items:center; gap: 6px;
-    background: var(--bg); border: 1px solid var(--border); border-radius: 999px;
-    padding: 4px 12px 4px 10px;
-  }
-  .prep-time-icon{ font-size: 13px; }
-  .prep-time-field input{
-    border:none; background:none; outline:none;
-    font-family:'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 600;
-    color: var(--ink); width: 128px;
-  }
-  .prep-time-field input::placeholder{ font-weight: 400; color: var(--muted); }
-  .star-rating{ display:flex; gap: 2px; }
-  .star-rating .star{
-    font-size: 22px; color: var(--border); cursor: pointer; line-height:1;
-    padding: 8px 3px; margin: -8px -3px;
-  }
-  .star-rating .star.on{ color: var(--accent); }
-  .star-rating .star:hover{ color: var(--accent); opacity: .7; }
-  .last-cooked{
-    font-family:'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted);
-    margin-left: auto;
-  }
-  .last-cooked.muted{ opacity: .7; }
-  .cat-select{
-    font-family:'IBM Plex Sans', sans-serif; font-size: 13px; font-weight:600;
-    padding: 6px 10px; border-radius: 999px; border: 1.5px solid var(--border);
-    background: var(--bg); color: var(--ink);
-  }
-  .macro-row{ display:flex; gap: 10px; flex-wrap: wrap; margin-bottom: 16px; }
-  @media (max-width: 640px){
-    .macro-row{ display:grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
-    .macro-field input{ width: 100%; box-sizing: border-box; font-size: 16px; padding: 9px 10px; }
-  }
-  .image-row{ display:flex; align-items:center; gap: 14px; margin-bottom: 16px; }
-  .meal-photo-preview{ width: 84px; height: 84px; border-radius: 10px; object-fit: cover; flex:none; border: 1px solid var(--border); }
-  .meal-photo-placeholder{
-    width: 84px; height: 84px; border-radius: 10px; flex:none;
-    background: var(--bg); border: 1px dashed var(--border);
-    display:flex; align-items:center; justify-content:center;
-    font-size: 11px; color: var(--muted); text-align:center; padding: 4px;
-  }
-  .image-row-actions{ display:flex; flex-direction:column; gap: 8px; align-items:flex-start; }
-  .upload-btn{
-    font-family:'IBM Plex Sans', sans-serif; font-size: 13px; font-weight:600;
-    padding: 7px 14px; border-radius: 7px; border: 1px solid var(--border);
-    background: var(--primary-light); color: var(--primary); cursor: pointer;
-  }
-  .upload-btn:hover{ background: var(--primary-mid); color: #fff; }
-  .macro-field{ display:flex; flex-direction:column; gap: 4px; }
-  .macro-field label{
-    font-family:'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing:0.05em;
-    text-transform: uppercase; color: var(--muted);
-  }
-  .macro-field input{
-    width: 84px;
-    font-family:'IBM Plex Sans', sans-serif; font-size: 14px;
-    padding: 7px 9px; border-radius: 7px; border: 1px solid var(--border);
-    background: var(--bg); color: var(--ink);
-  }
-  .macro-field input:focus{ outline: 2px solid var(--primary-mid); outline-offset: 1px; }
-  .modal-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 18px; }
-  @media (max-width: 640px){ .modal-grid{ grid-template-columns: 1fr; } }
-  .modal-grid label, .field-label{
-    font-family:'IBM Plex Mono', monospace; font-size: 10.5px; letter-spacing:0.05em;
-    text-transform: uppercase; color: var(--muted); display:block; margin-bottom:5px;
-  }
-  .modal-grid textarea, .recipe-name-input{
-    width: 100%;
-    font-family: 'IBM Plex Sans', sans-serif; font-size: 14px;
-    padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--bg); color: var(--ink); resize: vertical; min-height: 140px;
-  }
-  .recipe-name-input{ min-height: unset; font-size: 20px; font-family:'Fraunces', serif; font-weight:600; margin-bottom: 10px; }
-  .modal-grid textarea:focus, .recipe-name-input:focus{ outline: 2px solid var(--primary-mid); outline-offset: 1px; }
-  .modal-actions{ display:flex; justify-content:space-between; align-items:center; margin-top: 18px; }
-  .modal-actions .save-note{ font-size: 12px; color: var(--muted); }
-  .danger-btn{
-    font-family:'IBM Plex Sans', sans-serif; font-size: 13px; color: #A0453A;
-    background: none; border: 1px solid #E9C9C3; border-radius: 7px;
-    padding: 7px 14px; cursor: pointer;
-  }
-  .danger-btn:hover{ background: #FBEEEC; }
-
-  /* database modal specifics */
-  .db-search-row{ position: relative; margin-bottom: 16px; }
-  .db-search-row input{
-    width: 100%;
-    font-family:'IBM Plex Sans', sans-serif; font-size: 14px;
-    padding: 10px 36px 10px 12px; border-radius: 9px; border: 1px solid var(--border);
-    background: var(--bg); color: var(--ink);
-  }
-  .db-search-row input:focus{ outline: 2px solid var(--primary-mid); outline-offset: 1px; }
-  .db-search-row button{
-    position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-    border:none; background:none; color: var(--muted); cursor:pointer; font-size: 13px;
-  }
-  .db-search-row button:hover{ color: var(--ink); }
-  .db-grid{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-  @media (max-width: 860px){ .db-grid{ grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 500px){ .db-grid{ grid-template-columns: 1fr; } }
-  .cat-col{
-    border-radius: 18px; background: var(--bg); border: 1px solid var(--border);
-    padding: 16px; display:flex; flex-direction:column; min-height: 160px;
-  }
-  .cat-head{ display:flex; align-items:center; gap:8px; font-family:'Fraunces', serif; font-weight:600; font-size: 15px; margin-bottom: 8px; }
-  .cat-dot{ width:10px; height:10px; border-radius:50%; flex:none; }
-  .cat-count{ margin-left:auto; font-family:'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); }
-  .meal-list{ list-style:none; margin:0; padding:0 2px 0 0; flex:1; display:flex; flex-direction:column; gap:6px; margin-bottom: 10px; max-height: 340px; overflow-y: auto; }
-  .meal-item{
-    display:flex; align-items:center; justify-content:space-between;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-    padding: 7px 10px; font-size: 13.5px; cursor: pointer;
-  }
-  .meal-item .meal-name{ display:flex; align-items:center; gap:6px; }
-  .meal-thumb{ width:22px; height:22px; border-radius:5px; object-fit:cover; flex:none; }
-  .meal-item .recipe-dot{ width:6px; height:6px; border-radius:50%; background: var(--accent); flex: none; }
-  .meal-item .del-btn{
-    border:none; background:none; color: var(--muted); cursor:pointer;
-    font-size: 15px; padding: 8px; margin: -8px -6px -8px 0;
-    line-height: 1; border-radius: 6px;
-  }
-  .meal-item .del-btn:hover{ color: var(--ink); }
-  .cat-empty{ font-size: 12.5px; color: var(--muted); padding: 4px 2px 8px; }
-  .cat-add{ display:flex; gap:6px; }
-  .cat-add input{
-    flex:1; font-family:'IBM Plex Sans', sans-serif; font-size: 13px;
-    padding: 8px 10px; border-radius: 7px; border: 1px solid var(--border);
-    background: var(--surface); color: var(--ink); min-width: 0;
-  }
-  .cat-add input:focus{ outline: 2px solid var(--primary-mid); outline-offset: 1px; }
-  .cat-add button{
-    font-family:'IBM Plex Sans', sans-serif; font-weight:600; font-size: 13px;
-    padding: 8px 12px; border-radius: 7px; border: none;
-    background: var(--primary); color: #fff; cursor:pointer; flex:none;
-  }
-  .cat-add button:hover{ background:#1B4132; }
-  .db-footer{ margin-top: 16px; border-top: 1px solid var(--border); padding-top: 14px; }
-  .db-footer-head{ display:flex; align-items:center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-  .db-footer-head span.lbl{ font-family:'IBM Plex Mono', monospace; font-size: 11.5px; color: var(--muted); }
-  .db-footer-head button{
-    font-family:'IBM Plex Sans', sans-serif; font-size: 12.5px; color: var(--primary);
-    background: var(--primary-light); border: none; border-radius: 7px;
-    padding: 6px 12px; cursor: pointer;
-  }
-  .db-footer-head button:hover{ background: var(--primary-mid); color: #fff; }
-  textarea.io-box{
-    width: 100%; min-height: 80px; font-family: 'IBM Plex Mono', monospace; font-size: 12px;
-    padding: 9px 10px; border-radius: 8px; border: 1px solid var(--border);
-    background: var(--bg); color: var(--ink); resize: vertical;
-  }
-  .io-note{ font-size: 11.5px; color: var(--muted); margin: 6px 0 0; }
+:root{--bg:#fff;--ink:#1d201e;--mut:#6a716d;--line:#e8ebe8;--soft:#f4f6f4;--acc:#24543F;--acc2:#e6f0ea;--warn:#b3261e;--r:14px;--tab:62px;
+  --c-zajtrk:#fdf1d9;--c-kosilo:#e3efe7;--c-vecerja:#e6e9f6;--c-malica:#f9e5ec}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+[hidden]{display:none!important}
+svg{display:block}
+.view{max-width:720px;margin:0 auto;padding:0 16px calc(var(--tab) + 28px + env(safe-area-inset-bottom))}
+h1{font-size:26px;line-height:1.15;margin:0;font-weight:700;letter-spacing:-.01em}
+h2{font-size:19px;margin:26px 0 10px;font-weight:700}
+.ttl{display:flex;align-items:center;justify-content:space-between;padding:20px 0 10px;padding-top:calc(16px + env(safe-area-inset-top))}
+.cnt{font-size:15px;color:var(--mut);font-weight:500;margin-left:6px}
+.sub{color:var(--mut);margin:0 0 14px;font-size:15px}
+.ib{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ib:active{background:var(--soft)}
+.btn{min-height:48px;padding:0 20px;border-radius:24px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:#fff}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.danger{color:var(--warn);border-color:#f0cfcc}
+.btn.sm{min-height:44px;padding:0 18px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.55}
+.lnk{color:var(--acc);font-weight:600;min-height:44px;padding:0 6px}
+.lnk.danger{color:var(--warn)}
+.sticky{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);margin:0 -16px;padding:6px 16px 8px}
+.search{position:relative}
+.search input{width:100%;height:48px;border:1px solid var(--line);background:var(--soft);border-radius:24px;padding:0 48px 0 46px;outline:none;font-size:16px;-webkit-appearance:none}
+.search input:focus{border-color:var(--acc);background:#fff}
+.search>svg{position:absolute;left:16px;top:14px;color:var(--mut);pointer-events:none}
+.search .x{position:absolute;right:2px;top:2px;width:44px;height:44px;display:grid;place-items:center;color:var(--mut)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips.wrap{flex-wrap:wrap;overflow:visible}
+.chip{flex:none;height:44px;padding:0 16px;border-radius:22px;border:1px solid var(--line);background:#fff;font-weight:500;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.chips.tags{padding:4px 0 0}
+.chips.tags .chip{background:var(--soft);border-color:transparent;font-size:15px}
+.chips.tags .chip.on{background:var(--acc2);border-color:var(--acc);color:var(--acc)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px 12px;padding-top:14px}
+.card{position:relative;cursor:pointer;content-visibility:auto;contain-intrinsic-size:auto 230px}
+.ph{aspect-ratio:4/3;border-radius:var(--r);overflow:hidden;background:var(--soft)}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph.none{display:grid;place-items:center;font-size:36px}
+.ph.c-zajtrk,.hero.c-zajtrk{background:var(--c-zajtrk)}.ph.c-kosilo,.hero.c-kosilo{background:var(--c-kosilo)}
+.ph.c-vecerja,.hero.c-vecerja{background:var(--c-vecerja)}.ph.c-malica,.hero.c-malica{background:var(--c-malica)}
+.ct{font-weight:600;font-size:15px;line-height:1.25;margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cm{color:var(--mut);font-size:13px;margin-top:2px}
+.fav{position:absolute;top:0;right:0;width:46px;height:46px;display:grid;place-items:center}
+.fav span{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.empty{text-align:center;color:var(--mut);padding:50px 10px}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.97);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+.tabbar button{flex:1;height:var(--tab);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;font-weight:600;color:var(--mut)}
+.tabbar button.on{color:var(--acc)}
+.tabbar .plus span{width:44px;height:30px;border-radius:15px;background:var(--acc);color:#fff;display:grid;place-items:center}
+/* read view */
+.hero{position:relative;margin:0 -16px;aspect-ratio:4/3;max-height:52vh;background:var(--soft);overflow:hidden}
+.hero img{width:100%;height:100%;object-fit:cover;display:block}
+.hero.none{aspect-ratio:auto;height:170px;display:grid;place-items:center;font-size:56px;max-height:none}
+.htop{position:absolute;left:10px;right:10px;top:calc(10px + env(safe-area-inset-top));display:flex;justify-content:space-between;z-index:2}
+.htop .r{display:flex;gap:8px}
+.rb{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.93);box-shadow:0 1px 6px rgba(0,0,0,.25);display:grid;place-items:center}
+.rbody{padding-top:18px}
+.kick{font-size:13px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.06em}
+.rbody h1{margin:4px 0 12px;font-size:28px}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.pill{background:var(--soft);border-radius:18px;padding:7px 13px;font-size:15px;font-weight:500}
+.macros{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.macros div{background:var(--soft);border-radius:12px;padding:8px 4px;text-align:center}
+.macros b{display:block;font-size:17px}.macros small{color:var(--mut);font-size:12px}
+.tagrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tag{background:var(--acc2);color:var(--acc);border-radius:14px;padding:4px 11px;font-size:14px;font-weight:600}
+.ing{display:flex;align-items:center;gap:14px;min-height:52px;padding:6px 2px;border-bottom:1px solid var(--line);font-size:18px;line-height:1.35;cursor:pointer}
+.ing input,.shop-item input{width:26px;height:26px;flex:none;accent-color:var(--acc);margin:0}
+.ing input:checked+span,.shop-item.checked .txt{text-decoration:line-through;color:var(--mut)}
+ol.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+ol.steps li{counter-increment:s;display:flex;gap:14px;padding:12px 0;font-size:18px;line-height:1.55}
+ol.steps li::before{content:counter(s);flex:none;width:32px;height:32px;border-radius:50%;background:var(--acc);color:#fff;font-weight:700;font-size:15px;display:grid;place-items:center;margin-top:2px}
+.note{background:var(--soft);border-radius:12px;padding:12px 14px;margin-top:10px;color:var(--mut);font-size:15px}
+.src{margin-top:18px;color:var(--mut);font-size:15px;word-break:break-word}
+.src a{color:var(--acc);font-weight:600}
+.cta{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);border-top:1px solid var(--line)}
+.cta .btn{max-width:688px;margin:0 auto;display:flex}
+/* edit */
+.etop{display:flex;align-items:center;gap:6px;padding:calc(10px + env(safe-area-inset-top)) 0 6px;position:sticky;top:0;background:#fff;z-index:5;margin:0 -16px;padding-left:10px;padding-right:16px}
+.etop h2{margin:0;flex:1;font-size:18px}
+.fl{display:block;margin-top:16px;font-weight:600;font-size:14px;color:var(--mut)}
+.fl input,.fl select,.fl textarea,.addtag input{display:block;width:100%;margin-top:6px;min-height:48px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:16px;background:#fff;color:var(--ink);font-weight:400;outline:none;-webkit-appearance:none}
+.fl textarea{line-height:1.5;resize:vertical}
+.fl input:focus,.fl select:focus,.fl textarea:focus,.addtag input:focus{border-color:var(--acc)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.four{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.four .fl{margin-top:16px}.four input{padding:10px 8px}
+.eph{aspect-ratio:4/3;border-radius:var(--r);overflow:hidden;background:var(--soft);display:grid;place-items:center;color:var(--mut);margin-top:12px}
+.eph img{width:100%;height:100%;object-fit:cover}
+.row{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.addtag{display:flex;gap:8px;margin-top:8px;align-items:flex-start}
+.addtag input{margin-top:0}
+/* week */
+.wk{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.wr{font-weight:600;text-align:center}
+.seg{display:flex;background:var(--soft);border-radius:24px;padding:4px;margin-bottom:14px}
+.seg button{flex:1;height:44px;border-radius:20px;font-weight:600;color:var(--mut)}
+.seg button.on{background:#fff;color:var(--acc);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.day{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px 6px;margin-bottom:12px}
+.day.today{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.dh{font-weight:700;display:flex;gap:8px;align-items:baseline}
+.dh small{color:var(--mut);font-weight:500}
+.dh .td{font-size:11px;background:var(--acc);color:#fff;border-radius:8px;padding:1px 7px;font-weight:700}
+.slot{display:flex;align-items:center;gap:8px;margin:8px 0}
+.slot .sl{width:62px;flex:none;font-size:13px;color:var(--mut);font-weight:600}
+.slot select{flex:1;min-width:0;height:44px;border:1px solid var(--line);border-radius:10px;padding:0 8px;background:#fff;font-size:15px;-webkit-appearance:none;appearance:none;text-overflow:ellipsis}
+.slot select.f{background:var(--acc2);border-color:transparent;font-weight:600}
+.slot .ib{width:44px;height:44px}
+.shop-add{display:flex;gap:8px;margin-bottom:10px}
+.shop-add input{flex:1;min-width:0;height:48px;border:1px solid var(--line);border-radius:24px;padding:0 16px;font-size:16px;outline:none}
+.shop-h{font-weight:700;margin:18px 0 2px}
+.shop-item{display:flex;align-items:center;gap:14px;min-height:52px;border-bottom:1px solid var(--line);font-size:17px}
+.shop-item .txt{flex:1}
+.shop-item .c{color:var(--mut);font-size:14px}
+.rowx{display:flex;gap:8px;margin:6px 0 4px;flex-wrap:wrap}
+/* ing search */
+.res{display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;min-height:64px}
+.res .t{width:64px;height:64px;border-radius:12px;overflow:hidden;flex:none;background:var(--soft);display:grid;place-items:center;font-size:24px}
+.res img{width:100%;height:100%;object-fit:cover}
+.res b{display:block;line-height:1.25}.res small{color:var(--mut)}
+/* cook */
+#vCook{position:fixed;inset:0;z-index:50;background:#fff;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
+.ck-top{display:flex;align-items:center;gap:8px;padding:6px 8px}
+.ck-t{flex:1;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ck-prog{height:5px;background:var(--line)}.ck-prog i{display:block;height:100%;background:var(--acc);transition:width .25s}
+.ck-body{flex:1;overflow:auto;padding:26px 22px;display:flex;flex-direction:column;justify-content:center}
+.ck-n{color:var(--acc);font-weight:700;margin-bottom:14px;text-transform:uppercase;font-size:14px;letter-spacing:.06em}
+.ck-txt{font-size:26px;line-height:1.45}
+.ck-nav{display:flex;gap:12px;padding:12px 16px calc(14px + env(safe-area-inset-bottom))}
+.ck-nav .btn{min-height:60px;font-size:18px;flex:1}
+.ck-nav .btn.pri{flex:2}
+/* sheet + toast */
+#sheet{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;background:rgba(0,0,0,.4)}
+.sh{background:#fff;width:100%;max-width:720px;margin:0 auto;border-radius:20px 20px 0 0;max-height:82vh;overflow:auto;padding:14px 18px calc(18px + env(safe-area-inset-bottom))}
+.sh h3{margin:4px 0 8px;font-size:18px}
+.sh .opt{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;text-align:left;font-size:17px;border-bottom:1px solid var(--line)}
+.sh .opt.danger{color:var(--warn)}
+#toast{position:fixed;left:50%;bottom:calc(var(--tab) + 18px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#222;color:#fff;border-radius:22px;padding:11px 18px;z-index:90;max-width:90vw;text-align:center;font-size:15px}
+.loading{padding:80px 0;text-align:center;color:var(--mut)}
+@media (min-width:700px){.view{padding-left:24px;padding-right:24px}}
 </style>
 </head>
 <body>
-<div class="wrap" id="app">
-  <div class="loading" id="loading">Nalagam jedilnik …</div>
-</div>
-
+<div id="vList" class="view"></div>
+<div id="vIng" class="view" hidden></div>
+<div id="vWeek" class="view" hidden></div>
+<div id="vSub" class="view" hidden></div>
+<div id="vCook" hidden></div>
+<nav class="tabbar" id="tabbar" aria-label="Glavna navigacija">
+  <button data-tab="" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M9 8h6"/></svg>Recepti</button>
+  <button data-tab="ing"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Imam doma</button>
+  <button data-tab="new" class="plus"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>Dodaj</button>
+  <button data-tab="week"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Teden</button>
+</nav>
+<div id="sheet" hidden></div>
+<div id="toast" hidden></div>
+<input type="file" id="impFile" accept=".json,application/json" hidden>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -642,27 +197,6 @@ if(CONFIG_READY){
   const fbApp = initializeApp(firebaseConfig);
   dbFs = getFirestore(fbApp);
 }
-
-const DAY_NAMES = ['Ponedeljek','Torek','Sreda','Četrtek','Petek','Sobota','Nedelja'];
-const CATEGORIES = [
-  { id: 'zajtrk',  label: 'Zajtrk',  dot: 'var(--cat-zajtrk)' },
-  { id: 'kosilo',  label: 'Kosilo',  dot: 'var(--cat-kosilo)' },
-  { id: 'vecerja', label: 'Večerja', dot: 'var(--cat-vecerja)' },
-  { id: 'malica',  label: 'Sladice',  dot: 'var(--cat-malica)' },
-];
-const REAL_TODAY = new Date();
-
-let db = { meals: [] };
-let weekMenu = { selections: {}, shoppingChecked: {}, extraItems: [] };
-let hideCheckedShopping = false;
-let weekStart = getMonday(REAL_TODAY);
-let openModal = null; // null | 'db' | 'recipe' | 'search'
-let recipeModalMealId = null;
-let recipeModalIsNew = false;
-let searchQueryText = '';
-let searchExpandedMealId = null;
-let dbSearchText = '';
-
 function pad(n){ return String(n).padStart(2,'0'); }
 function isoDate(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
 function getMonday(d){
@@ -676,6 +210,68 @@ function addDays(d, n){ const x = new Date(d); x.setDate(x.getDate()+n); return 
 function weekKey(monday){ return `week-${isoDate(monday)}`; }
 function fmtShort(d){ return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.`; }
 
+const DAY_NAMES = ['Ponedeljek','Torek','Sreda','Četrtek','Petek','Sobota','Nedelja'];
+const CATEGORIES = [
+  { id: 'zajtrk',  label: 'Zajtrk',  emoji: '🥣' },
+  { id: 'kosilo',  label: 'Kosilo',  emoji: '🍲' },
+  { id: 'vecerja', label: 'Večerja', emoji: '🥗' },
+  { id: 'malica',  label: 'Sladice', emoji: '🍰' },
+];
+const REAL_TODAY = new Date();
+let db = { meals: [] };
+let weekMenu = { selections: {}, shoppingChecked: {}, extraItems: [] };
+let hideCheckedShopping = false;
+let weekStart = getMonday(REAL_TODAY);
+let weekLoaded = false;
+
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const IC = {
+  back:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  edit:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+  close:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  more:'<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+  search:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  heart:on=>`<svg width="19" height="19" viewBox="0 0 24 24" fill="${on?'#d6336c':'none'}" stroke="${on?'#d6336c':'#333'}" stroke-width="2.2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.2-9.2C1.6 8 3.6 4.8 6.8 4.8c2 0 3.4 1.1 5.2 3.2 1.8-2.1 3.2-3.2 5.2-3.2 3.2 0 5.2 3.2 4 6.5-1.7 4.6-9.2 9.2-9.2 9.2z"/></svg>`,
+};
+
+/* ---------------- lokalni predpomnilnik (IndexedDB) ---------------- */
+let _idb = null;
+function idb(){
+  if(!_idb) _idb = new Promise((res, rej)=>{
+    try{
+      const r = indexedDB.open('jedilnik-cache', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('kv');
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    }catch(e){ rej(e); }
+  });
+  return _idb;
+}
+async function cacheGet(k){
+  try{
+    const d = await idb();
+    return await new Promise(res=>{
+      const q = d.transaction('kv').objectStore('kv').get(k);
+      q.onsuccess = () => res(q.result || null);
+      q.onerror = () => res(null);
+    });
+  }catch(e){ return null; }
+}
+async function cacheSet(k, v){
+  try{
+    const d = await idb();
+    await new Promise(res=>{
+      const t = d.transaction('kv','readwrite');
+      t.objectStore('kv').put(v, k);
+      t.oncomplete = res; t.onerror = res; t.onabort = res;
+    });
+  }catch(e){}
+}
+function cacheMeals(){ return cacheSet('meals', db.meals); }
+
+/* ---------------- Firestore ---------------- */
+function isFav(m){ return m.favorite === undefined || m.favorite === null || m.favorite === '' ? (Number(m.rating)||0) >= 4 : !!m.favorite; }
 function mealDocFields(m){
   return {
     name: m.name || '', category: m.category || 'kosilo',
@@ -684,41 +280,32 @@ function mealDocFields(m){
     image: m.image || '',
     lastCooked: m.lastCooked || '', rating: m.rating || 0,
     prepTime: m.prepTime || '', servings: m.servings || '',
+    tags: Array.isArray(m.tags) ? m.tags : [], source: m.source || '', favorite: isFav(m),
   };
 }
-
-async function loadDb(){
-  try{
-    const snap = await getDocs(collection(dbFs, 'meals'));
-    const meals = [];
-    snap.forEach(d => meals.push({ id: d.id, ...d.data() }));
-    db = { meals };
-    return;
-  }catch(e){ console.error('Nalaganje baze ni uspelo', e); }
-  db = { meals: [] };
+const withTimeout = (p, ms=12000) => Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), ms))]);
+async function fetchMeals(){
+  const snap = await withTimeout(getDocs(collection(dbFs, 'meals')), 20000);
+  const meals = [];
+  snap.forEach(d => meals.push({ id: d.id, ...d.data() }));
+  return meals;
 }
-// Persists a single meal document (each meal = its own Firestore doc,
-// so large photos on some meals can't blow past Firestore's 1MB/document
-// limit for the whole database the way one shared doc would).
 async function saveMeal(meal){
-  try{ await setDoc(doc(dbFs, 'meals', meal.id), mealDocFields(meal)); return true; }
+  try{ await withTimeout(setDoc(doc(dbFs, 'meals', meal.id), mealDocFields(meal))); return true; }
   catch(e){ console.error('Obrok se ni shranil', e); return false; }
 }
 async function deleteMealDoc(id){
-  try{ await deleteDoc(doc(dbFs, 'meals', id)); return true; }
+  try{ await withTimeout(deleteDoc(doc(dbFs, 'meals', id))); return true; }
   catch(e){ console.error('Obroka ni bilo mogoče izbrisati', e); return false; }
 }
 async function saveMealsBatch(meals){
   try{
     const batch = writeBatch(dbFs);
     meals.forEach(m => batch.set(doc(dbFs, 'meals', m.id), mealDocFields(m)));
-    await batch.commit();
+    await withTimeout(batch.commit(), 30000);
     return true;
   }catch(e){ console.error('Obrokov ni bilo mogoče shraniti', e); return false; }
 }
-// Writes in small batches instead of one big one — keeps each request light
-// (important on mobile networks) and means a mid-way failure doesn't lose
-// meals that already saved successfully.
 async function saveMealsInChunks(meals, chunkSize=15){
   for(let i=0;i<meals.length;i+=chunkSize){
     const ok = await saveMealsBatch(meals.slice(i, i+chunkSize));
@@ -728,12 +315,90 @@ async function saveMealsInChunks(meals, chunkSize=15){
 }
 async function deleteAllMeals(){
   try{
-    const batch = writeBatch(dbFs);
-    db.meals.forEach(m => batch.delete(doc(dbFs, 'meals', m.id)));
-    await batch.commit();
+    for(let i=0;i<db.meals.length;i+=400){
+      const batch = writeBatch(dbFs);
+      db.meals.slice(i,i+400).forEach(m => batch.delete(doc(dbFs, 'meals', m.id)));
+      await batch.commit();
+    }
     return true;
   }catch(e){ console.error('Baze ni bilo mogoče počistiti', e); return false; }
 }
+
+/* ---------------- iskalni indeks ---------------- */
+const sidx = new Map();
+function indexMeal(m){
+  sidx.set(m.id, normalizeText([m.name, ...(m.ingredients||[]), ...(m.tags||[]), m.source||''].join(' | ')));
+}
+function indexAll(){ sidx.clear(); db.meals.forEach(indexMeal); }
+function allTags(){
+  const c = {};
+  db.meals.forEach(m => (m.tags||[]).forEach(t => { c[t] = (c[t]||0)+1; }));
+  return Object.keys(c).sort((a,b)=> c[b]-c[a] || a.localeCompare(b,'sl'));
+}
+
+/* ---------------- razčlenitev recepta ---------------- */
+function parseRecipe(m){
+  const text = String(m.recipe || '').replace(/\r/g,'');
+  const steps = [], notes = []; let source = '';
+  text.split(/\n\s*\n/).map(s=>s.trim()).filter(Boolean).forEach(p=>{
+    if(/^(vir|source)\s*:/i.test(p)){ source = p.replace(/^[^:]*:\s*/,''); return; }
+    if(/^(zahtevnost|opomba|nasvet)\s*:/i.test(p)){ notes.push(p); return; }
+    const parts = p.split(/\n(?=\d+[.)]\s)/);
+    if(parts.length > 1) parts.forEach(x => steps.push(x.replace(/^\d+[.)]\s*/,'').replace(/\n/g,' ').trim()));
+    else steps.push(p.replace(/^\d+[.)]\s*/,''));
+  });
+  return { steps, notes, source };
+}
+function linkify(s){
+  return esc(s).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+}
+
+/* ---------------- kljukice sestavin (samo v tem telefonu) ---------------- */
+let chk = {};
+try{ chk = JSON.parse(localStorage.getItem('jed-chk') || '{}'); }catch(e){}
+function saveChk(){ try{ localStorage.setItem('jed-chk', JSON.stringify(chk)); }catch(e){} }
+const isChk = (id,i) => (chk[id]||[]).includes(i);
+function toggleChk(id,i,on){
+  const a = new Set(chk[id]||[]); on ? a.add(i) : a.delete(i);
+  if(a.size) chk[id] = [...a]; else delete chk[id];
+  saveChk();
+}
+
+/* ---------------- toast / sheet ---------------- */
+let toastT = null;
+function toast(msg, ms=2600){
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastT); toastT = setTimeout(()=>{ t.hidden = true; }, ms);
+}
+function openSheet(html){
+  const s = $('#sheet');
+  s.innerHTML = `<div class="sh" role="dialog">${html}</div>`;
+  s.hidden = false;
+  s.onclick = e => { if(e.target === s) closeSheet(); };
+}
+function closeSheet(){ const s = $('#sheet'); s.hidden = true; s.innerHTML = ''; }
+
+/* ---------------- navigacija ---------------- */
+const VIEWS = { List:'#vList', Ing:'#vIng', Week:'#vWeek', Sub:'#vSub', Cook:'#vCook' };
+let curView = '';
+const scrollPos = {};
+function show(name){
+  if(curView) scrollPos[curView] = window.scrollY;
+  curView = name;
+  Object.keys(VIEWS).forEach(n => { $(VIEWS[n]).hidden = (n !== name); });
+  $('#tabbar').hidden = (name === 'Sub' || name === 'Cook');
+  const tab = name === 'List' ? '' : name === 'Ing' ? 'ing' : name === 'Week' ? 'week' : null;
+  document.querySelectorAll('#tabbar button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  window.scrollTo(0, (name==='List'||name==='Ing'||name==='Week') ? (scrollPos[name]||0) : 0);
+}
+function depth(){ return (history.state && history.state.i) || 0; }
+function go(hash, replace){
+  const i = replace ? depth() : depth()+1;
+  history[replace ? 'replaceState' : 'pushState']({ i }, '', '#/' + hash);
+  route();
+}
+function goBack(fallback){ if(depth() > 0) history.back(); else go(fallback||'', true); }
+
 async function loadWeek(){
   const key = weekKey(weekStart);
   try{
@@ -769,13 +434,12 @@ async function copyPreviousWeek(){
       extraItems: (d.extraItems || []).map(item => ({...item, id: 'x'+Date.now()+Math.floor(Math.random()*1000)}))
     };
     await saveWeek();
-    render();
+    renderWeek();
   }catch(e){
     console.error('Kopiranje tedna ni uspelo', e);
     alert('Prejšnjega tedna ni bilo mogoče kopirati.');
   }
 }
-
 function mealsByCategory(catId){ return db.meals.filter(m => m.category === catId); }
 function mealById(id){ return db.meals.find(x=>x.id===id) || null; }
 function mealName(id){ const m = mealById(id); return m ? m.name : null; }
@@ -1010,261 +674,6 @@ function buildShoppingList(){
   }));
   return recipeItems.concat(manualItems).sort((a,b)=>a.label.localeCompare(b.label,'sl'));
 }
-
-/* ============================= RENDER ============================= */
-
-function render(){
-  const app = document.getElementById('app');
-  const weekEnd = addDays(weekStart, 6);
-  const isRealCurrentWeek = isoDate(weekStart) === isoDate(getMonday(REAL_TODAY));
-
-  // ---- weekly menu table ----
-  let headCells = `<th>Dan</th>` + CATEGORIES.map(c=>`<th>${c.label}</th>`).join('');
-  let bodyRows = '';
-  for(let i=0;i<7;i++){
-    const d = addDays(weekStart, i);
-    const key = isoDate(d);
-    const isToday = key === isoDate(REAL_TODAY);
-    let cells = `<td class="day-cell">${DAY_NAMES[i]}${isToday?'<span class="today-badge">DANES</span>':''}<span class="date">${fmtShort(d)}</span></td>`;
-    CATEGORIES.forEach(cat=>{
-      const meals = mealsByCategory(cat.id);
-      const rawVal = (weekMenu.selections[key] && weekMenu.selections[key][cat.id]) || '';
-      const isCustom = rawVal.startsWith('~');
-      const customText = isCustom ? rawVal.slice(1) : '';
-      const selectedMealId = isCustom ? '' : rawVal;
-      const hasSelection = !!(selectedMealId && mealName(selectedMealId));
-      const isEmptyCell = !hasSelection && !isCustom;
-      let options = `<option value="">${hasSelection?'—':'+ dodaj obrok'}</option>`;
-      if(meals.length===0){
-        options += `<option value="" disabled>ni obrokov v bazi</option>`;
-      } else {
-        meals.forEach(m=>{
-          options += `<option value="${m.id}" ${selectedMealId===m.id?'selected':''}>${m.name}</option>`;
-        });
-      }
-      cells += `
-        <td data-label="${cat.label}">
-          <div class="cell-inner">
-            ${hasSelection && mealById(selectedMealId).image
-              ? `<img class="cell-thumb" src="${mealById(selectedMealId).image}" data-view-meal="${selectedMealId}" title="Poglej recept" alt="">`
-              : ''}
-            <select class="meal-select${hasSelection?` filled-${cat.id}`:(isEmptyCell?' empty-select':'')}" data-day="${key}" data-cat="${cat.id}" ${isCustom?'disabled':''}>
-              ${options}
-            </select>
-            ${hasSelection ? `<button class="view-recipe-btn" data-view-meal="${selectedMealId}" title="Poglej recept">📖</button>` : ''}
-          </div>
-          <input type="text" class="custom-entry" data-custom-day="${key}" data-custom-cat="${cat.id}" placeholder="ali vpiši ročno …" value="${customText.replace(/"/g,'&quot;')}">
-        </td>`;
-    });
-    bodyRows += `<tr class="day-row${isToday?' today':''}">${cells}</tr>`;
-  }
-
-  // ---- shopping list ----
-  const shopping = buildShoppingList();
-  let shopHtml;
-  if(shopping.length===0){
-    shopHtml = `<p class="shop-empty">${shopping.length ? 'Vse je označeno kot kupljeno.' : 'Za ta teden še ni izbranih obrokov s sestavinami.'} Dodaj sestavine obrokom v bazi ali spodaj dopiši še kaj ročno.</p>`;
-  } else {
-    const shopGroups = {};
-    shopping.filter(item => !hideCheckedShopping || !weekMenu.shoppingChecked[item.key]).forEach(item=>{
-      if(!shopGroups[item.shopCat]) shopGroups[item.shopCat] = [];
-      shopGroups[item.shopCat].push(item);
-    });
-    const order = [...SHOP_CATEGORIES.map(c=>c.id), 'drugo'];
-    shopHtml = order.filter(id => shopGroups[id] && shopGroups[id].length).map(id=>{
-      const catDef = SHOP_CATEGORIES.find(c=>c.id===id);
-      const label = catDef ? `${catDef.emoji} ${catDef.label}` : 'Drugo';
-      const items = shopGroups[id];
-      const itemsHtml = items.map(item=>{
-        const checked = !!weekMenu.shoppingChecked[item.key];
-        return `
-          <li class="shop-item${checked?' checked':''}">
-            <input type="checkbox" data-shop-item="${item.key.replace(/"/g,'&quot;')}" ${checked?'checked':''}>
-            <span class="txt">${item.label}</span>
-            ${(!item.hasQty && item.count>1)?`<span class="count">×${item.count}</span>`:''}
-            ${item.isManual ? `<button class="shop-del-btn" data-del-manual="${item.manualId}" title="Odstrani">✕</button>` : ''}
-          </li>`;
-      }).join('');
-      return `
-        <div class="shop-cat-group">
-          <div class="shop-cat-heading">${label}</div>
-          <ul class="shop-list">${itemsHtml}</ul>
-        </div>`;
-    }).join('');
-  }
-
-  app.innerHTML = `
-    <header>
-      <div>
-        <p class="eyebrow">Tedenski pregled</p>
-        <div class="title-row">
-          <button class="nav-btn" id="prevWeekBtn" title="Prejšnji teden">‹</button>
-          <h1>Jedilnik</h1>
-          <button class="nav-btn" id="nextWeekBtn" title="Naslednji teden">›</button>
-          ${!isRealCurrentWeek ? `<button class="today-btn" id="todayBtn">Ta teden</button>` : ''}
-        </div>
-        <p class="week-range">${fmtShort(weekStart)} – ${fmtShort(weekEnd)} ${weekEnd.getFullYear()}</p>
-      </div>
-    </header>
-
-    <div class="toolbar">
-      <button class="db-open-btn generate-btn" id="generateWeekBtn">✨ Ustvari teden</button>
-      <button class="db-open-btn" id="openSearchBtn">🔎 Kaj skuhati?</button>
-      <button class="db-open-btn" id="openDbBtn">📚 Baza obrokov (${db.meals.length})</button>
-      <button class="db-open-btn secondary-action" id="copyPreviousWeekBtn">↶ Kopiraj prejšnji teden</button>
-      <button class="db-open-btn install-app-btn" id="installAppBtn">📲 Namesti aplikacijo</button>
-    </div>
-
-    <nav class="quick-nav" aria-label="Hitra navigacija">
-      <button id="jumpWeekBtn">📅 Teden</button>
-      <button id="jumpShoppingBtn">🛒 Nakupovalni seznam</button>
-    </nav>
-
-    <section class="panel" id="weekPanel">
-      <h2>Tedenski meni</h2>
-      <p class="sub">Za vsak dan izberi obrok iz baze. Klikni 📖, da odpreš recept.</p>
-      <div class="table-scroll">
-        <table class="menu">
-          <thead><tr>${headCells}</tr></thead>
-          <tbody>${bodyRows}</tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="panel" id="shoppingPanel">
-      <h2>Nakupovalni seznam</h2>
-      <p class="sub">Sestavljen iz sestavin vseh obrokov, izbranih v tedenskem meniju zgoraj — spodaj lahko dopišeš še kar koli ročno.</p>
-      <div class="shop-add-row">
-        <input type="text" id="shopAddInput" placeholder="Dopiši na seznam, npr. wc papir …" maxlength="80">
-        <button id="shopAddBtn">+ Dodaj</button>
-      </div>
-      <div class="shop-tools">
-        <button class="shop-tool-btn" id="toggleCheckedBtn">${hideCheckedShopping?'👁 Pokaži kupljeno':'✓ Skrij kupljeno'}</button>
-        <button class="shop-tool-btn" id="shareShoppingBtn">↗ Deli seznam</button>
-      </div>
-      ${shopHtml}
-    </section>
-
-    <footer>
-      <span>Podatki se shranjujejo samodejno v tvojo Firebase bazo.</span>
-      <button id="clearWeekBtn">Počisti ta teden</button>
-    </footer>
-
-    <div id="modalRoot"></div>
-  `;
-
-  bindMainEvents();
-  renderModal();
-}
-
-function bindMainEvents(){
-  document.getElementById('jumpWeekBtn').addEventListener('click', ()=>{
-    document.getElementById('weekPanel').scrollIntoView({ behavior:'smooth', block:'start' });
-  });
-  document.getElementById('jumpShoppingBtn').addEventListener('click', ()=>{
-    document.getElementById('shoppingPanel').scrollIntoView({ behavior:'smooth', block:'start' });
-  });
-  document.getElementById('prevWeekBtn').addEventListener('click', ()=>changeWeek(-7));
-  document.getElementById('nextWeekBtn').addEventListener('click', ()=>changeWeek(7));
-  const todayBtn = document.getElementById('todayBtn');
-  if(todayBtn) todayBtn.addEventListener('click', ()=>goToWeek(getMonday(REAL_TODAY)));
-
-  document.getElementById('openDbBtn').addEventListener('click', ()=>{ openModal = 'db'; renderModal(); });
-  document.getElementById('openSearchBtn').addEventListener('click', ()=>{ openModal = 'search'; renderModal(); });
-  document.getElementById('generateWeekBtn').addEventListener('click', generateWeek);
-  document.getElementById('copyPreviousWeekBtn').addEventListener('click', copyPreviousWeek);
-  document.getElementById('toggleCheckedBtn').addEventListener('click', ()=>{
-    hideCheckedShopping = !hideCheckedShopping;
-    render();
-  });
-  document.getElementById('shareShoppingBtn').addEventListener('click', shareShoppingList);
-
-  document.querySelectorAll('.meal-select').forEach(sel=>{
-    sel.addEventListener('change', async ()=>{
-      const day = sel.getAttribute('data-day');
-      const cat = sel.getAttribute('data-cat');
-      if(!weekMenu.selections[day]) weekMenu.selections[day] = {};
-      if(sel.value) weekMenu.selections[day][cat] = sel.value;
-      else delete weekMenu.selections[day][cat];
-      await saveWeek();
-      render();
-    });
-  });
-
-  document.querySelectorAll('.custom-entry').forEach(inp=>{
-    inp.addEventListener('change', async ()=>{
-      const day = inp.getAttribute('data-custom-day');
-      const cat = inp.getAttribute('data-custom-cat');
-      const text = inp.value.trim();
-      if(!weekMenu.selections[day]) weekMenu.selections[day] = {};
-      if(text) weekMenu.selections[day][cat] = '~' + text;
-      else delete weekMenu.selections[day][cat];
-      await saveWeek();
-      render();
-    });
-  });
-
-  document.querySelectorAll('[data-view-meal]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      recipeModalMealId = btn.getAttribute('data-view-meal');
-      recipeModalIsNew = false;
-      openModal = 'recipe';
-      renderModal();
-    });
-  });
-
-  document.querySelectorAll('[data-shop-item]').forEach(cb=>{
-    cb.addEventListener('change', async ()=>{
-      const key = cb.getAttribute('data-shop-item');
-      if(cb.checked) weekMenu.shoppingChecked[key] = true;
-      else delete weekMenu.shoppingChecked[key];
-      await saveWeek();
-      render();
-    });
-  });
-
-  async function addShopItem(){
-    const input = document.getElementById('shopAddInput');
-    const text = input.value.trim();
-    if(!text) return;
-    if(!weekMenu.extraItems) weekMenu.extraItems = [];
-    weekMenu.extraItems.push({ id: 'x'+Date.now()+Math.floor(Math.random()*1000), text });
-    await saveWeek();
-    render();
-  }
-  document.getElementById('shopAddBtn').addEventListener('click', addShopItem);
-  document.getElementById('shopAddInput').addEventListener('keydown', (e)=>{
-    if(e.key==='Enter') addShopItem();
-  });
-
-  document.querySelectorAll('[data-del-manual]').forEach(btn=>{
-    btn.addEventListener('click', async ()=>{
-      const id = btn.getAttribute('data-del-manual');
-      weekMenu.extraItems = (weekMenu.extraItems||[]).filter(it=>it.id!==id);
-      delete weekMenu.shoppingChecked['manual:'+id];
-      await saveWeek();
-      render();
-    });
-  });
-
-  document.getElementById('clearWeekBtn').addEventListener('click', async ()=>{
-    const weekEnd = addDays(weekStart, 6);
-    if(!confirm(`Počistim izbrane obroke za teden ${fmtShort(weekStart)}–${fmtShort(weekEnd)}?`)) return;
-    weekMenu = { selections: {}, shoppingChecked: {}, extraItems: [] };
-    await saveWeek();
-    render();
-  });
-}
-
-async function goToWeek(monday){
-  document.getElementById('app').innerHTML = '<div class="loading">Nalagam jedilnik …</div>';
-  weekStart = monday;
-  await loadWeek();
-  await syncCookedHistory();
-  render();
-}
-function changeWeek(deltaDays){ goToWeek(addDays(weekStart, deltaDays)); }
-
 async function shareShoppingList(){
   const items = buildShoppingList();
   const text = `Nakupovalni seznam — ${fmtShort(weekStart)}–${fmtShort(addDays(weekStart,6))}\n\n` +
@@ -1282,7 +691,6 @@ async function shareShoppingList(){
     if(e.name !== 'AbortError') alert('Seznama ni bilo mogoče deliti.');
   }
 }
-
 function shuffle(arr){
   const a = arr.slice();
   for(let i=a.length-1;i>0;i--){
@@ -1336,7 +744,7 @@ async function generateWeek(){
   });
 
   await saveWeek();
-  render();
+  renderWeek();
 
   if(missing.length){
     const labels = { meso:'mesnih', riba:'ribjih', testenine:'testeninskih', juha:'juh', vegetarijansko:'vegetarijanskih' };
@@ -1348,582 +756,638 @@ async function generateWeek(){
  }
 }
 
-/* ============================= MODALS ============================= */
+/* ============================ SEZNAM RECEPTOV ============================ */
+const ui = { q:'', cat:'all', tag:'', fav:false };
+const CHUNK = 30;
+let shown = 0, listFiltered = [], listDirty = false, sentObs = null, listBuilt = false;
 
-function renderModal(){
-  const root = document.getElementById('modalRoot');
-  if(!root) return;
-  if(openModal === 'db'){
-    root.innerHTML = dbModalHtml();
-    bindDbModalEvents();
-  } else if(openModal === 'recipe'){
-    root.innerHTML = recipeModalHtml();
-    bindRecipeModalEvents();
-  } else if(openModal === 'search'){
-    root.innerHTML = searchModalHtml();
-    bindSearchModalEvents();
-  } else {
-    root.innerHTML = '';
-  }
-}
-
-function closeModal(){
-  openModal = null;
-  recipeModalMealId = null;
-  recipeModalIsNew = false;
-  searchExpandedMealId = null;
-  dbSearchText = '';
-  renderModal();
-}
-
-/* ---- Search-by-ingredients modal ---- */
-function searchModalHtml(){
-  const { terms, results } = searchQueryText.trim() ? searchMealsByIngredients(searchQueryText) : { terms: [], results: [] };
-  const days = [0,1,2,3,4,5,6].map(i=>addDays(weekStart, i));
-
-  let resultsHtml;
-  if(!searchQueryText.trim()){
-    resultsHtml = `<p class="sub">Vpiši nekaj sestavin, ki jih imaš/želiš uporabiti (ločene z vejico), npr. "piščanec, riž, čebula".</p>`;
-  } else if(results.length === 0){
-    resultsHtml = `<p class="shop-empty">Nobenega obroka v bazi ne vsebuje nič od vpisanega.</p>`;
-  } else {
-    resultsHtml = `<div class="search-results">` + results.map(r=>{
-      const m = r.meal;
-      const isExpanded = searchExpandedMealId === m.id;
-      const dayPicker = isExpanded ? `
-        <div class="day-picker">
-          ${days.map(d=>{
-            const key = isoDate(d);
-            const already = weekMenu.selections[key] && weekMenu.selections[key][m.category] === m.id;
-            return `<button class="day-pick-btn${already?' picked':''}" data-assign-day="${key}" data-assign-meal="${m.id}">${DAY_NAMES[(d.getDay()+6)%7].slice(0,3)}<span>${fmtShort(d)}</span></button>`;
-          }).join('')}
-        </div>` : '';
-      return `
-        <div class="search-card">
-          <div class="search-card-row" data-open-result="${m.id}">
-            ${m.image ? `<img class="search-thumb" src="${m.image}" alt="">` : `<div class="search-thumb search-thumb-empty"></div>`}
-            <div class="search-card-body">
-              <div class="search-card-top">
-                <span class="search-card-name">${m.name}</span>
-                <span class="search-card-cat" style="color:${(CATEGORIES.find(c=>c.id===m.category)||{}).dot||'var(--muted)'}">${catLabel(m.category)}</span>
-              </div>
-              <div class="search-card-match">Ujema se: ${r.matchedTerms.length}/${terms.length} sestavin (${r.matchedTerms.join(', ')})</div>
-            </div>
-          </div>
-          <div class="search-card-actions">
-            <button class="search-action-btn" data-open-result="${m.id}">📖 Recept</button>
-            <button class="search-action-btn${isExpanded?' active':''}" data-toggle-add="${m.id}">+ Dodaj v teden</button>
-          </div>
-          ${dayPicker}
-        </div>`;
-    }).join('') + `</div>`;
-  }
-
-  return `
-    <div class="modal-backdrop" id="searchBackdrop">
-      <div class="modal-box narrow">
-        <div class="modal-head">
-          <h2>Kaj skuhati?</h2>
-          <button class="modal-close" id="searchCloseBtn">✕</button>
-        </div>
-        <p class="sub">Poišče recepte iz baze, ki vsebujejo vpisane sestavine.</p>
-        <div class="search-input-row">
-          <input type="text" id="searchInput" placeholder="npr. piščanec, riž, čebula" value="${searchQueryText.replace(/"/g,'&quot;')}">
-          <button id="searchGoBtn">Poišči</button>
-        </div>
-        ${resultsHtml}
-      </div>
-    </div>`;
-}
-
-function bindSearchModalEvents(){
-  const backdrop = document.getElementById('searchBackdrop');
-  document.getElementById('searchCloseBtn').addEventListener('click', closeModal);
-  backdrop.addEventListener('click', (e)=>{ if(e.target.id === 'searchBackdrop') closeModal(); });
-
-  const input = document.getElementById('searchInput');
-  function runSearch(){
-    searchQueryText = input.value;
-    renderModal();
-  }
-  document.getElementById('searchGoBtn').addEventListener('click', runSearch);
-  input.addEventListener('keydown', (e)=>{ if(e.key==='Enter') runSearch(); });
-  input.focus();
-  input.selectionStart = input.selectionEnd = input.value.length;
-
-  document.querySelectorAll('[data-open-result]').forEach(el=>{
-    el.addEventListener('click', ()=>{
-      recipeModalMealId = el.getAttribute('data-open-result');
-      recipeModalIsNew = false;
-      openModal = 'recipe';
-      renderModal();
-    });
+function buildList(){
+  $('#vList').innerHTML = `
+    <div class="ttl"><h1>Recepti<span class="cnt" id="cnt"></span></h1>
+      <button class="ib" id="moreBtn" aria-label="Več možnosti">${IC.more}</button></div>
+    <div class="sticky">
+      <div class="search">${IC.search}<input id="q" type="search" placeholder="Ime, sestavina, oznaka …" autocomplete="off" enterkeyhint="search"><button class="x" id="qx" aria-label="Počisti" hidden>${IC.close}</button></div>
+      <div class="chips" id="catChips"></div>
+    </div>
+    <div class="chips tags" id="tagChips"></div>
+    <div id="grid" class="grid"></div>
+    <div id="sent" style="height:1px"></div>
+    <div id="empty" class="empty" hidden></div>`;
+  listBuilt = true;
+  const q = $('#q'); let t;
+  q.addEventListener('input', () => {
+    clearTimeout(t); t = setTimeout(()=>{ ui.q = q.value; $('#qx').hidden = !q.value; applyFilter(); }, 120);
   });
-
-  document.querySelectorAll('[data-toggle-add]').forEach(btn=>{
-    btn.addEventListener('click', (e)=>{
-      e.stopPropagation();
-      const id = btn.getAttribute('data-toggle-add');
-      searchExpandedMealId = (searchExpandedMealId === id) ? null : id;
-      renderModal();
-    });
-  });
-
-  document.querySelectorAll('[data-assign-day]').forEach(btn=>{
-    btn.addEventListener('click', async (e)=>{
-      e.stopPropagation();
-      const day = btn.getAttribute('data-assign-day');
-      const mealId = btn.getAttribute('data-assign-meal');
-      const meal = mealById(mealId);
-      if(!meal) return;
-      if(!weekMenu.selections[day]) weekMenu.selections[day] = {};
-      weekMenu.selections[day][meal.category] = mealId;
-      await saveWeek();
-      render();
-    });
-  });
-}
-
-/* ---- Database modal ---- */
-function dbModalHtml(){
-  const filterNorm = normalizeText(dbSearchText || '');
-  let dbCols = '';
-  CATEGORIES.forEach(cat=>{
-    const allMeals = mealsByCategory(cat.id).slice().sort((a,b)=>a.name.localeCompare(b.name,'sl'));
-    const meals = filterNorm ? allMeals.filter(m => normalizeText(m.name).includes(filterNorm)) : allMeals;
-    const items = meals.length
-      ? meals.map(m => `
-          <li class="meal-item" data-open-meal="${m.id}">
-            <span class="meal-name">${m.image?`<img class="meal-thumb" src="${m.image}" alt="">`:''}${hasRecipeData(m)?'<span class="recipe-dot" title="Ima recept"></span>':''}${m.name}</span>
-            <button class="del-btn" data-del-meal="${m.id}" title="Izbriši obrok">✕</button>
-          </li>`).join('')
-      : `<li class="cat-empty">${filterNorm ? 'Ni ujemanj.' : 'Še ni obrokov.'}</li>`;
-    dbCols += `
-      <div class="cat-col">
-        <div class="cat-head">
-          <span class="cat-dot" style="background:${cat.dot}"></span>
-          ${cat.label}
-          <span class="cat-count">${filterNorm ? `${meals.length}/${allMeals.length}` : allMeals.length}</span>
-        </div>
-        <ul class="meal-list">${items}</ul>
-        <div class="cat-add">
-          <input type="text" placeholder="Nov obrok …" data-add-input="${cat.id}" maxlength="60">
-          <button data-add-btn="${cat.id}">+</button>
-        </div>
-      </div>`;
-  });
-
-  return `
-    <div class="modal-backdrop" id="dbBackdrop">
-      <div class="modal-box">
-        <div class="modal-head">
-          <h2>Baza obrokov</h2>
-          <button class="modal-close" id="dbCloseBtn">✕</button>
-        </div>
-        <p class="sub">Dodaj obroke v ustrezno kategorijo. Klikni na obrok, da vpišeš sestavine, kalorije in recept.</p>
-        <div class="db-search-row">
-          <input type="text" id="dbSearchInput" placeholder="🔍 Išči po imenu obroka …" value="${dbSearchText.replace(/"/g,'&quot;')}">
-          ${dbSearchText ? `<button id="dbSearchClearBtn" title="Počisti iskanje">✕</button>` : ''}
-        </div>
-        <div class="db-grid">${dbCols}</div>
-        <div class="db-footer">
-          <div class="db-footer-head">
-            <span class="lbl">Uvoz / izvoz baze (JSON)</span>
-            <button id="exportBtn">Izvozi trenutno bazo</button>
-            <label class="upload-btn" for="importFileInput">📁 Uvozi iz datoteke</label>
-            <input type="file" id="importFileInput" accept="application/json,.json" style="display:none">
-          </div>
-          <p class="io-note" style="margin-bottom:8px;">Priporočeno za večje datoteke (npr. s slikami) — izberi .json datoteko neposredno, brez lepljenja.</p>
-          <div class="db-footer-head">
-            <span class="lbl">…ali prilepi ročno:</span>
-            <button id="importBtn">Uvozi iz spodnjega polja</button>
-          </div>
-          <textarea class="io-box" id="ioBox" placeholder='[{"name":"Ovsena kaša","category":"zajtrk","ingredients":["Ovseni kosmiči","Mleko"],"recipe":"...","kcal":320,"carbs":45,"protein":12,"fat":8}]'></textarea>
-          <p class="io-note">Sem prilepi seznam obrokov v JSON obliki in klikni "Uvozi" — dodajo se k obstoječi bazi.</p>
-        </div>
-        <div class="modal-actions">
-          <button class="danger-btn" id="clearDbBtn">Počisti celotno bazo obrokov</button>
-        </div>
-      </div>
-    </div>`;
-}
-
-function bindDbModalEvents(){
-  document.getElementById('dbCloseBtn').addEventListener('click', closeModal);
-  document.getElementById('dbBackdrop').addEventListener('click', (e)=>{
-    if(e.target.id === 'dbBackdrop') closeModal();
-  });
-
-  const searchInput = document.getElementById('dbSearchInput');
-  searchInput.addEventListener('input', ()=>{
-    dbSearchText = searchInput.value;
-    renderModal();
-  });
-  // keep focus + cursor position after each re-render while typing
-  searchInput.focus();
-  searchInput.selectionStart = searchInput.selectionEnd = searchInput.value.length;
-  const clearBtn = document.getElementById('dbSearchClearBtn');
-  if(clearBtn) clearBtn.addEventListener('click', ()=>{ dbSearchText=''; renderModal(); });
-
-  document.querySelectorAll('[data-add-btn]').forEach(btn=>{
-    btn.addEventListener('click', ()=>addMeal(btn.getAttribute('data-add-btn')));
-  });
-  document.querySelectorAll('[data-add-input]').forEach(inp=>{
-    inp.addEventListener('keydown', (e)=>{ if(e.key==='Enter') addMeal(inp.getAttribute('data-add-input')); });
-  });
-  async function addMeal(catId){
-    const input = document.querySelector(`[data-add-input="${catId}"]`);
-    const name = input.value.trim();
-    if(!name) return;
-    const id = 'm'+Date.now()+Math.floor(Math.random()*1000);
-    const meal = { id, name, category: catId, ingredients: [], recipe: '', kcal:'', carbs:'', protein:'', fat:'', image: '', lastCooked: '', rating: 0, prepTime: '', servings: '' };
-    db.meals.push(meal);
-    await saveMeal(meal);
-    renderModal();
-    render();
-  }
-
-  document.querySelectorAll('[data-open-meal]').forEach(row=>{
-    row.addEventListener('click', (e)=>{
-      if(e.target.closest('.del-btn')) return;
-      recipeModalMealId = row.getAttribute('data-open-meal');
-      recipeModalIsNew = false;
-      openModal = 'recipe';
-      renderModal();
-    });
-  });
-
-  document.querySelectorAll('[data-del-meal]').forEach(btn=>{
-    btn.addEventListener('click', async (e)=>{
-      e.stopPropagation();
-      const id = btn.getAttribute('data-del-meal');
-      db.meals = db.meals.filter(m=>m.id!==id);
-      await deleteMealDoc(id);
-      Object.keys(weekMenu.selections).forEach(day=>{
-        Object.keys(weekMenu.selections[day]).forEach(cat=>{
-          if(weekMenu.selections[day][cat]===id) delete weekMenu.selections[day][cat];
-        });
-      });
-      await saveWeek();
-      renderModal();
-      render();
-    });
-  });
-
-  document.getElementById('exportBtn').addEventListener('click', ()=>{
-    document.getElementById('ioBox').value = JSON.stringify(db.meals, null, 2);
-  });
-
-  async function runImport(raw){
-    if(!raw || !raw.trim()) return;
-    let parsed;
-    try{ parsed = JSON.parse(raw); }
-    catch(e){ alert('JSON ni veljaven — datoteka/besedilo je morda okrnjeno (prekinjeno lepljenje ali nalaganje). Poskusi uvoz iz datoteke namesto lepljenja.'); return; }
-    if(!Array.isArray(parsed)){ alert('Pričakovan je seznam obrokov v [ ] oklepajih.'); return; }
-    const validCats = CATEGORIES.map(c=>c.id);
-    let added = 0, updated = 0, skipped = 0;
-    const toSave = [];
-    parsed.forEach(item=>{
-      if(!item || !item.name){ skipped++; return; }
-      const nameNorm = String(item.name).trim().toLowerCase();
-      const existing = db.meals.find(m => m.name.trim().toLowerCase() === nameNorm);
-      if(existing){
-        // Update only the fields present in this import item (e.g. an
-        // "images only" JSON just adds photos to already-imported recipes).
-        if(item.category != null && validCats.includes(item.category)) existing.category = item.category;
-        if(Array.isArray(item.ingredients)) existing.ingredients = item.ingredients.map(String);
-        if(item.recipe != null) existing.recipe = String(item.recipe);
-        if(item.kcal != null) existing.kcal = String(item.kcal);
-        if(item.carbs != null) existing.carbs = String(item.carbs);
-        if(item.protein != null) existing.protein = String(item.protein);
-        if(item.fat != null) existing.fat = String(item.fat);
-        if(item.image) existing.image = String(item.image);
-        if(item.prepTime != null) existing.prepTime = String(item.prepTime);
-        if(item.servings != null) existing.servings = String(item.servings);
-        toSave.push(existing);
-        updated++;
-      } else if(validCats.includes(item.category)){
-        const meal = {
-          id: 'm'+Date.now()+Math.floor(Math.random()*10000)+added,
-          name: String(item.name).slice(0,120),
-          category: item.category,
-          ingredients: Array.isArray(item.ingredients) ? item.ingredients.map(String) : [],
-          recipe: item.recipe ? String(item.recipe) : '',
-          kcal: item.kcal!=null ? String(item.kcal) : '',
-          carbs: item.carbs!=null ? String(item.carbs) : '',
-          protein: item.protein!=null ? String(item.protein) : '',
-          fat: item.fat!=null ? String(item.fat) : '',
-          image: item.image ? String(item.image) : '',
-          prepTime: item.prepTime ? String(item.prepTime) : '',
-          servings: item.servings ? String(item.servings) : '',
-        };
-        db.meals.push(meal);
-        toSave.push(meal);
-        added++;
-      } else {
-        skipped++; // no matching existing meal, and no valid category to create a new one
-      }
-    });
-    const ok = await saveMealsInChunks(toSave);
-    const ioBox = document.getElementById('ioBox');
-    if(ioBox) ioBox.value = '';
-    renderModal();
-    render();
-    if(!ok){
-      alert('Shranjevanje ni uspelo v celoti. Poskusi znova — obroki, ki so se že shranili, ostanejo, ostale lahko uvoziš še enkrat.');
-    } else if(skipped>0 || updated>0){
-      alert(`Dodanih ${added}, posodobljenih ${updated} obrokov. Preskočenih ${skipped} (ni ujemanja po imenu in manjka/napačna kategorija).`);
-    } else if(added>0){
-      alert(`Dodanih ${added} obrokov.`);
+  $('#qx').onclick = () => { q.value=''; ui.q=''; $('#qx').hidden = true; applyFilter(); q.focus(); };
+  $('#moreBtn').onclick = openMenu;
+  $('#catChips').onclick = e => {
+    const b = e.target.closest('.chip'); if(!b) return;
+    if(b.dataset.fav){ ui.fav = !ui.fav; } else { ui.cat = b.dataset.cat; }
+    renderChips(); applyFilter();
+  };
+  $('#tagChips').onclick = e => {
+    const b = e.target.closest('.chip'); if(!b) return;
+    ui.tag = ui.tag === b.dataset.tag ? '' : b.dataset.tag;
+    renderChips(); applyFilter();
+  };
+  $('#grid').onclick = e => {
+    const card = e.target.closest('.card'); if(!card) return;
+    const id = card.dataset.id;
+    if(e.target.closest('.fav')){ toggleFav(id); return; }
+    go('r/' + id);
+  };
+  sentObs = new IntersectionObserver(es => {
+    if(es.some(x => x.isIntersecting) && shown < listFiltered.length){
+      appendChunk(); sentObs.unobserve($('#sent')); sentObs.observe($('#sent'));
     }
-  }
-
-  document.getElementById('importBtn').addEventListener('click', ()=>{
-    runImport(document.getElementById('ioBox').value.trim());
+  }, { rootMargin: '900px' });
+  sentObs.observe($('#sent'));
+  renderChips();
+}
+function renderChips(){
+  const cats = [{id:'all',label:'Vsi'}, ...CATEGORIES];
+  $('#catChips').innerHTML = cats.map(c => `<button class="chip${ui.cat===c.id?' on':''}" data-cat="${c.id}">${c.label}</button>`).join('')
+    + `<button class="chip${ui.fav?' on':''}" data-fav="1">♥ Priljubljeni</button>`;
+  const tags = allTags();
+  $('#tagChips').innerHTML = tags.map(t => `<button class="chip${ui.tag===t?' on':''}" data-tag="${esc(t)}">#${esc(t)}</button>`).join('');
+  $('#tagChips').hidden = tags.length === 0;
+}
+function cardHtml(m){
+  const cat = CATEGORIES.find(c=>c.id===m.category);
+  const meta = [m.prepTime && String(m.prepTime).trim(), m.kcal && (m.kcal + ' kcal')].filter(Boolean).join(' · ');
+  const img = m.image
+    ? `<div class="ph"><img src="${m.image}" alt="" loading="lazy" decoding="async"></div>`
+    : `<div class="ph none c-${m.category}">${cat ? cat.emoji : '🍽'}</div>`;
+  return `<article class="card" data-id="${esc(m.id)}" role="link" tabindex="0">${img}
+    <button class="fav" aria-label="Priljubljen"><span>${IC.heart(isFav(m))}</span></button>
+    <div class="ct">${esc(m.name)}</div>${meta ? `<div class="cm">${esc(meta)}</div>` : ''}</article>`;
+}
+function appendChunk(n=CHUNK){
+  const slice = listFiltered.slice(shown, shown+n);
+  $('#grid').insertAdjacentHTML('beforeend', slice.map(cardHtml).join(''));
+  shown += slice.length;
+}
+function applyFilter(keep){
+  const keepN = keep ? shown : 0;
+  const terms = normalizeText(ui.q).split(/\s+/).filter(Boolean);
+  listFiltered = db.meals.filter(m =>
+    (ui.cat==='all' || m.category===ui.cat) && (!ui.fav || isFav(m)) &&
+    (!ui.tag || (m.tags||[]).includes(ui.tag)) &&
+    terms.every(t => (sidx.get(m.id)||'').includes(t))
+  );
+  const nq = normalizeText(ui.q);
+  listFiltered.sort((a,b)=>{
+    if(nq){
+      const ai = normalizeText(a.name).includes(nq) ? 0 : 1, bi = normalizeText(b.name).includes(nq) ? 0 : 1;
+      if(ai !== bi) return ai - bi;
+    }
+    return a.name.localeCompare(b.name,'sl');
   });
+  shown = 0; $('#grid').innerHTML = '';
+  appendChunk(Math.max(CHUNK, keepN));
+  $('#cnt').textContent = db.meals.length ? (listFiltered.length === db.meals.length ? db.meals.length : `${listFiltered.length} / ${db.meals.length}`) : '';
+  const em = $('#empty');
+  if(listFiltered.length === 0){
+    em.hidden = false;
+    em.innerHTML = db.meals.length
+      ? 'Ni zadetkov. Poskusi drug izraz ali odstrani filter.'
+      : 'Baza je še prazna.<br><br><button class="btn pri" id="emptyAdd">Dodaj prvi recept</button>';
+    const ea = $('#emptyAdd'); if(ea) ea.onclick = () => go('new');
+  } else em.hidden = true;
+  renderChips();
+  listDirty = false;
+}
+async function toggleFav(id){
+  const m = mealById(id); if(!m) return;
+  const prev = { favorite: m.favorite };
+  m.favorite = !isFav(m);
+  document.querySelectorAll(`.card[data-id="${CSS.escape(id)}"] .fav span`).forEach(s => s.innerHTML = IC.heart(m.favorite));
+  const hb = $('#favBtn'); if(hb) hb.innerHTML = IC.heart(m.favorite);
+  if(ui.fav) listDirty = true;
+  cacheMeals();
+  const ok = await saveMeal(m);
+  if(!ok){ m.favorite = prev.favorite; cacheMeals(); toast('Ni se shranilo. Preveri povezavo.'); applyFilter(true); }
+}
 
-  document.getElementById('importFileInput').addEventListener('change', (e)=>{
-    const file = e.target.files && e.target.files[0];
-    if(!file) return;
+/* ============================ BRALNI POGLED ============================ */
+let curMealId = null;
+function ingListHtml(m){
+  return (m.ingredients||[]).map((l,i) =>
+    `<label class="ing"><input type="checkbox" data-ci="${i}"${isChk(m.id,i)?' checked':''}><span>${esc(l)}</span></label>`).join('');
+}
+function openRead(id){
+  const m = mealById(id); curMealId = id;
+  const cat = CATEGORIES.find(c=>c.id===m.category);
+  const { steps, notes, source: pSrc } = parseRecipe(m);
+  const src = m.source || pSrc;
+  const macros = [['kcal','kcal'],['carbs','OH'],['protein','Bel.'],['fat','Mašč.']].filter(([k])=>m[k]!=='' && m[k]!=null);
+  $('#vSub').innerHTML = `
+    <div class="hero${m.image?'':' none c-'+m.category}">
+      ${m.image ? `<img src="${m.image}" alt="">` : (cat?cat.emoji:'🍽')}
+      <div class="htop"><button class="rb" id="rBack" aria-label="Nazaj">${IC.back}</button>
+        <div class="r"><button class="rb" id="favBtn" aria-label="Priljubljen">${IC.heart(isFav(m))}</button>
+        <button class="rb" id="rEdit" aria-label="Uredi">${IC.edit}</button></div></div>
+    </div>
+    <div class="rbody">
+      <div class="kick">${cat?cat.label:''}</div><h1>${esc(m.name)}</h1>
+      <div class="meta">${m.prepTime?`<span class="pill">⏱ ${esc(m.prepTime)}</span>`:''}${m.servings?`<span class="pill">🍽 ${esc(m.servings)}</span>`:''}${m.lastCooked?`<span class="pill">Skuhano: ${esc(daysAgoLabel(m.lastCooked))}</span>`:''}</div>
+      ${macros.length?`<div class="macros">${macros.map(([k,l])=>`<div><b>${esc(m[k])}</b><small>${l}</small></div>`).join('')}</div>`:''}
+      ${(m.tags||[]).length?`<div class="tagrow">${m.tags.map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div>`:''}
+      ${(m.ingredients||[]).length?`<h2>Sestavine</h2><div id="ingList">${ingListHtml(m)}</div>
+        <button class="lnk" id="clrChk"${(chk[m.id]||[]).length?'':' hidden'}>Počisti kljukice</button>`:''}
+      ${steps.length?`<h2>Postopek</h2><ol class="steps">${steps.map(s=>`<li><span>${esc(s)}</span></li>`).join('')}</ol>`:(!(m.ingredients||[]).length?'<p class="note">Ta recept še nima sestavin ali postopka. Dodaj jih z gumbom za urejanje (svinčnik).</p>':'')}
+      ${notes.map(n=>`<div class="note">${esc(n)}</div>`).join('')}
+      ${src?`<div class="src">Vir: ${linkify(src)}</div>`:''}
+      <div class="rowx" style="margin-top:20px"><button class="btn" id="cookedBtn">✓ Skuhano danes</button></div>
+    </div>
+    ${steps.length?`<div class="cta"><button class="btn pri block" id="cookBtn">▶ Začni kuhati</button></div>`:''}`;
+  show('Sub');
+  $('#rBack').onclick = () => goBack('');
+  $('#favBtn').onclick = () => toggleFav(id);
+  $('#rEdit').onclick = () => go('edit/' + id);
+  const cb = $('#cookBtn'); if(cb) cb.onclick = () => go('cook/' + id);
+  $('#cookedBtn').onclick = async () => {
+    const prev = m.lastCooked; m.lastCooked = isoDate(REAL_TODAY);
+    cacheMeals();
+    if(await saveMeal(m)){ toast('Označeno kot skuhano danes'); openRead(id); }
+    else { m.lastCooked = prev; toast('Ni se shranilo. Preveri povezavo.'); }
+  };
+  const cc = $('#clrChk'); if(cc) cc.onclick = () => { delete chk[id]; saveChk(); openRead(id); };
+}
+document.addEventListener('change', e => {
+  const cb = e.target.closest && e.target.closest('input[data-ci]'); if(!cb || !curMealId) return;
+  toggleChk(curMealId, +cb.dataset.ci, cb.checked);
+  const cc = $('#clrChk'); if(cc) cc.hidden = !(chk[curMealId]||[]).length;
+});
+
+/* ============================ NAČIN KUHANJA ============================ */
+let wl = null, cook = null;
+async function startWake(){
+  try{ if('wakeLock' in navigator && !wl){ wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', ()=>{ wl = null; }); } }catch(e){}
+}
+function stopWake(){ try{ wl && wl.release(); }catch(e){} wl = null; }
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && curView === 'Cook') startWake(); });
+
+function openCook(id){
+  const m = mealById(id); curMealId = id;
+  const { steps } = parseRecipe(m);
+  cook = { id, steps, i: 0 };
+  show('Cook'); startWake(); renderCook();
+}
+function renderCook(){
+  const m = mealById(cook.id), n = cook.steps.length, last = cook.i === n-1;
+  $('#vCook').innerHTML = `
+    <div class="ck-top"><button class="ib" id="ckX" aria-label="Zapri">${IC.close}</button><div class="ck-t">${esc(m.name)}</div>
+      ${(m.ingredients||[]).length?'<button class="btn sm" id="ckIng">Sestavine</button>':''}</div>
+    <div class="ck-prog"><i style="width:${(cook.i+1)/n*100}%"></i></div>
+    <div class="ck-body"><div class="ck-n">Korak ${cook.i+1} od ${n}</div><div class="ck-txt">${esc(cook.steps[cook.i])}</div></div>
+    <div class="ck-nav"><button class="btn" id="ckPrev"${cook.i===0?' disabled':''}>‹ Nazaj</button>
+      <button class="btn pri" id="ckNext">${last?'Končano ✓':'Naprej ›'}</button></div>`;
+  $('#ckX').onclick = () => goBack('r/' + cook.id);
+  $('#ckPrev').onclick = () => { if(cook.i > 0){ cook.i--; renderCook(); } };
+  $('#ckNext').onclick = cookNext;
+  const ci = $('#ckIng');
+  if(ci) ci.onclick = () => openSheet(`<h3>Sestavine</h3>${ingListHtml(m)}<button class="btn block" id="shX" style="margin-top:12px">Zapri</button>`) || ($('#shX').onclick = closeSheet);
+}
+async function cookNext(){
+  if(cook.i < cook.steps.length - 1){ cook.i++; renderCook(); return; }
+  const m = mealById(cook.id);
+  if(confirm('Končano! Označim recept kot skuhan danes?')){
+    m.lastCooked = isoDate(REAL_TODAY); cacheMeals(); saveMeal(m);
+  }
+  goBack('r/' + cook.id);
+}
+(function swipe(){
+  let x0 = null, y0 = null;
+  const el = document.getElementById('vCook');
+  el.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive:true });
+  el.addEventListener('touchend', e => {
+    if(x0 === null || !cook) return;
+    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+    if(Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy)*1.5) return;
+    if(dx < 0) cookNext(); else if(cook.i > 0){ cook.i--; renderCook(); }
+  }, { passive:true });
+})();
+
+/* ============================ UREJANJE ============================ */
+const SUGGEST_TAGS = ['za otroke','slano','sladko','brez peke','hitro','priloga','prigrizek'];
+let edit = null;
+function resizeImageToDataUrl(file){
+  return new Promise((resolve, reject)=>{
     const reader = new FileReader();
-    reader.onerror = () => alert('Datoteke ni bilo mogoče prebrati.');
-    reader.onload = () => runImport(String(reader.result));
-    reader.readAsText(file);
-    e.target.value = ''; // allow re-selecting the same file later
-  });
-
-  document.getElementById('clearDbBtn').addEventListener('click', async ()=>{
-    if(!confirm('Počistim celotno bazo obrokov? To izbriše vse shranjene obroke v vseh kategorijah.')) return;
-    await deleteAllMeals();
-    db = { meals: [] };
-    closeModal();
-    render();
-  });
-}
-
-/* ---- Recipe modal ---- */
-function recipeModalHtml(){
-  const m = mealById(recipeModalMealId);
-  if(!m) return '';
-  const catOptions = CATEGORIES.map(c=>`<option value="${c.id}" ${c.id===m.category?'selected':''}>${c.label}</option>`).join('');
-  return `
-    <div class="modal-backdrop" id="recipeBackdrop">
-      <div class="modal-box narrow">
-        <div class="modal-head">
-          <div style="flex:1">
-            <input class="recipe-name-input" id="mealNameInput" value="${m.name.replace(/"/g,'&quot;')}">
-          </div>
-          <button class="modal-close" id="recipeCloseBtn">✕</button>
-        </div>
-        <div class="recipe-topline">
-          <select class="cat-select" id="mealCatSelect">${catOptions}</select>
-          <div class="prep-time-field">
-            <span class="prep-time-icon">⏱</span>
-            <input type="text" id="mealPrepTime" value="${(m.prepTime||'').replace(/"/g,'&quot;')}" placeholder="čas priprave, npr. 30 min">
-          </div>
-          <div class="prep-time-field">
-            <span class="prep-time-icon">🍽</span>
-            <input type="text" id="mealServings" value="${(m.servings||'').replace(/"/g,'&quot;')}" placeholder="za koliko oseb, npr. 4 porcije">
-          </div>
-          <div class="star-rating" id="starRating">
-            ${[1,2,3,4,5].map(n=>`<span class="star${n<=(m.rating||0)?' on':''}" data-star="${n}">★</span>`).join('')}
-          </div>
-          ${m.lastCooked ? `<span class="last-cooked">Nazadnje: ${daysAgoLabel(m.lastCooked)}</span>` : `<span class="last-cooked muted">Še ni bil na jedilniku</span>`}
-        </div>
-        <div class="image-row">
-          ${m.image
-            ? `<img class="meal-photo-preview" id="mealPhotoPreview" src="${m.image}" alt="">`
-            : `<div class="meal-photo-placeholder" id="mealPhotoPreview">brez slike</div>`}
-          <div class="image-row-actions">
-            <label class="upload-btn" for="mealImageInput">${m.image?'Zamenjaj sliko':'Dodaj sliko'}</label>
-            <input type="file" id="mealImageInput" accept="image/*" style="display:none">
-            ${m.image?`<button class="danger-btn" id="removeImageBtn">Odstrani sliko</button>`:''}
-          </div>
-        </div>
-        <div class="macro-row">
-          <div class="macro-field"><label>Kcal</label><input type="number" min="0" id="macroKcal" value="${m.kcal||''}"></div>
-          <div class="macro-field"><label>OH (g)</label><input type="number" min="0" id="macroCarbs" value="${m.carbs||''}"></div>
-          <div class="macro-field"><label>Beljakovine (g)</label><input type="number" min="0" id="macroProtein" value="${m.protein||''}"></div>
-          <div class="macro-field"><label>Maščobe (g)</label><input type="number" min="0" id="macroFat" value="${m.fat||''}"></div>
-        </div>
-        <div class="modal-grid">
-          <div>
-            <label>Sestavine (ena na vrstico)</label>
-            <textarea id="mealIngredients" placeholder="npr.&#10;2 jajci&#10;200 g moke">${(m.ingredients||[]).join('\n')}</textarea>
-          </div>
-          <div>
-            <label>Recept / postopek priprave</label>
-            <textarea id="mealRecipe" placeholder="Kratek opis priprave …">${m.recipe||''}</textarea>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button class="danger-btn" id="deleteMealBtn">Izbriši obrok</button>
-          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end">
-            <button class="shop-tool-btn" id="cookedTodayBtn">✅ Skuhano danes</button>
-            <span class="save-note">Spremembe se shranijo samodejno</span>
-          </div>
-        </div>
-      </div>
-    </div>`;
-}
-
-function bindRecipeModalEvents(){
-  const backdrop = document.getElementById('recipeBackdrop');
-  document.getElementById('recipeCloseBtn').addEventListener('click', closeModal);
-  backdrop.addEventListener('click', (e)=>{ if(e.target.id === 'recipeBackdrop') closeModal(); });
-
-  async function persistMealField(field, value){
-    const m = mealById(recipeModalMealId);
-    if(!m) return false;
-    const prev = m[field];
-    m[field] = value;
-    const ok = await saveMeal(m);
-    if(!ok) m[field] = prev; // revert local change if it couldn't be saved (e.g. too large)
-    return ok;
-  }
-
-  function resizeImageToDataUrl(file){
-    return new Promise((resolve, reject)=>{
-      const reader = new FileReader();
-      reader.onerror = () => reject(new Error('Branje datoteke ni uspelo'));
-      reader.onload = () => {
-        const img = new Image();
-        img.onerror = () => reject(new Error('Slike ni bilo mogoče naložiti'));
-        img.onload = () => {
-          const MAX_DIM = 260;
-          let { width, height } = img;
-          if(width > height && width > MAX_DIM){ height = Math.round(height * MAX_DIM/width); width = MAX_DIM; }
-          else if(height > MAX_DIM){ width = Math.round(width * MAX_DIM/height); height = MAX_DIM; }
-          const canvas = document.createElement('canvas');
-          canvas.width = width; canvas.height = height;
-          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-          resolve(canvas.toDataURL('image/jpeg', 0.6));
-        };
-        img.src = reader.result;
+    reader.onerror = () => reject(new Error('Branje datoteke ni uspelo'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Slike ni bilo mogoče naložiti'));
+      img.onload = () => {
+        const MAX_DIM = 560;
+        let { width, height } = img;
+        if(width > height && width > MAX_DIM){ height = Math.round(height * MAX_DIM/width); width = MAX_DIM; }
+        else if(height > MAX_DIM){ width = Math.round(width * MAX_DIM/height); height = MAX_DIM; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.72));
       };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  document.getElementById('mealImageInput').addEventListener('change', async (e)=>{
-    const file = e.target.files && e.target.files[0];
-    if(!file) return;
-    let dataUrl;
-    try{ dataUrl = await resizeImageToDataUrl(file); }
-    catch(err){ alert('Slike ni bilo mogoče obdelati. Poskusi drugo datoteko.'); return; }
-    const ok = await persistMealField('image', dataUrl);
-    if(!ok){
-      alert('Slika je prevelika za shrambo (skupna baza obrokov ima omejitev prostora). Poskusi manjšo/bolj stisnjeno sliko ali odstrani kakšno drugo sliko iz baze.');
-      return;
-    }
-    render();
-  });
-  const removeImageBtn = document.getElementById('removeImageBtn');
-  if(removeImageBtn){
-    removeImageBtn.addEventListener('click', async ()=>{
-      await persistMealField('image', '');
-      render();
-    });
-  }
-
-  document.getElementById('mealNameInput').addEventListener('change', async (e)=>{
-    const v = e.target.value.trim();
-    if(v) await persistMealField('name', v);
-    render();
-  });
-  document.getElementById('mealCatSelect').addEventListener('change', async (e)=>{
-    await persistMealField('category', e.target.value);
-    render();
-  });
-  document.getElementById('mealPrepTime').addEventListener('change', (e)=>{
-    persistMealField('prepTime', e.target.value.trim());
-  });
-  document.getElementById('mealServings').addEventListener('change', (e)=>{
-    persistMealField('servings', e.target.value.trim());
-  });
-  document.querySelectorAll('#starRating .star').forEach(starEl=>{
-    starEl.addEventListener('click', async ()=>{
-      const n = parseInt(starEl.getAttribute('data-star'), 10);
-      const m = mealById(recipeModalMealId);
-      const newRating = (m && m.rating === n) ? 0 : n; // clicking the same star again clears it
-      await persistMealField('rating', newRating);
-      renderModal();
-    });
-  });
-  ['macroKcal:kcal','macroCarbs:carbs','macroProtein:protein','macroFat:fat'].forEach(pair=>{
-    const [elId, field] = pair.split(':');
-    document.getElementById(elId).addEventListener('change', (e)=>persistMealField(field, e.target.value));
-  });
-  document.getElementById('mealIngredients').addEventListener('change', async (e)=>{
-    const list = e.target.value.split('\n').map(s=>s.trim()).filter(Boolean);
-    await persistMealField('ingredients', list);
-    render();
-  });
-  document.getElementById('mealRecipe').addEventListener('change', (e)=>persistMealField('recipe', e.target.value));
-
-  document.getElementById('cookedTodayBtn').addEventListener('click', async ()=>{
-    await persistMealField('lastCooked', isoDate(REAL_TODAY));
-    renderModal();
-  });
-
-  document.getElementById('deleteMealBtn').addEventListener('click', async ()=>{
-    if(!confirm('Izbrišem ta obrok iz baze?')) return;
-    const id = recipeModalMealId;
-    db.meals = db.meals.filter(m=>m.id!==id);
-    await deleteMealDoc(id);
-    Object.keys(weekMenu.selections).forEach(day=>{
-      Object.keys(weekMenu.selections[day]).forEach(cat=>{
-        if(weekMenu.selections[day][cat]===id) delete weekMenu.selections[day][cat];
-      });
-    });
-    await saveWeek();
-    closeModal();
-    render();
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
   });
 }
+function openEdit(id){
+  const m = id ? mealById(id) : { category: ui.cat !== 'all' ? ui.cat : 'kosilo', ingredients: [], tags: [] };
+  const { source: pSrc } = parseRecipe(m);
+  edit = { id, newId: id || ('m' + Date.now() + Math.floor(Math.random()*1000)), tags: [...(m.tags||[])], image: m.image || '' };
+  const v = k => esc(m[k] == null ? '' : m[k]);
+  $('#vSub').innerHTML = `
+    <div class="etop"><button class="ib" id="eBack" aria-label="Nazaj">${IC.back}</button><h2>${id?'Uredi recept':'Nov recept'}</h2>
+      <button class="btn pri sm" id="eSave">Shrani</button></div>
+    <div class="eph" id="ePh"></div>
+    <div class="row"><label class="btn" for="eFile">📷 <span id="eFileTxt"></span></label><input id="eFile" type="file" accept="image/*" hidden>
+      <button class="lnk danger" id="eRmImg">Odstrani sliko</button></div>
+    <label class="fl">Ime recepta<input id="fName" value="${v('name')}" autocomplete="off"></label>
+    <label class="fl">Kategorija<select id="fCat">${CATEGORIES.map(c=>`<option value="${c.id}"${c.id===m.category?' selected':''}>${c.label}</option>`).join('')}</select></label>
+    <div class="two"><label class="fl">Čas priprave<input id="fTime" value="${v('prepTime')}" placeholder="npr. 30 min"></label>
+      <label class="fl">Porcije<input id="fServ" value="${v('servings')}" placeholder="npr. 4 porcije"></label></div>
+    <div class="fl">Oznake<div class="chips wrap" id="fTags"></div>
+      <div class="addtag"><input id="fTagIn" placeholder="nova oznaka" enterkeyhint="done"><button class="btn" id="fTagAdd">Dodaj</button></div></div>
+    <label class="fl">Vir (ime ali povezava)<input id="fSrc" value="${esc(m.source || pSrc || '')}" placeholder="npr. https://…"></label>
+    <div class="four"><label class="fl">Kcal<input id="fK" type="number" inputmode="decimal" value="${v('kcal')}"></label>
+      <label class="fl">OH (g)<input id="fC" type="number" inputmode="decimal" value="${v('carbs')}"></label>
+      <label class="fl">Bel. (g)<input id="fP" type="number" inputmode="decimal" value="${v('protein')}"></label>
+      <label class="fl">Mašč. (g)<input id="fF" type="number" inputmode="decimal" value="${v('fat')}"></label></div>
+    <label class="fl">Sestavine (ena na vrstico)<textarea id="fIng" rows="8" placeholder="2 jajci&#10;200 g moke">${esc((m.ingredients||[]).join('\n'))}</textarea></label>
+    <label class="fl">Postopek (korake loči s prazno vrstico)<textarea id="fRec" rows="10">${esc(m.recipe||'')}</textarea></label>
+    <div style="margin-top:22px;display:grid;gap:12px">
+      <button class="btn pri block" id="eSave2">Shrani</button>
+      ${id?'<button class="btn danger block" id="eDel">Izbriši recept</button>':''}</div>`;
+  show('Sub');
+  renderEditPhoto(); renderEditTags();
+  $('#eBack').onclick = () => goBack(id ? 'r/' + id : '');
+  $('#eSave').onclick = $('#eSave2').onclick = saveEdit;
+  $('#eFile').onchange = async e => {
+    const f = e.target.files && e.target.files[0]; if(!f) return;
+    try{ edit.image = await resizeImageToDataUrl(f); renderEditPhoto(); }
+    catch(err){ toast('Slike ni bilo mogoče obdelati. Poskusi drugo.'); }
+    e.target.value = '';
+  };
+  $('#eRmImg').onclick = () => { edit.image = ''; renderEditPhoto(); };
+  const addTag = () => {
+    const inp = $('#fTagIn'), t = inp.value.trim().replace(/^#/,'').toLowerCase();
+    if(t && !edit.tags.includes(t)) edit.tags.push(t);
+    inp.value = ''; renderEditTags();
+  };
+  $('#fTagAdd').onclick = addTag;
+  $('#fTagIn').onkeydown = e => { if(e.key === 'Enter'){ e.preventDefault(); addTag(); } };
+  $('#fTags').onclick = e => {
+    const b = e.target.closest('.chip'); if(!b) return;
+    const t = b.dataset.tag; edit.tags = edit.tags.includes(t) ? edit.tags.filter(x=>x!==t) : [...edit.tags, t];
+    renderEditTags();
+  };
+  const del = $('#eDel');
+  if(del) del.onclick = async () => {
+    if(!confirm(`Izbrišem recept »${m.name}«? Tega ni mogoče razveljaviti.`)) return;
+    del.disabled = true;
+    if(!(await deleteMealDoc(id))){ del.disabled = false; toast('Brisanje ni uspelo. Preveri povezavo.'); return; }
+    db.meals = db.meals.filter(x => x.id !== id); sidx.delete(id); delete chk[id]; saveChk();
+    cacheMeals(); listDirty = true;
+    if(weekLoaded){
+      let changed = false;
+      Object.keys(weekMenu.selections).forEach(d => Object.keys(weekMenu.selections[d]).forEach(c => {
+        if(weekMenu.selections[d][c] === id){ delete weekMenu.selections[d][c]; changed = true; }
+      }));
+      if(changed) saveWeek();
+    }
+    toast('Recept izbrisan'); go('', true);
+  };
+}
+function renderEditPhoto(){
+  $('#ePh').innerHTML = edit.image ? `<img src="${edit.image}" alt="">` : 'Brez slike';
+  $('#eFileTxt').textContent = edit.image ? 'Zamenjaj sliko' : 'Dodaj sliko';
+  $('#eRmImg').hidden = !edit.image;
+}
+function renderEditTags(){
+  const list = [...new Set([...edit.tags, ...SUGGEST_TAGS, ...allTags()])];
+  $('#fTags').innerHTML = list.map(t => `<button type="button" class="chip${edit.tags.includes(t)?' on':''}" data-tag="${esc(t)}">${esc(t)}</button>`).join('');
+}
+async function saveEdit(){
+  const name = $('#fName').value.trim();
+  if(!name){ toast('Vpiši ime recepta'); $('#fName').focus(); return; }
+  const old = edit.id ? mealById(edit.id) : null;
+  const m = {
+    ...(old || {}), id: edit.newId, name,
+    category: $('#fCat').value, prepTime: $('#fTime').value.trim(), servings: $('#fServ').value.trim(),
+    kcal: $('#fK').value, carbs: $('#fC').value, protein: $('#fP').value, fat: $('#fF').value,
+    ingredients: $('#fIng').value.split('\n').map(s=>s.trim()).filter(Boolean),
+    recipe: $('#fRec').value.trim(), tags: edit.tags, source: $('#fSrc').value.trim(), image: edit.image,
+    lastCooked: old ? (old.lastCooked||'') : '', rating: old ? (old.rating||0) : 0, favorite: old ? isFav(old) : false,
+  };
+  const btns = [$('#eSave'), $('#eSave2')]; btns.forEach(b => { b.disabled = true; b.textContent = 'Shranjujem …'; });
+  const ok = await saveMeal(m);
+  if(!ok){
+    btns.forEach(b => { b.disabled = false; b.textContent = 'Shrani'; });
+    toast('Shranjevanje ni uspelo. Preveri povezavo in poskusi znova.', 4000); return;
+  }
+  const i = db.meals.findIndex(x => x.id === m.id);
+  if(i >= 0) db.meals[i] = m; else db.meals.push(m);
+  indexMeal(m); cacheMeals(); listDirty = true;
+  toast('Shranjeno');
+  if(edit.id) goBack('r/' + m.id); else go('r/' + m.id, true);
+}
+
+/* ============================ IMAM DOMA ============================ */
+function buildIng(){
+  $('#vIng').innerHTML = `<div class="ttl"><h1>Imam doma</h1></div>
+    <p class="sub">Vpiši, kaj imaš doma (loči z vejico) — pokazala bom recepte, ki ujemajo največ sestavin.</p>
+    <div class="search">${IC.search}<input id="ingQ" type="search" placeholder="npr. jajca, skuta, banana" autocomplete="off" enterkeyhint="search"></div>
+    <div id="ingRes" style="margin-top:8px"></div>`;
+  let t; const inp = $('#ingQ');
+  inp.addEventListener('input', () => { clearTimeout(t); t = setTimeout(renderIng, 150); });
+  $('#ingRes').onclick = e => { const r = e.target.closest('.res'); if(r) go('r/' + r.dataset.id); };
+}
+function renderIng(){
+  const { terms, results } = searchMealsByIngredients($('#ingQ').value);
+  const box = $('#ingRes');
+  if(!terms.length){ box.innerHTML = ''; return; }
+  if(!results.length){ box.innerHTML = '<div class="empty">Ni ujemanj.</div>'; return; }
+  box.innerHTML = results.slice(0, 40).map(({meal:m, matchCount, matchedTerms}) => {
+    const cat = CATEGORIES.find(c=>c.id===m.category);
+    return `<div class="res" data-id="${esc(m.id)}"><div class="t">${m.image?`<img src="${m.image}" alt="" loading="lazy">`:(cat?cat.emoji:'🍽')}</div>
+      <div><b>${esc(m.name)}</b><small>${cat?cat.label:''} · ujema ${matchCount} od ${terms.length}: ${esc(matchedTerms.join(', '))}</small></div></div>`;
+  }).join('');
+}
+
+/* ============================ TEDEN ============================ */
+let weekTab = 'menu';
+async function openWeek(){
+  show('Week');
+  if(!weekLoaded){
+    $('#vWeek').innerHTML = '<div class="loading">Nalagam jedilnik …</div>';
+    await loadWeek(); await syncCookedHistory(); cacheMeals(); weekLoaded = true;
+  }
+  renderWeek();
+}
+async function goToWeek(monday){
+  $('#vWeek').innerHTML = '<div class="loading">Nalagam jedilnik …</div>';
+  weekStart = monday; await loadWeek(); await syncCookedHistory(); cacheMeals(); weekLoaded = true;
+  renderWeek(); window.scrollTo(0,0);
+}
+function renderWeek(){
+  if(curView !== 'Week') return;
+  const y = window.scrollY;
+  const weekEnd = addDays(weekStart, 6);
+  const isCur = isoDate(weekStart) === isoDate(getMonday(REAL_TODAY));
+  let body = '';
+  if(weekTab === 'menu'){
+    let days = '';
+    for(let i=0;i<7;i++){
+      const d = addDays(weekStart, i), key = isoDate(d), isToday = key === isoDate(REAL_TODAY);
+      let slots = '';
+      CATEGORIES.forEach(cat => {
+        const raw = (weekMenu.selections[key] && weekMenu.selections[key][cat.id]) || '';
+        const custom = raw.startsWith('~'), mid = custom ? '' : raw;
+        const has = !!(mid && mealName(mid));
+        let opts = `<option value="">${has||custom?'— brez —':'+ dodaj'}</option>`;
+        if(custom) opts += `<option value="__keep" selected>✎ ${esc(raw.slice(1))}</option>`;
+        const pool = mealsByCategory(cat.id);
+        if(has && !pool.some(x => x.id === mid)) pool.push(mealById(mid));
+        pool.slice().sort((a,b)=>a.name.localeCompare(b.name,'sl')).forEach(m => {
+          opts += `<option value="${esc(m.id)}"${mid===m.id?' selected':''}>${esc(m.name)}</option>`;
+        });
+        opts += `<option value="__custom">✎ Vpiši ročno …</option>`;
+        slots += `<div class="slot"><span class="sl">${cat.label}</span>
+          <select data-day="${key}" data-cat="${cat.id}" class="${has||custom?'f':''}" aria-label="${cat.label}">${opts}</select>
+          ${has ? `<button class="ib" data-view="${esc(mid)}" aria-label="Poglej recept">${IC.search}</button>` : '<span style="width:44px"></span>'}</div>`;
+      });
+      days += `<div class="day${isToday?' today':''}"><div class="dh">${DAY_NAMES[i]} <small>${fmtShort(d)}</small>${isToday?'<span class="td">DANES</span>':''}</div>${slots}</div>`;
+    }
+    body = `<div class="tools"><button class="btn sm" id="genW">✨ Ustvari kosila</button><button class="btn sm" id="copyW">↶ Kopiraj prejšnji teden</button></div>${days}
+      <div style="text-align:center"><button class="lnk danger" id="clrW">Počisti ta teden</button></div>`;
+  } else {
+    const shopping = buildShoppingList();
+    const groups = {};
+    shopping.filter(it => !hideCheckedShopping || !weekMenu.shoppingChecked[it.key]).forEach(it => { (groups[it.shopCat] = groups[it.shopCat] || []).push(it); });
+    const order = [...SHOP_CATEGORIES.map(c=>c.id), 'drugo'];
+    const list = order.filter(id => groups[id] && groups[id].length).map(id => {
+      const cd = SHOP_CATEGORIES.find(c=>c.id===id);
+      return `<div class="shop-h">${cd ? cd.emoji + ' ' + cd.label : 'Drugo'}</div>` + groups[id].map(it => {
+        const c = !!weekMenu.shoppingChecked[it.key];
+        return `<label class="shop-item${c?' checked':''}"><input type="checkbox" data-shop="${esc(it.key)}"${c?' checked':''}>
+          <span class="txt">${esc(it.label)}</span>${(!it.hasQty && it.count>1)?`<span class="c">×${it.count}</span>`:''}
+          ${it.isManual?`<button class="ib" data-delm="${esc(it.manualId)}" aria-label="Odstrani">${IC.close}</button>`:''}</label>`;
+      }).join('');
+    }).join('');
+    body = `<p class="sub">Sestavljen iz sestavin obrokov, ki so izbrani v tedenskem jedilniku.</p>
+      <div class="shop-add"><input id="shopIn" placeholder="Dopiši na seznam …" maxlength="80" enterkeyhint="done"><button class="btn pri sm" id="shopAdd">Dodaj</button></div>
+      <div class="rowx"><button class="btn sm" id="togChk">${hideCheckedShopping?'👁 Pokaži kupljeno':'✓ Skrij kupljeno'}</button><button class="btn sm" id="shareShop">↗ Deli seznam</button></div>
+      ${list || '<div class="empty">Seznam je prazen. Izberi obroke v jedilniku ali dopiši kaj ročno.</div>'}`;
+  }
+  $('#vWeek').innerHTML = `<div class="ttl"><h1>Teden</h1></div>
+    <div class="wk"><button class="ib" id="prevW" aria-label="Prejšnji teden">${IC.back}</button>
+      <div class="wr">${fmtShort(weekStart)} – ${fmtShort(weekEnd)} ${weekEnd.getFullYear()}${!isCur?'<br><button class="lnk" id="todayW">Ta teden</button>':''}</div>
+      <button class="ib" id="nextW" aria-label="Naslednji teden" style="transform:scaleX(-1)">${IC.back}</button></div>
+    <div class="seg"><button data-wt="menu" class="${weekTab==='menu'?'on':''}">Jedilnik</button><button data-wt="shop" class="${weekTab==='shop'?'on':''}">Nakupi</button></div>${body}`;
+  window.scrollTo(0, y);
+}
+(function bindWeek(){
+  const v = $('#vWeek');
+  v.addEventListener('click', async e => {
+    const b = e.target.closest('button'); if(!b) return;
+    if(b.id === 'prevW') return goToWeek(addDays(weekStart, -7));
+    if(b.id === 'nextW') return goToWeek(addDays(weekStart, 7));
+    if(b.id === 'todayW') return goToWeek(getMonday(REAL_TODAY));
+    if(b.dataset.wt){ weekTab = b.dataset.wt; return renderWeek(); }
+    if(b.dataset.view) return go('r/' + b.dataset.view);
+    if(b.id === 'genW') return generateWeek();
+    if(b.id === 'copyW') return copyPreviousWeek();
+    if(b.id === 'clrW'){
+      if(!confirm(`Počistim izbrane obroke za teden ${fmtShort(weekStart)}–${fmtShort(addDays(weekStart,6))}?`)) return;
+      weekMenu = { selections: {}, shoppingChecked: {}, extraItems: [] }; await saveWeek(); return renderWeek();
+    }
+    if(b.id === 'togChk'){ hideCheckedShopping = !hideCheckedShopping; return renderWeek(); }
+    if(b.id === 'shareShop') return shareShoppingList();
+    if(b.id === 'shopAdd') return addShopItem();
+    if(b.dataset.delm){
+      e.preventDefault();
+      const id = b.dataset.delm;
+      weekMenu.extraItems = (weekMenu.extraItems||[]).filter(it => it.id !== id);
+      delete weekMenu.shoppingChecked['manual:' + id]; await saveWeek(); renderWeek();
+    }
+  });
+  v.addEventListener('change', async e => {
+    const t = e.target;
+    if(t.matches('select[data-day]')){
+      const day = t.dataset.day, cat = t.dataset.cat;
+      if(!weekMenu.selections[day]) weekMenu.selections[day] = {};
+      if(t.value === '__keep') return;
+      if(t.value === '__custom'){
+        const cur = weekMenu.selections[day][cat] || '';
+        const txt = prompt('Kaj bo na jedilniku?', cur.startsWith('~') ? cur.slice(1) : '');
+        if(txt === null){ return renderWeek(); }
+        if(txt.trim()) weekMenu.selections[day][cat] = '~' + txt.trim(); else delete weekMenu.selections[day][cat];
+      } else if(t.value) weekMenu.selections[day][cat] = t.value;
+      else delete weekMenu.selections[day][cat];
+      await saveWeek(); renderWeek();
+    } else if(t.matches('input[data-shop]')){
+      const k = t.dataset.shop;
+      if(t.checked) weekMenu.shoppingChecked[k] = true; else delete weekMenu.shoppingChecked[k];
+      await saveWeek(); renderWeek();
+    }
+  });
+  v.addEventListener('keydown', e => { if(e.key === 'Enter' && e.target.id === 'shopIn') addShopItem(); });
+  async function addShopItem(){
+    const inp = $('#shopIn'), text = inp.value.trim(); if(!text) return;
+    if(!weekMenu.extraItems) weekMenu.extraItems = [];
+    weekMenu.extraItems.push({ id: 'x' + Date.now() + Math.floor(Math.random()*1000), text });
+    await saveWeek(); renderWeek();
+  }
+})();
+
+/* ============================ MENI / UVOZ / IZVOZ ============================ */
+let installPrompt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; });
+window.addEventListener('appinstalled', () => { installPrompt = null; });
+function openMenu(){
+  openSheet(`<h3>Več možnosti</h3>
+    <button class="opt" id="mImp">📥 Uvozi recepte iz datoteke</button>
+    <button class="opt" id="mExp">📤 Izvozi vse recepte (varnostna kopija)</button>
+    ${installPrompt?'<button class="opt" id="mInst">📲 Namesti aplikacijo</button>':''}
+    <button class="opt danger" id="mClr">🗑 Počisti celotno bazo</button>
+    <button class="btn block" id="mX" style="margin-top:14px">Zapri</button>`);
+  $('#mX').onclick = closeSheet;
+  $('#mImp').onclick = () => { closeSheet(); $('#impFile').click(); };
+  $('#mExp').onclick = () => {
+    closeSheet();
+    const blob = new Blob([JSON.stringify(db.meals, null, 1)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'recepti-' + isoDate(REAL_TODAY) + '.json'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  };
+  const mi = $('#mInst'); if(mi) mi.onclick = async () => { closeSheet(); installPrompt.prompt(); await installPrompt.userChoice; installPrompt = null; };
+  $('#mClr').onclick = async () => {
+    closeSheet();
+    if(!db.meals.length) return;
+    if(!confirm(`Izbrišem VSE recepte (${db.meals.length})? Tega ni mogoče razveljaviti.`)) return;
+    if(!confirm('Si čisto prepričana? Vsi recepti bodo trajno izbrisani.')) return;
+    if(!(await deleteAllMeals())){ toast('Brisanje ni uspelo.'); return; }
+    db.meals = []; indexAll(); cacheMeals(); applyFilter(); toast('Baza je počiščena');
+  };
+}
+document.getElementById('impFile').addEventListener('change', e => {
+  const file = e.target.files && e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onerror = () => alert('Datoteke ni bilo mogoče prebrati.');
+  reader.onload = () => runImport(String(reader.result));
+  reader.readAsText(file); e.target.value = '';
+});
+async function runImport(raw){
+  if(!raw || !raw.trim()) return;
+  let parsed;
+  try{ parsed = JSON.parse(raw); }
+  catch(e){ alert('JSON ni veljaven — datoteka je morda okrnjena.'); return; }
+  if(!Array.isArray(parsed)){ alert('Pričakovan je seznam obrokov v [ ] oklepajih.'); return; }
+  const validCats = CATEGORIES.map(c=>c.id);
+  const toTags = v => (Array.isArray(v) ? v : String(v).split(',')).map(s => String(s).trim().replace(/^#/,'').toLowerCase()).filter(Boolean);
+  let added = 0, updated = 0, skipped = 0; const toSave = [];
+  toast('Uvažam …', 60000);
+  parsed.forEach(item => {
+    if(!item || !item.name){ skipped++; return; }
+    const nameNorm = String(item.name).trim().toLowerCase();
+    const existing = db.meals.find(m => m.name.trim().toLowerCase() === nameNorm);
+    if(existing){
+      if(item.category != null && validCats.includes(item.category)) existing.category = item.category;
+      if(Array.isArray(item.ingredients)) existing.ingredients = item.ingredients.map(String);
+      if(item.recipe != null) existing.recipe = String(item.recipe);
+      ['kcal','carbs','protein','fat','prepTime','servings','source'].forEach(k => { if(item[k] != null) existing[k] = String(item[k]); });
+      if(item.image) existing.image = String(item.image);
+      if(item.tags != null) existing.tags = toTags(item.tags);
+      if(item.favorite != null) existing.favorite = !!item.favorite;
+      toSave.push(existing); updated++;
+    } else if(validCats.includes(item.category)){
+      const meal = {
+        id: 'm' + Date.now() + Math.floor(Math.random()*10000) + added,
+        name: String(item.name).slice(0,120), category: item.category,
+        ingredients: Array.isArray(item.ingredients) ? item.ingredients.map(String) : [],
+        recipe: item.recipe ? String(item.recipe) : '',
+        kcal: item.kcal!=null ? String(item.kcal) : '', carbs: item.carbs!=null ? String(item.carbs) : '',
+        protein: item.protein!=null ? String(item.protein) : '', fat: item.fat!=null ? String(item.fat) : '',
+        image: item.image ? String(item.image) : '', prepTime: item.prepTime ? String(item.prepTime) : '',
+        servings: item.servings ? String(item.servings) : '', source: item.source ? String(item.source) : '',
+        tags: item.tags != null ? toTags(item.tags) : [], favorite: !!item.favorite,
+      };
+      db.meals.push(meal); toSave.push(meal); added++;
+    } else skipped++;
+  });
+  const ok = await saveMealsInChunks(toSave);
+  indexAll(); cacheMeals(); listDirty = true;
+  if(curView === 'List') applyFilter(true);
+  $('#toast').hidden = true;
+  if(!ok) alert('Shranjevanje ni uspelo v celoti. Poskusi znova — že shranjeni recepti ostanejo, ostale lahko uvoziš še enkrat.');
+  else alert(`Dodanih ${added}, posodobljenih ${updated}.` + (skipped ? ` Preskočenih ${skipped} (ni ujemanja po imenu in manjka/napačna kategorija).` : ''));
+}
+
+/* ============================ ZAGON ============================ */
+function route(){
+  stopWake();
+  const [p, id] = location.hash.replace(/^#\/?/, '').split('/');
+  closeSheet();
+  if(p === 'r' && mealById(id)) return openRead(id);
+  if(p === 'edit' && mealById(id)) return openEdit(id);
+  if(p === 'new') return openEdit(null);
+  if(p === 'cook' && mealById(id)){
+    if(parseRecipe(mealById(id)).steps.length) return openCook(id);
+    toast('Ta recept nima postopka.'); return go('r/' + id, true);
+  }
+  if(p === 'ing'){ if(!$('#ingQ')) buildIng(); return show('Ing'); }
+  if(p === 'week') return openWeek();
+  if(!listBuilt) buildList();
+  if(listDirty || !$('#grid').children.length) applyFilter(true);
+  show('List');
+}
+window.addEventListener('popstate', route);
+document.getElementById('tabbar').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  const t = b.dataset.tab, cur = location.hash.replace(/^#\/?/, '').split('/')[0];
+  if(t === cur) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  go(t, !!cur && ['ing','week'].includes(cur) && ['', 'ing', 'week'].includes(t));
+});
+document.addEventListener('keydown', e => {
+  if(curView === 'Cook'){
+    if(e.key === 'ArrowRight') cookNext();
+    else if(e.key === 'ArrowLeft' && cook.i > 0){ cook.i--; renderCook(); }
+  }
+  if(e.key === 'Escape') closeSheet();
+});
+document.getElementById('vList').addEventListener('keydown', e => {
+  if(e.key === 'Enter' && e.target.classList && e.target.classList.contains('card')) go('r/' + e.target.dataset.id);
+});
 
 (async function init(){
-  // PWA features are active once this file is served from HTTPS (or localhost).
-  // They are intentionally harmless when the HTML is opened directly as a file.
   if('serviceWorker' in navigator && location.protocol !== 'file:'){
-    navigator.serviceWorker.register('./sw.js').catch(e => console.warn('Offline način ni na voljo', e));
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
   }
-  let deferredInstallPrompt = null;
-  window.addEventListener('beforeinstallprompt', e=>{
-    e.preventDefault();
-    deferredInstallPrompt = e;
-    const installBtn = document.getElementById('installAppBtn');
-    if(installBtn) installBtn.classList.add('visible');
-  });
-  window.addEventListener('appinstalled', ()=>{
-    deferredInstallPrompt = null;
-    const installBtn = document.getElementById('installAppBtn');
-    if(installBtn) installBtn.classList.remove('visible');
-  });
-  document.addEventListener('click', async e=>{
-    if(!e.target.closest('#installAppBtn') || !deferredInstallPrompt) return;
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
-    e.target.closest('#installAppBtn').classList.remove('visible');
-  });
-  if(!CONFIG_READY){
-    document.getElementById('app').innerHTML = `
-      <div class="panel" style="max-width:560px;margin:40px auto;text-align:center;">
-        <h2>Nastavitev shranjevanja manjka</h2>
-        <p class="sub" style="margin-bottom:14px;">
-          V datoteko (na začetku &lt;script&gt; oznake, iskati "firebaseConfig") je treba prilepiti
-          podatke iz tvojega brezplačnega Firebase projekta, da bo jedilnik deloval in se
-          sinhroniziral med napravami.
-        </p>
-      </div>`;
-    return;
+  history.replaceState({ i: 0 }, '', location.href);
+  if(!CONFIG_READY){ $('#vList').innerHTML = '<div class="loading">Manjka nastavitev Firebase.</div>'; return; }
+  buildList();
+  const cached = await cacheGet('meals');
+  let haveCache = false;
+  if(Array.isArray(cached) && cached.length){ db.meals = cached; indexAll(); haveCache = true; route(); }
+  else $('#grid').innerHTML = '<div class="loading" style="grid-column:1/-1">Nalagam recepte …</div>';
+  try{
+    const fresh = await fetchMeals();
+    const changed = JSON.stringify(fresh) !== JSON.stringify(db.meals);
+    if(changed || !haveCache){
+      db.meals = fresh; indexAll(); cacheMeals(); listDirty = true;
+      if(!haveCache) route();
+      else if(curView === 'List') applyFilter(true);
+    }
+  }catch(e){
+    console.error('Nalaganje baze ni uspelo', e);
+    if(haveCache) toast('Ni povezave — prikazani so shranjeni recepti.', 4000);
+    else $('#grid').innerHTML = '<div class="empty" style="grid-column:1/-1">Receptov ni bilo mogoče naložiti.<br><br><button class="btn pri" id="retry">Poskusi znova</button></div>', $('#retry').onclick = () => location.reload();
   }
-  await loadDb();
-  await loadWeek();
-  await syncCookedHistory();
-  render();
 })();
+
 </script>
 </body>
 </html>
