@@ -1,0 +1,1393 @@
+<!DOCTYPE html>
+<html lang="sl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Recepti</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#24543F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="./icon.svg">
+<link rel="icon" href="./icon.svg">
+<style>
+:root{--bg:#fff;--ink:#1d201e;--mut:#6a716d;--line:#e8ebe8;--soft:#f4f6f4;--acc:#24543F;--acc2:#e6f0ea;--warn:#b3261e;--r:14px;--tab:62px;
+  --c-zajtrk:#fdf1d9;--c-kosilo:#e3efe7;--c-vecerja:#e6e9f6;--c-malica:#f9e5ec}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+[hidden]{display:none!important}
+svg{display:block}
+.view{max-width:720px;margin:0 auto;padding:0 16px calc(var(--tab) + 28px + env(safe-area-inset-bottom))}
+h1{font-size:26px;line-height:1.15;margin:0;font-weight:700;letter-spacing:-.01em}
+h2{font-size:19px;margin:26px 0 10px;font-weight:700}
+.ttl{display:flex;align-items:center;justify-content:space-between;padding:20px 0 10px;padding-top:calc(16px + env(safe-area-inset-top))}
+.cnt{font-size:15px;color:var(--mut);font-weight:500;margin-left:6px}
+.sub{color:var(--mut);margin:0 0 14px;font-size:15px}
+.ib{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;flex:none}
+.ib:active{background:var(--soft)}
+.btn{min-height:48px;padding:0 20px;border-radius:24px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:#fff}
+.btn.pri{background:var(--acc);border-color:var(--acc);color:#fff}
+.btn.danger{color:var(--warn);border-color:#f0cfcc}
+.btn.sm{min-height:44px;padding:0 18px}
+.btn.block{width:100%}
+.btn:disabled{opacity:.55}
+.lnk{color:var(--acc);font-weight:600;min-height:44px;padding:0 6px}
+.lnk.danger{color:var(--warn)}
+.sticky{position:sticky;top:0;z-index:5;background:rgba(255,255,255,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);margin:0 -16px;padding:6px 16px 8px}
+.search{position:relative}
+.search input{width:100%;height:48px;border:1px solid var(--line);background:var(--soft);border-radius:24px;padding:0 48px 0 46px;outline:none;font-size:16px;-webkit-appearance:none}
+.search input:focus{border-color:var(--acc);background:#fff}
+.search>svg{position:absolute;left:16px;top:14px;color:var(--mut);pointer-events:none}
+.search .x{position:absolute;right:2px;top:2px;width:44px;height:44px;display:grid;place-items:center;color:var(--mut)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips.wrap{flex-wrap:wrap;overflow:visible}
+.chip{flex:none;height:44px;padding:0 16px;border-radius:22px;border:1px solid var(--line);background:#fff;font-weight:500;white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.chip.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.chips.tags{padding:4px 0 0}
+.chips.tags .chip{background:var(--soft);border-color:transparent;font-size:15px}
+.chips.tags .chip.on{background:var(--acc2);border-color:var(--acc);color:var(--acc)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:16px 12px;padding-top:14px}
+.card{position:relative;cursor:pointer;content-visibility:auto;contain-intrinsic-size:auto 230px}
+.ph{aspect-ratio:4/3;border-radius:var(--r);overflow:hidden;background:var(--soft)}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph.none{display:grid;place-items:center;font-size:36px}
+.ph.c-zajtrk,.hero.c-zajtrk{background:var(--c-zajtrk)}.ph.c-kosilo,.hero.c-kosilo{background:var(--c-kosilo)}
+.ph.c-vecerja,.hero.c-vecerja{background:var(--c-vecerja)}.ph.c-malica,.hero.c-malica{background:var(--c-malica)}
+.ct{font-weight:600;font-size:15px;line-height:1.25;margin-top:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cm{color:var(--mut);font-size:13px;margin-top:2px}
+.fav{position:absolute;top:0;right:0;width:46px;height:46px;display:grid;place-items:center}
+.fav span{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.92);display:grid;place-items:center;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+.empty{text-align:center;color:var(--mut);padding:50px 10px}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:rgba(255,255,255,.97);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+.tabbar button{flex:1;height:var(--tab);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:12px;font-weight:600;color:var(--mut)}
+.tabbar button.on{color:var(--acc)}
+.tabbar .plus span{width:44px;height:30px;border-radius:15px;background:var(--acc);color:#fff;display:grid;place-items:center}
+/* read view */
+.hero{position:relative;margin:0 -16px;aspect-ratio:4/3;max-height:52vh;background:var(--soft);overflow:hidden}
+.hero img{width:100%;height:100%;object-fit:cover;display:block}
+.hero.none{aspect-ratio:auto;height:170px;display:grid;place-items:center;font-size:56px;max-height:none}
+.htop{position:absolute;left:10px;right:10px;top:calc(10px + env(safe-area-inset-top));display:flex;justify-content:space-between;z-index:2}
+.htop .r{display:flex;gap:8px}
+.rb{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.93);box-shadow:0 1px 6px rgba(0,0,0,.25);display:grid;place-items:center}
+.rbody{padding-top:18px}
+.kick{font-size:13px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.06em}
+.rbody h1{margin:4px 0 12px;font-size:28px}
+.meta{display:flex;flex-wrap:wrap;gap:8px}
+.pill{background:var(--soft);border-radius:18px;padding:7px 13px;font-size:15px;font-weight:500}
+.macros{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.macros div{background:var(--soft);border-radius:12px;padding:8px 4px;text-align:center}
+.macros b{display:block;font-size:17px}.macros small{color:var(--mut);font-size:12px}
+.tagrow{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.tag{background:var(--acc2);color:var(--acc);border-radius:14px;padding:4px 11px;font-size:14px;font-weight:600}
+.ing{display:flex;align-items:center;gap:14px;min-height:52px;padding:6px 2px;border-bottom:1px solid var(--line);font-size:18px;line-height:1.35;cursor:pointer}
+.ing input,.shop-item input{width:26px;height:26px;flex:none;accent-color:var(--acc);margin:0}
+.ing input:checked+span,.shop-item.checked .txt{text-decoration:line-through;color:var(--mut)}
+ol.steps{list-style:none;margin:0;padding:0;counter-reset:s}
+ol.steps li{counter-increment:s;display:flex;gap:14px;padding:12px 0;font-size:18px;line-height:1.55}
+ol.steps li::before{content:counter(s);flex:none;width:32px;height:32px;border-radius:50%;background:var(--acc);color:#fff;font-weight:700;font-size:15px;display:grid;place-items:center;margin-top:2px}
+.note{background:var(--soft);border-radius:12px;padding:12px 14px;margin-top:10px;color:var(--mut);font-size:15px}
+.src{margin-top:18px;color:var(--mut);font-size:15px;word-break:break-word}
+.src a{color:var(--acc);font-weight:600}
+.cta{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 16px calc(10px + env(safe-area-inset-bottom));background:rgba(255,255,255,.97);border-top:1px solid var(--line)}
+.cta .btn{max-width:688px;margin:0 auto;display:flex}
+/* edit */
+.etop{display:flex;align-items:center;gap:6px;padding:calc(10px + env(safe-area-inset-top)) 0 6px;position:sticky;top:0;background:#fff;z-index:5;margin:0 -16px;padding-left:10px;padding-right:16px}
+.etop h2{margin:0;flex:1;font-size:18px}
+.fl{display:block;margin-top:16px;font-weight:600;font-size:14px;color:var(--mut)}
+.fl input,.fl select,.fl textarea,.addtag input{display:block;width:100%;margin-top:6px;min-height:48px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;font-size:16px;background:#fff;color:var(--ink);font-weight:400;outline:none;-webkit-appearance:none}
+.fl textarea{line-height:1.5;resize:vertical}
+.fl input:focus,.fl select:focus,.fl textarea:focus,.addtag input:focus{border-color:var(--acc)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.four{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.four .fl{margin-top:16px}.four input{padding:10px 8px}
+.eph{aspect-ratio:4/3;border-radius:var(--r);overflow:hidden;background:var(--soft);display:grid;place-items:center;color:var(--mut);margin-top:12px}
+.eph img{width:100%;height:100%;object-fit:cover}
+.row{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.addtag{display:flex;gap:8px;margin-top:8px;align-items:flex-start}
+.addtag input{margin-top:0}
+/* week */
+.wk{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.wr{font-weight:600;text-align:center}
+.seg{display:flex;background:var(--soft);border-radius:24px;padding:4px;margin-bottom:14px}
+.seg button{flex:1;height:44px;border-radius:20px;font-weight:600;color:var(--mut)}
+.seg button.on{background:#fff;color:var(--acc);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.day{border:1px solid var(--line);border-radius:var(--r);padding:12px 14px 6px;margin-bottom:12px}
+.day.today{border-color:var(--acc);box-shadow:0 0 0 1px var(--acc)}
+.dh{font-weight:700;display:flex;gap:8px;align-items:baseline}
+.dh small{color:var(--mut);font-weight:500}
+.dh .td{font-size:11px;background:var(--acc);color:#fff;border-radius:8px;padding:1px 7px;font-weight:700}
+.slot{display:flex;align-items:center;gap:8px;margin:8px 0}
+.slot .sl{width:62px;flex:none;font-size:13px;color:var(--mut);font-weight:600}
+.slot select{flex:1;min-width:0;height:44px;border:1px solid var(--line);border-radius:10px;padding:0 8px;background:#fff;font-size:15px;-webkit-appearance:none;appearance:none;text-overflow:ellipsis}
+.slot select.f{background:var(--acc2);border-color:transparent;font-weight:600}
+.slot .ib{width:44px;height:44px}
+.shop-add{display:flex;gap:8px;margin-bottom:10px}
+.shop-add input{flex:1;min-width:0;height:48px;border:1px solid var(--line);border-radius:24px;padding:0 16px;font-size:16px;outline:none}
+.shop-h{font-weight:700;margin:18px 0 2px}
+.shop-item{display:flex;align-items:center;gap:14px;min-height:52px;border-bottom:1px solid var(--line);font-size:17px}
+.shop-item .txt{flex:1}
+.shop-item .c{color:var(--mut);font-size:14px}
+.rowx{display:flex;gap:8px;margin:6px 0 4px;flex-wrap:wrap}
+/* ing search */
+.res{display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);cursor:pointer;min-height:64px}
+.res .t{width:64px;height:64px;border-radius:12px;overflow:hidden;flex:none;background:var(--soft);display:grid;place-items:center;font-size:24px}
+.res img{width:100%;height:100%;object-fit:cover}
+.res b{display:block;line-height:1.25}.res small{color:var(--mut)}
+/* cook */
+#vCook{position:fixed;inset:0;z-index:50;background:#fff;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
+.ck-top{display:flex;align-items:center;gap:8px;padding:6px 8px}
+.ck-t{flex:1;font-weight:600;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ck-prog{height:5px;background:var(--line)}.ck-prog i{display:block;height:100%;background:var(--acc);transition:width .25s}
+.ck-body{flex:1;overflow:auto;padding:26px 22px;display:flex;flex-direction:column;justify-content:center}
+.ck-n{color:var(--acc);font-weight:700;margin-bottom:14px;text-transform:uppercase;font-size:14px;letter-spacing:.06em}
+.ck-txt{font-size:26px;line-height:1.45}
+.ck-nav{display:flex;gap:12px;padding:12px 16px calc(14px + env(safe-area-inset-bottom))}
+.ck-nav .btn{min-height:60px;font-size:18px;flex:1}
+.ck-nav .btn.pri{flex:2}
+/* sheet + toast */
+#sheet{position:fixed;inset:0;z-index:80;display:flex;align-items:flex-end;background:rgba(0,0,0,.4)}
+.sh{background:#fff;width:100%;max-width:720px;margin:0 auto;border-radius:20px 20px 0 0;max-height:82vh;overflow:auto;padding:14px 18px calc(18px + env(safe-area-inset-bottom))}
+.sh h3{margin:4px 0 8px;font-size:18px}
+.sh .opt{display:flex;align-items:center;gap:12px;width:100%;min-height:54px;text-align:left;font-size:17px;border-bottom:1px solid var(--line)}
+.sh .opt.danger{color:var(--warn)}
+#toast{position:fixed;left:50%;bottom:calc(var(--tab) + 18px + env(safe-area-inset-bottom));transform:translateX(-50%);background:#222;color:#fff;border-radius:22px;padding:11px 18px;z-index:90;max-width:90vw;text-align:center;font-size:15px}
+.loading{padding:80px 0;text-align:center;color:var(--mut)}
+@media (min-width:700px){.view{padding-left:24px;padding-right:24px}}
+</style>
+</head>
+<body>
+<div id="vList" class="view"></div>
+<div id="vIng" class="view" hidden></div>
+<div id="vWeek" class="view" hidden></div>
+<div id="vSub" class="view" hidden></div>
+<div id="vCook" hidden></div>
+<nav class="tabbar" id="tabbar" aria-label="Glavna navigacija">
+  <button data-tab="" class="on"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/><path d="M9 8h6"/></svg>Recepti</button>
+  <button data-tab="ing"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>Imam doma</button>
+  <button data-tab="new" class="plus"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></span>Dodaj</button>
+  <button data-tab="week"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Teden</button>
+</nav>
+<div id="sheet" hidden></div>
+<div id="toast" hidden></div>
+<input type="file" id="impFile" accept=".json,application/json" hidden>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ====== 1) SEM PRILEPI SVOJ firebaseConfig IZ FIREBASE CONSOLE ======
+const firebaseConfig = {
+  apiKey: "AIzaSyAm_iXo27uK0ASguOJK7x43WLbE8LscI0Y",
+  authDomain: "baza-receptov.firebaseapp.com",
+  projectId: "baza-receptov",
+  storageBucket: "baza-receptov.firebasestorage.app",
+  messagingSenderId: "1066144103715",
+  appId: "1:1066144103715:web:9d2c585525c9bc1b24e096",
+};
+// =====================================================================
+
+const CONFIG_READY = !!firebaseConfig.apiKey && !!firebaseConfig.projectId;
+let dbFs = null;
+if(CONFIG_READY){
+  const fbApp = initializeApp(firebaseConfig);
+  dbFs = getFirestore(fbApp);
+}
+function pad(n){ return String(n).padStart(2,'0'); }
+function isoDate(d){ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+function getMonday(d){
+  const x = new Date(d);
+  const day = (x.getDay()+6)%7;
+  x.setDate(x.getDate()-day);
+  x.setHours(0,0,0,0);
+  return x;
+}
+function addDays(d, n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
+function weekKey(monday){ return `week-${isoDate(monday)}`; }
+function fmtShort(d){ return `${pad(d.getDate())}.${pad(d.getMonth()+1)}.`; }
+
+const DAY_NAMES = ['Ponedeljek','Torek','Sreda','Četrtek','Petek','Sobota','Nedelja'];
+const CATEGORIES = [
+  { id: 'zajtrk',  label: 'Zajtrk',  emoji: '🥣' },
+  { id: 'kosilo',  label: 'Kosilo',  emoji: '🍲' },
+  { id: 'vecerja', label: 'Večerja', emoji: '🥗' },
+  { id: 'malica',  label: 'Sladice', emoji: '🍰' },
+];
+const REAL_TODAY = new Date();
+let db = { meals: [] };
+let weekMenu = { selections: {}, shoppingChecked: {}, extraItems: [] };
+let hideCheckedShopping = false;
+let weekStart = getMonday(REAL_TODAY);
+let weekLoaded = false;
+
+const $ = (s, r=document) => r.querySelector(s);
+const esc = s => String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const IC = {
+  back:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>',
+  edit:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+  close:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  more:'<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+  search:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+  heart:on=>`<svg width="19" height="19" viewBox="0 0 24 24" fill="${on?'#d6336c':'none'}" stroke="${on?'#d6336c':'#333'}" stroke-width="2.2" stroke-linejoin="round"><path d="M12 20.5s-7.5-4.6-9.2-9.2C1.6 8 3.6 4.8 6.8 4.8c2 0 3.4 1.1 5.2 3.2 1.8-2.1 3.2-3.2 5.2-3.2 3.2 0 5.2 3.2 4 6.5-1.7 4.6-9.2 9.2-9.2 9.2z"/></svg>`,
+};
+
+/* ---------------- lokalni predpomnilnik (IndexedDB) ---------------- */
+let _idb = null;
+function idb(){
+  if(!_idb) _idb = new Promise((res, rej)=>{
+    try{
+      const r = indexedDB.open('jedilnik-cache', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('kv');
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    }catch(e){ rej(e); }
+  });
+  return _idb;
+}
+async function cacheGet(k){
+  try{
+    const d = await idb();
+    return await new Promise(res=>{
+      const q = d.transaction('kv').objectStore('kv').get(k);
+      q.onsuccess = () => res(q.result || null);
+      q.onerror = () => res(null);
+    });
+  }catch(e){ return null; }
+}
+async function cacheSet(k, v){
+  try{
+    const d = await idb();
+    await new Promise(res=>{
+      const t = d.transaction('kv','readwrite');
+      t.objectStore('kv').put(v, k);
+      t.oncomplete = res; t.onerror = res; t.onabort = res;
+    });
+  }catch(e){}
+}
+function cacheMeals(){ return cacheSet('meals', db.meals); }
+
+/* ---------------- Firestore ---------------- */
+function isFav(m){ return m.favorite === undefined || m.favorite === null || m.favorite === '' ? (Number(m.rating)||0) >= 4 : !!m.favorite; }
+function mealDocFields(m){
+  return {
+    name: m.name || '', category: m.category || 'kosilo',
+    ingredients: m.ingredients || [], recipe: m.recipe || '',
+    kcal: m.kcal || '', carbs: m.carbs || '', protein: m.protein || '', fat: m.fat || '',
+    image: m.image || '',
+    lastCooked: m.lastCooked || '', rating: m.rating || 0,
+    prepTime: m.prepTime || '', servings: m.servings || '',
+    tags: Array.isArray(m.tags) ? m.tags : [], source: m.source || '', favorite: isFav(m),
+  };
+}
+const withTimeout = (p, ms=12000) => Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')), ms))]);
+async function fetchMeals(){
+  const snap = await withTimeout(getDocs(collection(dbFs, 'meals')), 20000);
+  const meals = [];
+  snap.forEach(d => meals.push({ id: d.id, ...d.data() }));
+  return meals;
+}
+async function saveMeal(meal){
+  try{ await withTimeout(setDoc(doc(dbFs, 'meals', meal.id), mealDocFields(meal))); return true; }
+  catch(e){ console.error('Obrok se ni shranil', e); return false; }
+}
+async function deleteMealDoc(id){
+  try{ await withTimeout(deleteDoc(doc(dbFs, 'meals', id))); return true; }
+  catch(e){ console.error('Obroka ni bilo mogoče izbrisati', e); return false; }
+}
+async function saveMealsBatch(meals){
+  try{
+    const batch = writeBatch(dbFs);
+    meals.forEach(m => batch.set(doc(dbFs, 'meals', m.id), mealDocFields(m)));
+    await withTimeout(batch.commit(), 30000);
+    return true;
+  }catch(e){ console.error('Obrokov ni bilo mogoče shraniti', e); return false; }
+}
+async function saveMealsInChunks(meals, chunkSize=15){
+  for(let i=0;i<meals.length;i+=chunkSize){
+    const ok = await saveMealsBatch(meals.slice(i, i+chunkSize));
+    if(!ok) return false;
+  }
+  return true;
+}
+async function deleteAllMeals(){
+  try{
+    for(let i=0;i<db.meals.length;i+=400){
+      const batch = writeBatch(dbFs);
+      db.meals.slice(i,i+400).forEach(m => batch.delete(doc(dbFs, 'meals', m.id)));
+      await batch.commit();
+    }
+    return true;
+  }catch(e){ console.error('Baze ni bilo mogoče počistiti', e); return false; }
+}
+
+/* ---------------- iskalni indeks ---------------- */
+const sidx = new Map();
+function indexMeal(m){
+  sidx.set(m.id, normalizeText([m.name, ...(m.ingredients||[]), ...(m.tags||[]), m.source||''].join(' | ')));
+}
+function indexAll(){ sidx.clear(); db.meals.forEach(indexMeal); }
+function allTags(){
+  const c = {};
+  db.meals.forEach(m => (m.tags||[]).forEach(t => { c[t] = (c[t]||0)+1; }));
+  return Object.keys(c).sort((a,b)=> c[b]-c[a] || a.localeCompare(b,'sl'));
+}
+
+/* ---------------- razčlenitev recepta ---------------- */
+function parseRecipe(m){
+  const text = String(m.recipe || '').replace(/\r/g,'');
+  const steps = [], notes = []; let source = '';
+  text.split(/\n\s*\n/).map(s=>s.trim()).filter(Boolean).forEach(p=>{
+    if(/^(vir|source)\s*:/i.test(p)){ source = p.replace(/^[^:]*:\s*/,''); return; }
+    if(/^(zahtevnost|opomba|nasvet)\s*:/i.test(p)){ notes.push(p); return; }
+    const parts = p.split(/\n(?=\d+[.)]\s)/);
+    if(parts.length > 1) parts.forEach(x => steps.push(x.replace(/^\d+[.)]\s*/,'').replace(/\n/g,' ').trim()));
+    else steps.push(p.replace(/^\d+[.)]\s*/,''));
+  });
+  return { steps, notes, source };
+}
+function linkify(s){
+  return esc(s).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+}
+
+/* ---------------- kljukice sestavin (samo v tem telefonu) ---------------- */
+let chk = {};
+try{ chk = JSON.parse(localStorage.getItem('jed-chk') || '{}'); }catch(e){}
+function saveChk(){ try{ localStorage.setItem('jed-chk', JSON.stringify(chk)); }catch(e){} }
+const isChk = (id,i) => (chk[id]||[]).includes(i);
+function toggleChk(id,i,on){
+  const a = new Set(chk[id]||[]); on ? a.add(i) : a.delete(i);
+  if(a.size) chk[id] = [...a]; else delete chk[id];
+  saveChk();
+}
+
+/* ---------------- toast / sheet ---------------- */
+let toastT = null;
+function toast(msg, ms=2600){
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastT); toastT = setTimeout(()=>{ t.hidden = true; }, ms);
+}
+function openSheet(html){
+  const s = $('#sheet');
+  s.innerHTML = `<div class="sh" role="dialog">${html}</div>`;
+  s.hidden = false;
+  s.onclick = e => { if(e.target === s) closeSheet(); };
+}
+function closeSheet(){ const s = $('#sheet'); s.hidden = true; s.innerHTML = ''; }
+
+/* ---------------- navigacija ---------------- */
+const VIEWS = { List:'#vList', Ing:'#vIng', Week:'#vWeek', Sub:'#vSub', Cook:'#vCook' };
+let curView = '';
+const scrollPos = {};
+function show(name){
+  if(curView) scrollPos[curView] = window.scrollY;
+  curView = name;
+  Object.keys(VIEWS).forEach(n => { $(VIEWS[n]).hidden = (n !== name); });
+  $('#tabbar').hidden = (name === 'Sub' || name === 'Cook');
+  const tab = name === 'List' ? '' : name === 'Ing' ? 'ing' : name === 'Week' ? 'week' : null;
+  document.querySelectorAll('#tabbar button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  window.scrollTo(0, (name==='List'||name==='Ing'||name==='Week') ? (scrollPos[name]||0) : 0);
+}
+function depth(){ return (history.state && history.state.i) || 0; }
+function go(hash, replace){
+  const i = replace ? depth() : depth()+1;
+  history[replace ? 'replaceState' : 'pushState']({ i }, '', '#/' + hash);
+  route();
+}
+function goBack(fallback){ if(depth() > 0) history.back(); else go(fallback||'', true); }
+
+async function loadWeek(){
+  const key = weekKey(weekStart);
+  try{
+    const snap = await getDoc(doc(dbFs, 'mealplan', key));
+    if(snap.exists() && snap.data().selections){
+      const d = snap.data();
+      weekMenu = { selections: d.selections, shoppingChecked: d.shoppingChecked || {}, extraItems: d.extraItems || [] };
+      return;
+    }
+  }catch(e){ console.error('Nalaganje tedna ni uspelo', e); }
+  weekMenu = { selections: {}, shoppingChecked: {}, extraItems: [] };
+}
+async function saveWeek(){
+  const key = weekKey(weekStart);
+  try{ await setDoc(doc(dbFs, 'mealplan', key), weekMenu); }
+  catch(e){ console.error('Teden se ni shranil', e); }
+}
+
+async function copyPreviousWeek(){
+  const previousKey = weekKey(addDays(weekStart, -7));
+  try{
+    const snap = await getDoc(doc(dbFs, 'mealplan', previousKey));
+    if(!snap.exists() || !snap.data().selections){
+      alert('Prejšnji teden še nima shranjenega jedilnika.');
+      return;
+    }
+    const currentHasMeals = Object.values(weekMenu.selections || {}).some(day => Object.keys(day || {}).length);
+    if(currentHasMeals && !confirm('Ta teden že vsebuje izbire. Prepišem ga z jedilnikom prejšnjega tedna?')) return;
+    const d = snap.data();
+    weekMenu = {
+      selections: JSON.parse(JSON.stringify(d.selections || {})),
+      shoppingChecked: {},
+      extraItems: (d.extraItems || []).map(item => ({...item, id: 'x'+Date.now()+Math.floor(Math.random()*1000)}))
+    };
+    await saveWeek();
+    renderWeek();
+  }catch(e){
+    console.error('Kopiranje tedna ni uspelo', e);
+    alert('Prejšnjega tedna ni bilo mogoče kopirati.');
+  }
+}
+function mealsByCategory(catId){ return db.meals.filter(m => m.category === catId); }
+function mealById(id){ return db.meals.find(x=>x.id===id) || null; }
+function mealName(id){ const m = mealById(id); return m ? m.name : null; }
+
+// Whenever a viewed week includes days that are today or in the past, treat
+// any real (non-custom) meal assigned there as "cooked" that day — this is
+// how lastCooked gets filled in automatically, just from browsing/using the
+// weekly menu. Weeks never opened won't be picked up.
+async function syncCookedHistory(){
+  const todayIso = isoDate(REAL_TODAY);
+  const toSave = [];
+  for(let i=0;i<7;i++){
+    const d = addDays(weekStart, i);
+    const dayIso = isoDate(d);
+    if(dayIso > todayIso) continue;
+    const dayMap = weekMenu.selections[dayIso];
+    if(!dayMap) continue;
+    Object.keys(dayMap).forEach(cat=>{
+      const val = dayMap[cat];
+      if(!val || val.startsWith('~')) return; // custom free-text entry, not a saved meal
+      const meal = mealById(val);
+      if(!meal) return;
+      if(!meal.lastCooked || meal.lastCooked < dayIso){
+        meal.lastCooked = dayIso;
+        if(!toSave.includes(meal)) toSave.push(meal);
+      }
+    });
+  }
+  if(toSave.length) await saveMealsInChunks(toSave);
+}
+
+function daysAgoLabel(isoStr){
+  if(!isoStr) return null;
+  const then = new Date(isoStr + 'T00:00:00');
+  const diffDays = Math.round((new Date(isoDate(REAL_TODAY)+'T00:00:00') - then) / 86400000);
+  if(diffDays === 0) return 'danes';
+  if(diffDays === 1) return 'včeraj';
+  if(diffDays > 1) return `${diffDays} dni nazaj`;
+  return 'v prihodnjih dneh'; // lastCooked somehow in the future — shouldn't normally happen
+}
+function hasRecipeData(m){
+  return (m.ingredients && m.ingredients.length>0) || (m.recipe && m.recipe.trim().length>0);
+}
+function catLabel(id){ const c = CATEGORIES.find(x=>x.id===id); return c ? c.label : id; }
+
+function normalizeText(s){
+  return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+}
+
+function searchMealsByIngredients(queryText){
+  const terms = queryText.split(/[,;\n]+/).map(normalizeText).filter(Boolean);
+  if(terms.length === 0) return { terms: [], results: [] };
+  const results = db.meals.map(m=>{
+    const ingNorm = (m.ingredients||[]).map(normalizeText);
+    const nameNorm = normalizeText(m.name);
+    const matchedTerms = terms.filter(t => ingNorm.some(i=>i.includes(t)) || nameNorm.includes(t));
+    return { meal: m, matchCount: matchedTerms.length, matchedTerms };
+  }).filter(r=>r.matchCount>0)
+    .sort((a,b)=> b.matchCount - a.matchCount || a.meal.name.localeCompare(b.meal.name,'sl'));
+  return { terms, results };
+}
+
+const UNIT_ALIASES = {
+  'g':'g','dag':'dag','kg':'kg','ml':'ml','dcl':'dcl','l':'l',
+  'žlica':'žlica','žlici':'žlica','žlice':'žlica','žlico':'žlica',
+  'žlička':'žlička','žlički':'žlička','žličke':'žlička','žličko':'žlička','žličk':'žlička',
+  'skodelica':'skodelica','skodelici':'skodelica','skodelice':'skodelica','skodelico':'skodelica',
+  'kos':'kos','kosa':'kos','kosov':'kos','kosi':'kos',
+  'stroka':'stroka','stroki':'stroka','strok':'stroka',
+  'ščepec':'ščepec','ščep':'ščepec',
+  'zrno':'zrno','zrna':'zrno',
+};
+const FRACTION_MAP = { '½':0.5, '¼':0.25, '¾':0.75, '⅓':0.334, '⅔':0.667 };
+
+function parseQty(token){
+  if(FRACTION_MAP[token] != null) return FRACTION_MAP[token];
+  const cleaned = token.replace(',', '.').split('-')[0].split('/');
+  if(cleaned.length === 2){
+    const n = parseFloat(cleaned[0]), d = parseFloat(cleaned[1]);
+    if(!isNaN(n) && !isNaN(d) && d) return n/d;
+  }
+  const n = parseFloat(token.replace(',', '.').split('-')[0]);
+  return isNaN(n) ? null : n;
+}
+
+function stripDescriptors(text){
+  return text.replace(/\([^)]*\)/g, '').split(',')[0].trim();
+}
+
+// Very lightweight Slovenian noun-ending stripper — not a real lemmatizer,
+// just enough to match common declensions of the same word for shopping-list
+// grouping (jajce/jajca/jajc/jajci -> "jajc"). Only strips if a reasonable
+// stem remains, to avoid mangling short words.
+function stemSl(word){
+  const suffixes = ['ami','imi','ov','ev','ih','em','om','ah','eh','a','e','i','o','u'];
+  for(const suf of suffixes){
+    if(word.endsWith(suf) && word.length - suf.length >= 3){
+      return word.slice(0, word.length - suf.length);
+    }
+  }
+  return word;
+}
+
+function formatQty(n){
+  const rounded = Math.round(n * 100) / 100;
+  return Number.isInteger(rounded) ? String(rounded) : String(rounded).replace(/0+$/,'').replace(/\.$/,'');
+}
+
+function parseIngredientLine(line){
+  const m = line.match(/^([\d½¼¾⅓⅔]+(?:[.,]\d+)?(?:-\d+)?(?:\/\d+)?)\s*([a-zA-ZčšžĆĐ]*)\.?\s*(.*)$/);
+  if(!m || m[1] === undefined) return { qty: null, unit: '', name: stripDescriptors(line) || line };
+  const qty = parseQty(m[1]);
+  if(qty == null) return { qty: null, unit: '', name: stripDescriptors(line) || line };
+  const unitToken = (m[2] || '').toLowerCase();
+  if(UNIT_ALIASES[unitToken]){
+    return { qty, unit: UNIT_ALIASES[unitToken], name: stripDescriptors(m[3]) };
+  }
+  // no recognized unit word — the "unit" token is actually the start of the name
+  const rest = (unitToken + ' ' + m[3]).trim();
+  return { qty, unit: '', name: stripDescriptors(rest) };
+}
+
+// Rough meal-type classifier for "Kosilo" recipes, used by the week generator
+// (3 mesne, 1 riba, 1 testenine, 1 juha, 1 vegetarijanska). Based on keyword
+// matches in the name + ingredients — best-effort, not a real diet/nutrition
+// classifier.
+const RIBA_KW = ['riba','losos','tuna','skus','postrv','sardel','skamp','gamber','skoljk','lignj','hobotnic','polip','oslic','brancin','orad','morsk sadez'];
+const TESTENINE_KW = ['testenin','njok','spaget','penne','fuzij','lazanj','rezanc','makaron','tortelin'];
+const JUHA_KW = ['juh','krem juh','goveja juh','zelenjavna juh'];
+const MESO_KW = ['piscan','puran','goved','svinjin','telet','klobas','salam','sunk','slanin','meso','mesn','zrezek','krac','rebr','pancet','prsut','burger','cevap','jetr'];
+
+function classifyMealType(meal){
+  const text = normalizeText(meal.name + ' ' + (meal.ingredients||[]).join(' '));
+  if(JUHA_KW.some(k=>text.includes(k))) return 'juha';
+  if(RIBA_KW.some(k=>text.includes(k))) return 'riba';
+  if(TESTENINE_KW.some(k=>text.includes(k))) return 'testenine';
+  if(MESO_KW.some(k=>text.includes(k))) return 'meso';
+  return 'vegetarijansko';
+}
+
+const SHOP_CATEGORIES = [
+  { id: 'sadje-zelenjava', label: 'Sadje/zelenjava', emoji: '🥬', keywords: [
+    'cebul','ces','korenj','paradiznik','paprik','buc','spinac','solat','zelj',
+    'brokol','cvetac','jabolk','banan','limon','limet','pomaranc','jagod','borovnic','malin',
+    'grozdj','hrusk','avokad','gob','por','zelen','peters','koper','bazilik','meta','ingver',
+    'kumar','redkvic','breskv','marelic','sliv','kivi','ananas','melon','lubenic','rukol','blitv',
+    'artican','sparglj','repic','endivij','radic','regrat','koleraba','fizol','grah',
+    'baklazan','rabarbar','rozin','datelj','fig','oreh','mandelj','lesnik','kokos','chi',
+  ]},
+  { id: 'meso', label: 'Meso', emoji: '🥩', keywords: [
+    'piscan','puran','goved','svinjin','telet','klobas','salam','sunk','slanin','meso','mesn',
+    'zrezek','file','krac','rebr','mlet meso','mleto meso','pancet','prsut','burger','cevap',
+    'jetr','krvavic','ocvirk',
+  ]},
+  { id: 'riba-morski', label: 'Ribe/morski sadeži', emoji: '🐟', keywords: [
+    'losos','tuna','riba','skus','postrv','sardel','skamp','gamber','skoljk','lignj','hobotnic',
+    'polip','morsk sadez','oslic','brancin','orad',
+  ]},
+  { id: 'mlecni', label: 'Mlečni izdelki', emoji: '🥛', keywords: [
+    'mlek','jogurt','skut','sir','smetan','maslo','jajc','mascarpon','kefir','sirotk','rikot',
+    'mocarel','parmezan','feta','ementalec','kisla smetan','proteinski napitek','beljakovinski napitek',
+    'protein napitek','skyr',
+  ]},
+  { id: 'oh', label: 'Ogljikovi hidrati', emoji: '🍞', keywords: [
+    'kruh','riz','testenin','njok','zitaric','kosmic','mok','kus kus','kvinoj','quinoa','krompir',
+    'polent','jecmen','pirin','ajdova kas','prosena kas','tortilj','pita','pito','rogljic','zemlj',
+    'bageta','pesk','musli','koruzni zdrob','pura kasa',
+  ]},
+  { id: 'konzervirano', label: 'Konzervirano', emoji: '🥫', keywords: [
+    'konzerv','vlozen','pasirani paradiznik','paradiznikova mezg','koruza v pesocic','fizol v konzerv',
+    'kokosovo mlek','tunina v konzerv','pelat',
+  ]},
+  { id: 'zacimbe', label: 'Začimbe in osnovne sestavine', emoji: '🧂', keywords: [
+    'sol','poper','cili','curry','kumin','origan','timijan','rozmarin','cimet','muskatn','vanilij',
+    'kis','olje','sladkor','kvas','pecilni prasek','soda bikarbon','med','gorcic','sojina omak',
+    'oljcn olje','zacimb','lovorov','paprika v prahu','cesnov prah','cebulni prah',
+  ]},
+];
+
+function classifyShopItem(name){
+  const norm = normalizeText(name);
+  for(const cat of SHOP_CATEGORIES){
+    if(cat.keywords.some(k => norm.includes(k))) return cat.id;
+  }
+  return 'drugo';
+}
+
+function buildShoppingList(){
+  const groups = {}; // key -> { name, unit, qtySum, hasQty, count }
+  Object.keys(weekMenu.selections).forEach(day=>{
+    const dayMap = weekMenu.selections[day];
+    Object.keys(dayMap).forEach(cat=>{
+      const meal = mealById(dayMap[cat]);
+      if(!meal || !meal.ingredients) return;
+      meal.ingredients.forEach(line=>{
+        const trimmed = line.trim();
+        if(!trimmed) return;
+        const parsed = parseIngredientLine(trimmed);
+        const fullName = (parsed.name || trimmed).toLowerCase();
+        let nameForKey;
+        if(parsed.qty != null){
+          // quantity+noun line (e.g. "5 jajc", "3 velika jajca") — match on the
+          // stemmed last word so different declensions of the same noun group together
+          const words = fullName.trim().split(/\s+/);
+          const lastWord = words[words.length-1] || fullName;
+          nameForKey = stemSl(lastWord);
+        } else {
+          // free-text line (e.g. "sol in poper po okusu") — keep exact matching,
+          // stemming a whole descriptive phrase is too likely to mismatch
+          nameForKey = fullName;
+        }
+        const key = parsed.unit + '|' + nameForKey;
+        if(!groups[key]){
+          groups[key] = { name: parsed.name || trimmed, unit: parsed.unit, qtySum: 0, hasQty: false, count: 0 };
+        }
+        groups[key].count += 1;
+        if(parsed.qty != null){ groups[key].qtySum += parsed.qty; groups[key].hasQty = true; }
+      });
+    });
+  });
+  const recipeItems = Object.values(groups).map(g=>{
+    let label;
+    if(g.hasQty){
+      label = `${formatQty(g.qtySum)}${g.unit ? ' '+g.unit : ''} ${g.name}`.trim();
+    } else {
+      label = g.name;
+    }
+    return { label, count: g.count, hasQty: g.hasQty, key: (g.unit+'|'+g.name).toLowerCase(), shopCat: classifyShopItem(g.name), isManual: false };
+  });
+  const manualItems = (weekMenu.extraItems || []).map(it=>({
+    label: it.text, count: 1, hasQty: false, key: 'manual:'+it.id, shopCat: classifyShopItem(it.text), isManual: true, manualId: it.id,
+  }));
+  return recipeItems.concat(manualItems).sort((a,b)=>a.label.localeCompare(b.label,'sl'));
+}
+async function shareShoppingList(){
+  const items = buildShoppingList();
+  const text = `Nakupovalni seznam — ${fmtShort(weekStart)}–${fmtShort(addDays(weekStart,6))}\n\n` +
+    items.map(item => `${weekMenu.shoppingChecked[item.key] ? '✓' : '□'} ${item.label}`).join('\n');
+  try{
+    if(navigator.share){
+      await navigator.share({ title: 'Nakupovalni seznam', text });
+    } else if(navigator.clipboard){
+      await navigator.clipboard.writeText(text);
+      alert('Nakupovalni seznam je kopiran. Prilepi ga lahko v sporočilo.');
+    } else {
+      prompt('Kopiraj nakupovalni seznam:', text);
+    }
+  }catch(e){
+    if(e.name !== 'AbortError') alert('Seznama ni bilo mogoče deliti.');
+  }
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+// Fills the 7 days' "Kosilo" slot for the current week with a randomised
+// mix: 3 meat, 1 fish, 1 pasta, 1 soup, 1 vegetarian. Only overwrites days
+// that don't already have a Kosilo pick. Any type with nothing available in
+// the database is simply skipped (reported back to the caller).
+async function generateWeek(){
+ try{
+  // Search both Kosilo and Večerja for candidates — soups in particular are
+  // often filed under Večerja, so restricting to Kosilo alone can leave the
+  // "juha" slot permanently unfillable.
+  const kosiloMeals = db.meals.filter(m => m.category === 'kosilo' || m.category === 'vecerja');
+  const byType = { meso: [], riba: [], testenine: [], juha: [], vegetarijansko: [] };
+  kosiloMeals.forEach(m => byType[classifyMealType(m)].push(m));
+
+  const plan = [
+    ...shuffle(byType.meso).slice(0,3),
+    ...shuffle(byType.riba).slice(0,1),
+    ...shuffle(byType.testenine).slice(0,1),
+    ...shuffle(byType.juha).slice(0,1),
+    ...shuffle(byType.vegetarijansko).slice(0,1),
+  ];
+  const wanted = { meso:3, riba:1, testenine:1, juha:1, vegetarijansko:1 };
+  const gotCounts = { meso:0, riba:0, testenine:0, juha:0, vegetarijansko:0 };
+  plan.forEach(m=>gotCounts[classifyMealType(m)]++);
+  const missing = Object.keys(wanted).filter(t => gotCounts[t] < wanted[t]);
+
+  const shuffledPlan = shuffle(plan);
+  const emptyDayIndexes = [];
+  for(let i=0;i<7;i++){
+    const dayIso = isoDate(addDays(weekStart, i));
+    const already = weekMenu.selections[dayIso] && weekMenu.selections[dayIso]['kosilo'];
+    if(!already) emptyDayIndexes.push(i);
+  }
+  if(emptyDayIndexes.length === 0){
+    alert('Ves teden že ima izbrano kosilo za vsak dan. Če želiš nov predlog, najprej počisti teden ali ročno odstrani nekaj izbir.');
+    return;
+  }
+
+  shuffledPlan.slice(0, emptyDayIndexes.length).forEach((meal, idx)=>{
+    const dayIso = isoDate(addDays(weekStart, emptyDayIndexes[idx]));
+    if(!weekMenu.selections[dayIso]) weekMenu.selections[dayIso] = {};
+    weekMenu.selections[dayIso]['kosilo'] = meal.id;
+  });
+
+  await saveWeek();
+  renderWeek();
+
+  if(missing.length){
+    const labels = { meso:'mesnih', riba:'ribjih', testenine:'testeninskih', juha:'juh', vegetarijansko:'vegetarijanskih' };
+    alert(`Teden je ustvarjen, a v bazi ni bilo dovolj receptov za: ${missing.map(t=>labels[t]).join(', ')}. Dodaj še kakšen tak recept v bazo, pa bo naslednjič polneje.`);
+  }
+ }catch(e){
+  console.error('Ustvarjanje tedna ni uspelo', e);
+  alert('Ustvarjanje tedna ni uspelo zaradi nepričakovane napake. Poskusi znova — če se ponovi, sporoči mi natančno sporočilo iz konzole brskalnika, če ga vidiš.');
+ }
+}
+
+/* ============================ SEZNAM RECEPTOV ============================ */
+const ui = { q:'', cat:'all', tag:'', fav:false };
+const CHUNK = 30;
+let shown = 0, listFiltered = [], listDirty = false, sentObs = null, listBuilt = false;
+
+function buildList(){
+  $('#vList').innerHTML = `
+    <div class="ttl"><h1>Recepti<span class="cnt" id="cnt"></span></h1>
+      <button class="ib" id="moreBtn" aria-label="Več možnosti">${IC.more}</button></div>
+    <div class="sticky">
+      <div class="search">${IC.search}<input id="q" type="search" placeholder="Ime, sestavina, oznaka …" autocomplete="off" enterkeyhint="search"><button class="x" id="qx" aria-label="Počisti" hidden>${IC.close}</button></div>
+      <div class="chips" id="catChips"></div>
+    </div>
+    <div class="chips tags" id="tagChips"></div>
+    <div id="grid" class="grid"></div>
+    <div id="sent" style="height:1px"></div>
+    <div id="empty" class="empty" hidden></div>`;
+  listBuilt = true;
+  const q = $('#q'); let t;
+  q.addEventListener('input', () => {
+    clearTimeout(t); t = setTimeout(()=>{ ui.q = q.value; $('#qx').hidden = !q.value; applyFilter(); }, 120);
+  });
+  $('#qx').onclick = () => { q.value=''; ui.q=''; $('#qx').hidden = true; applyFilter(); q.focus(); };
+  $('#moreBtn').onclick = openMenu;
+  $('#catChips').onclick = e => {
+    const b = e.target.closest('.chip'); if(!b) return;
+    if(b.dataset.fav){ ui.fav = !ui.fav; } else { ui.cat = b.dataset.cat; }
+    renderChips(); applyFilter();
+  };
+  $('#tagChips').onclick = e => {
+    const b = e.target.closest('.chip'); if(!b) return;
+    ui.tag = ui.tag === b.dataset.tag ? '' : b.dataset.tag;
+    renderChips(); applyFilter();
+  };
+  $('#grid').onclick = e => {
+    const card = e.target.closest('.card'); if(!card) return;
+    const id = card.dataset.id;
+    if(e.target.closest('.fav')){ toggleFav(id); return; }
+    go('r/' + id);
+  };
+  sentObs = new IntersectionObserver(es => {
+    if(es.some(x => x.isIntersecting) && shown < listFiltered.length){
+      appendChunk(); sentObs.unobserve($('#sent')); sentObs.observe($('#sent'));
+    }
+  }, { rootMargin: '900px' });
+  sentObs.observe($('#sent'));
+  renderChips();
+}
+function renderChips(){
+  const cats = [{id:'all',label:'Vsi'}, ...CATEGORIES];
+  $('#catChips').innerHTML = cats.map(c => `<button class="chip${ui.cat===c.id?' on':''}" data-cat="${c.id}">${c.label}</button>`).join('')
+    + `<button class="chip${ui.fav?' on':''}" data-fav="1">♥ Priljubljeni</button>`;
+  const tags = allTags();
+  $('#tagChips').innerHTML = tags.map(t => `<button class="chip${ui.tag===t?' on':''}" data-tag="${esc(t)}">#${esc(t)}</button>`).join('');
+  $('#tagChips').hidden = tags.length === 0;
+}
+function cardHtml(m){
+  const cat = CATEGORIES.find(c=>c.id===m.category);
+  const meta = [m.prepTime && String(m.prepTime).trim(), m.kcal && (m.kcal + ' kcal')].filter(Boolean).join(' · ');
+  const img = m.image
+    ? `<div class="ph"><img src="${m.image}" alt="" loading="lazy" decoding="async"></div>`
+    : `<div class="ph none c-${m.category}">${cat ? cat.emoji : '🍽'}</div>`;
+  return `<article class="card" data-id="${esc(m.id)}" role="link" tabindex="0">${img}
+    <button class="fav" aria-label="Priljubljen"><span>${IC.heart(isFav(m))}</span></button>
+    <div class="ct">${esc(m.name)}</div>${meta ? `<div class="cm">${esc(meta)}</div>` : ''}</article>`;
+}
+function appendChunk(n=CHUNK){
+  const slice = listFiltered.slice(shown, shown+n);
+  $('#grid').insertAdjacentHTML('beforeend', slice.map(cardHtml).join(''));
+  shown += slice.length;
+}
+function applyFilter(keep){
+  const keepN = keep ? shown : 0;
+  const terms = normalizeText(ui.q).split(/\s+/).filter(Boolean);
+  listFiltered = db.meals.filter(m =>
+    (ui.cat==='all' || m.category===ui.cat) && (!ui.fav || isFav(m)) &&
+    (!ui.tag || (m.tags||[]).includes(ui.tag)) &&
+    terms.every(t => (sidx.get(m.id)||'').includes(t))
+  );
+  const nq = normalizeText(ui.q);
+  listFiltered.sort((a,b)=>{
+    if(nq){
+      const ai = normalizeText(a.name).includes(nq) ? 0 : 1, bi = normalizeText(b.name).includes(nq) ? 0 : 1;
+      if(ai !== bi) return ai - bi;
+    }
+    return a.name.localeCompare(b.name,'sl');
+  });
+  shown = 0; $('#grid').innerHTML = '';
+  appendChunk(Math.max(CHUNK, keepN));
+  $('#cnt').textContent = db.meals.length ? (listFiltered.length === db.meals.length ? db.meals.length : `${listFiltered.length} / ${db.meals.length}`) : '';
+  const em = $('#empty');
+  if(listFiltered.length === 0){
+    em.hidden = false;
+    em.innerHTML = db.meals.length
+      ? 'Ni zadetkov. Poskusi drug izraz ali odstrani filter.'
+      : 'Baza je še prazna.<br><br><button class="btn pri" id="emptyAdd">Dodaj prvi recept</button>';
+    const ea = $('#emptyAdd'); if(ea) ea.onclick = () => go('new');
+  } else em.hidden = true;
+  renderChips();
+  listDirty = false;
+}
+async function toggleFav(id){
+  const m = mealById(id); if(!m) return;
+  const prev = { favorite: m.favorite };
+  m.favorite = !isFav(m);
+  document.querySelectorAll(`.card[data-id="${CSS.escape(id)}"] .fav span`).forEach(s => s.innerHTML = IC.heart(m.favorite));
+  const hb = $('#favBtn'); if(hb) hb.innerHTML = IC.heart(m.favorite);
+  if(ui.fav) listDirty = true;
+  cacheMeals();
+  const ok = await saveMeal(m);
+  if(!ok){ m.favorite = prev.favorite; cacheMeals(); toast('Ni se shranilo. Preveri povezavo.'); applyFilter(true); }
+}
+
+/* ============================ BRALNI POGLED ============================ */
+let curMealId = null;
+function ingListHtml(m){
+  return (m.ingredients||[]).map((l,i) =>
+    `<label class="ing"><input type="checkbox" data-ci="${i}"${isChk(m.id,i)?' checked':''}><span>${esc(l)}</span></label>`).join('');
+}
+function openRead(id){
+  const m = mealById(id); curMealId = id;
+  const cat = CATEGORIES.find(c=>c.id===m.category);
+  const { steps, notes, source: pSrc } = parseRecipe(m);
+  const src = m.source || pSrc;
+  const macros = [['kcal','kcal'],['carbs','OH'],['protein','Bel.'],['fat','Mašč.']].filter(([k])=>m[k]!=='' && m[k]!=null);
+  $('#vSub').innerHTML = `
+    <div class="hero${m.image?'':' none c-'+m.category}">
+      ${m.image ? `<img src="${m.image}" alt="">` : (cat?cat.emoji:'🍽')}
+      <div class="htop"><button class="rb" id="rBack" aria-label="Nazaj">${IC.back}</button>
+        <div class="r"><button class="rb" id="favBtn" aria-label="Priljubljen">${IC.heart(isFav(m))}</button>
+        <button class="rb" id="rEdit" aria-label="Uredi">${IC.edit}</button></div></div>
+    </div>
+    <div class="rbody">
+      <div class="kick">${cat?cat.label:''}</div><h1>${esc(m.name)}</h1>
+      <div class="meta">${m.prepTime?`<span class="pill">⏱ ${esc(m.prepTime)}</span>`:''}${m.servings?`<span class="pill">🍽 ${esc(m.servings)}</span>`:''}${m.lastCooked?`<span class="pill">Skuhano: ${esc(daysAgoLabel(m.lastCooked))}</span>`:''}</div>
+      ${macros.length?`<div class="macros">${macros.map(([k,l])=>`<div><b>${esc(m[k])}</b><small>${l}</small></div>`).join('')}</div>`:''}
+      ${(m.tags||[]).length?`<div class="tagrow">${m.tags.map(t=>`<span class="tag">#${esc(t)}</span>`).join('')}</div>`:''}
+      ${(m.ingredients||[]).length?`<h2>Sestavine</h2><div id="ingList">${ingListHtml(m)}</div>
+        <button class="lnk" id="clrChk"${(chk[m.id]||[]).length?'':' hidden'}>Počisti kljukice</button>`:''}
+      ${steps.length?`<h2>Postopek</h2><ol class="steps">${steps.map(s=>`<li><span>${esc(s)}</span></li>`).join('')}</ol>`:(!(m.ingredients||[]).length?'<p class="note">Ta recept še nima sestavin ali postopka. Dodaj jih z gumbom za urejanje (svinčnik).</p>':'')}
+      ${notes.map(n=>`<div class="note">${esc(n)}</div>`).join('')}
+      ${src?`<div class="src">Vir: ${linkify(src)}</div>`:''}
+      <div class="rowx" style="margin-top:20px"><button class="btn" id="cookedBtn">✓ Skuhano danes</button></div>
+    </div>
+    ${steps.length?`<div class="cta"><button class="btn pri block" id="cookBtn">▶ Začni kuhati</button></div>`:''}`;
+  show('Sub');
+  $('#rBack').onclick = () => goBack('');
+  $('#favBtn').onclick = () => toggleFav(id);
+  $('#rEdit').onclick = () => go('edit/' + id);
+  const cb = $('#cookBtn'); if(cb) cb.onclick = () => go('cook/' + id);
+  $('#cookedBtn').onclick = async () => {
+    const prev = m.lastCooked; m.lastCooked = isoDate(REAL_TODAY);
+    cacheMeals();
+    if(await saveMeal(m)){ toast('Označeno kot skuhano danes'); openRead(id); }
+    else { m.lastCooked = prev; toast('Ni se shranilo. Preveri povezavo.'); }
+  };
+  const cc = $('#clrChk'); if(cc) cc.onclick = () => { delete chk[id]; saveChk(); openRead(id); };
+}
+document.addEventListener('change', e => {
+  const cb = e.target.closest && e.target.closest('input[data-ci]'); if(!cb || !curMealId) return;
+  toggleChk(curMealId, +cb.dataset.ci, cb.checked);
+  const cc = $('#clrChk'); if(cc) cc.hidden = !(chk[curMealId]||[]).length;
+});
+
+/* ============================ NAČIN KUHANJA ============================ */
+let wl = null, cook = null;
+async function startWake(){
+  try{ if('wakeLock' in navigator && !wl){ wl = await navigator.wakeLock.request('screen'); wl.addEventListener('release', ()=>{ wl = null; }); } }catch(e){}
+}
+function stopWake(){ try{ wl && wl.release(); }catch(e){} wl = null; }
+document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible' && curView === 'Cook') startWake(); });
+
+function openCook(id){
+  const m = mealById(id); curMealId = id;
+  const { steps } = parseRecipe(m);
+  cook = { id, steps, i: 0 };
+  show('Cook'); startWake(); renderCook();
+}
+function renderCook(){
+  const m = mealById(cook.id), n = cook.steps.length, last = cook.i === n-1;
+  $('#vCook').innerHTML = `
+    <div class="ck-top"><button class="ib" id="ckX" aria-label="Zapri">${IC.close}</button><div class="ck-t">${esc(m.name)}</div>
+      ${(m.ingredients||[]).length?'<button class="btn sm" id="ckIng">Sestavine</button>':''}</div>
+    <div class="ck-prog"><i style="width:${(cook.i+1)/n*100}%"></i></div>
+    <div class="ck-body"><div class="ck-n">Korak ${cook.i+1} od ${n}</div><div class="ck-txt">${esc(cook.steps[cook.i])}</div></div>
+    <div class="ck-nav"><button class="btn" id="ckPrev"${cook.i===0?' disabled':''}>‹ Nazaj</button>
+      <button class="btn pri" id="ckNext">${last?'Končano ✓':'Naprej ›'}</button></div>`;
+  $('#ckX').onclick = () => goBack('r/' + cook.id);
+  $('#ckPrev').onclick = () => { if(cook.i > 0){ cook.i--; renderCook(); } };
+  $('#ckNext').onclick = cookNext;
+  const ci = $('#ckIng');
+  if(ci) ci.onclick = () => openSheet(`<h3>Sestavine</h3>${ingListHtml(m)}<button class="btn block" id="shX" style="margin-top:12px">Zapri</button>`) || ($('#shX').onclick = closeSheet);
+}
+async function cookNext(){
+  if(cook.i < cook.steps.length - 1){ cook.i++; renderCook(); return; }
+  const m = mealById(cook.id);
+  if(confirm('Končano! Označim recept kot skuhan danes?')){
+    m.lastCooked = isoDate(REAL_TODAY); cacheMeals(); saveMeal(m);
+  }
+  goBack('r/' + cook.id);
+}
+(function swipe(){
+  let x0 = null, y0 = null;
+  const el = document.getElementById('vCook');
+  el.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, { passive:true });
+  el.addEventListener('touchend', e => {
+    if(x0 === null || !cook) return;
+    const dx = e.changedTouches[0].clientX - x0, dy = e.changedTouches[0].clientY - y0; x0 = null;
+    if(Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy)*1.5) return;
+    if(dx < 0) cookNext(); else if(cook.i > 0){ cook.i--; renderCook(); }
+  }, { passive:true });
+})();
+
+/* ============================ UREJANJE ============================ */
+const SUGGEST_TAGS = ['za otroke','slano','sladko','brez peke','hitro','priloga','prigrizek'];
+let edit = null;
+function resizeImageToDataUrl(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Branje datoteke ni uspelo'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Slike ni bilo mogoče naložiti'));
+      img.onload = () => {
+        const MAX_DIM = 560;
+        let { width, height } = img;
+        if(width > height && width > MAX_DIM){ height = Math.round(height * MAX_DIM/width); width = MAX_DIM; }
+        else if(height > MAX_DIM){ width = Math.round(width * MAX_DIM/height); height = MAX_DIM; }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.72));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+function openEdit(id){
+  const m = id ? mealById(id) : { category: ui.cat !== 'all' ? ui.cat : 'kosilo', ingredients: [], tags: [] };
+  const { source: pSrc } = parseRecipe(m);
+  edit = { id, newId: id || ('m' + Date.now() + Math.floor(Math.random()*1000)), tags: [...(m.tags||[])], image: m.image || '' };
+  const v = k => esc(m[k] == null ? '' : m[k]);
+  $('#vSub').innerHTML = `
+    <div class="etop"><button class="ib" id="eBack" aria-label="Nazaj">${IC.back}</button><h2>${id?'Uredi recept':'Nov recept'}</h2>
+      <button class="btn pri sm" id="eSave">Shrani</button></div>
+    <div class="eph" id="ePh"></div>
+    <div class="row"><label class="btn" for="eFile">📷 <span id="eFileTxt"></span></label><input id="eFile" type="file" accept="image/*" hidden>
+      <button class="lnk danger" id="eRmImg">Odstrani sliko</button></div>
+    <label class="fl">Ime recepta<input id="fName" value="${v('name')}" autocomplete="off"></label>
+    <label class="fl">Kategorija<select id="fCat">${CATEGORIES.map(c=>`<option value="${c.id}"${c.id===m.category?' selected':''}>${c.label}</option>`).join('')}</select></label>
+    <div class="two"><label class="fl">Čas priprave<input id="fTime" value="${v('prepTime')}" placeholder="npr. 30 min"></label>
+      <label class="fl">Porcije<input id="fServ" value="${v('servings')}" placeholder="npr. 4 porcije"></label></div>
+    <div class="fl">Oznake<div class="chips wrap" id="fTags"></div>
+      <div class="addtag"><input id="fTagIn" placeholder="nova oznaka" enterkeyhint="done"><button class="btn" id="fTagAdd">Dodaj</button></div></div>
+    <label class="fl">Vir (ime ali povezava)<input id="fSrc" value="${esc(m.source || pSrc || '')}" placeholder="npr. https://…"></label>
+    <div class="four"><label class="fl">Kcal<input id="fK" type="number" inputmode="decimal" value="${v('kcal')}"></label>
+      <label class="fl">OH (g)<input id="fC" type="number" inputmode="decimal" value="${v('carbs')}"></label>
+      <label class="fl">Bel. (g)<input id="fP" type="number" inputmode="decimal" value="${v('protein')}"></label>
+      <label class="fl">Mašč. (g)<input id="fF" type="number" inputmode="decimal" value="${v('fat')}"></label></div>
+    <label class="fl">Sestavine (ena na vrstico)<textarea id="fIng" rows="8" placeholder="2 jajci&#10;200 g moke">${esc((m.ingredients||[]).join('\n'))}</textarea></label>
+    <label class="fl">Postopek (korake loči s prazno vrstico)<textarea id="fRec" rows="10">${esc(m.recipe||'')}</textarea></label>
+    <div style="margin-top:22px;display:grid;gap:12px">
+      <button class="btn pri block" id="eSave2">Shrani</button>
+      ${id?'<button class="btn danger block" id="eDel">Izbriši recept</button>':''}</div>`;
+  show('Sub');
+  renderEditPhoto(); renderEditTags();
+  $('#eBack').onclick = () => goBack(id ? 'r/' + id : '');
+  $('#eSave').onclick = $('#eSave2').onclick = saveEdit;
+  $('#eFile').onchange = async e => {
+    const f = e.target.files && e.target.files[0]; if(!f) return;
+    try{ edit.image = await resizeImageToDataUrl(f); renderEditPhoto(); }
+    catch(err){ toast('Slike ni bilo mogoče obdelati. Poskusi drugo.'); }
+    e.target.value = '';
+  };
+  $('#eRmImg').onclick = () => { edit.image = ''; renderEditPhoto(); };
+  const addTag = () => {
+    const inp = $('#fTagIn'), t = inp.value.trim().replace(/^#/,'').toLowerCase();
+    if(t && !edit.tags.includes(t)) edit.tags.push(t);
+    inp.value = ''; renderEditTags();
+  };
+  $('#fTagAdd').onclick = addTag;
+  $('#fTagIn').onkeydown = e => { if(e.key === 'Enter'){ e.preventDefault(); addTag(); } };
+  $('#fTags').onclick = e => {
+    const b = e.target.closest('.chip'); if(!b) return;
+    const t = b.dataset.tag; edit.tags = edit.tags.includes(t) ? edit.tags.filter(x=>x!==t) : [...edit.tags, t];
+    renderEditTags();
+  };
+  const del = $('#eDel');
+  if(del) del.onclick = async () => {
+    if(!confirm(`Izbrišem recept »${m.name}«? Tega ni mogoče razveljaviti.`)) return;
+    del.disabled = true;
+    if(!(await deleteMealDoc(id))){ del.disabled = false; toast('Brisanje ni uspelo. Preveri povezavo.'); return; }
+    db.meals = db.meals.filter(x => x.id !== id); sidx.delete(id); delete chk[id]; saveChk();
+    cacheMeals(); listDirty = true;
+    if(weekLoaded){
+      let changed = false;
+      Object.keys(weekMenu.selections).forEach(d => Object.keys(weekMenu.selections[d]).forEach(c => {
+        if(weekMenu.selections[d][c] === id){ delete weekMenu.selections[d][c]; changed = true; }
+      }));
+      if(changed) saveWeek();
+    }
+    toast('Recept izbrisan'); go('', true);
+  };
+}
+function renderEditPhoto(){
+  $('#ePh').innerHTML = edit.image ? `<img src="${edit.image}" alt="">` : 'Brez slike';
+  $('#eFileTxt').textContent = edit.image ? 'Zamenjaj sliko' : 'Dodaj sliko';
+  $('#eRmImg').hidden = !edit.image;
+}
+function renderEditTags(){
+  const list = [...new Set([...edit.tags, ...SUGGEST_TAGS, ...allTags()])];
+  $('#fTags').innerHTML = list.map(t => `<button type="button" class="chip${edit.tags.includes(t)?' on':''}" data-tag="${esc(t)}">${esc(t)}</button>`).join('');
+}
+async function saveEdit(){
+  const name = $('#fName').value.trim();
+  if(!name){ toast('Vpiši ime recepta'); $('#fName').focus(); return; }
+  const old = edit.id ? mealById(edit.id) : null;
+  const m = {
+    ...(old || {}), id: edit.newId, name,
+    category: $('#fCat').value, prepTime: $('#fTime').value.trim(), servings: $('#fServ').value.trim(),
+    kcal: $('#fK').value, carbs: $('#fC').value, protein: $('#fP').value, fat: $('#fF').value,
+    ingredients: $('#fIng').value.split('\n').map(s=>s.trim()).filter(Boolean),
+    recipe: $('#fRec').value.trim(), tags: edit.tags, source: $('#fSrc').value.trim(), image: edit.image,
+    lastCooked: old ? (old.lastCooked||'') : '', rating: old ? (old.rating||0) : 0, favorite: old ? isFav(old) : false,
+  };
+  const btns = [$('#eSave'), $('#eSave2')]; btns.forEach(b => { b.disabled = true; b.textContent = 'Shranjujem …'; });
+  const ok = await saveMeal(m);
+  if(!ok){
+    btns.forEach(b => { b.disabled = false; b.textContent = 'Shrani'; });
+    toast('Shranjevanje ni uspelo. Preveri povezavo in poskusi znova.', 4000); return;
+  }
+  const i = db.meals.findIndex(x => x.id === m.id);
+  if(i >= 0) db.meals[i] = m; else db.meals.push(m);
+  indexMeal(m); cacheMeals(); listDirty = true;
+  toast('Shranjeno');
+  if(edit.id) goBack('r/' + m.id); else go('r/' + m.id, true);
+}
+
+/* ============================ IMAM DOMA ============================ */
+function buildIng(){
+  $('#vIng').innerHTML = `<div class="ttl"><h1>Imam doma</h1></div>
+    <p class="sub">Vpiši, kaj imaš doma (loči z vejico) — pokazala bom recepte, ki ujemajo največ sestavin.</p>
+    <div class="search">${IC.search}<input id="ingQ" type="search" placeholder="npr. jajca, skuta, banana" autocomplete="off" enterkeyhint="search"></div>
+    <div id="ingRes" style="margin-top:8px"></div>`;
+  let t; const inp = $('#ingQ');
+  inp.addEventListener('input', () => { clearTimeout(t); t = setTimeout(renderIng, 150); });
+  $('#ingRes').onclick = e => { const r = e.target.closest('.res'); if(r) go('r/' + r.dataset.id); };
+}
+function renderIng(){
+  const { terms, results } = searchMealsByIngredients($('#ingQ').value);
+  const box = $('#ingRes');
+  if(!terms.length){ box.innerHTML = ''; return; }
+  if(!results.length){ box.innerHTML = '<div class="empty">Ni ujemanj.</div>'; return; }
+  box.innerHTML = results.slice(0, 40).map(({meal:m, matchCount, matchedTerms}) => {
+    const cat = CATEGORIES.find(c=>c.id===m.category);
+    return `<div class="res" data-id="${esc(m.id)}"><div class="t">${m.image?`<img src="${m.image}" alt="" loading="lazy">`:(cat?cat.emoji:'🍽')}</div>
+      <div><b>${esc(m.name)}</b><small>${cat?cat.label:''} · ujema ${matchCount} od ${terms.length}: ${esc(matchedTerms.join(', '))}</small></div></div>`;
+  }).join('');
+}
+
+/* ============================ TEDEN ============================ */
+let weekTab = 'menu';
+async function openWeek(){
+  show('Week');
+  if(!weekLoaded){
+    $('#vWeek').innerHTML = '<div class="loading">Nalagam jedilnik …</div>';
+    await loadWeek(); await syncCookedHistory(); cacheMeals(); weekLoaded = true;
+  }
+  renderWeek();
+}
+async function goToWeek(monday){
+  $('#vWeek').innerHTML = '<div class="loading">Nalagam jedilnik …</div>';
+  weekStart = monday; await loadWeek(); await syncCookedHistory(); cacheMeals(); weekLoaded = true;
+  renderWeek(); window.scrollTo(0,0);
+}
+function renderWeek(){
+  if(curView !== 'Week') return;
+  const y = window.scrollY;
+  const weekEnd = addDays(weekStart, 6);
+  const isCur = isoDate(weekStart) === isoDate(getMonday(REAL_TODAY));
+  let body = '';
+  if(weekTab === 'menu'){
+    let days = '';
+    for(let i=0;i<7;i++){
+      const d = addDays(weekStart, i), key = isoDate(d), isToday = key === isoDate(REAL_TODAY);
+      let slots = '';
+      CATEGORIES.forEach(cat => {
+        const raw = (weekMenu.selections[key] && weekMenu.selections[key][cat.id]) || '';
+        const custom = raw.startsWith('~'), mid = custom ? '' : raw;
+        const has = !!(mid && mealName(mid));
+        let opts = `<option value="">${has||custom?'— brez —':'+ dodaj'}</option>`;
+        if(custom) opts += `<option value="__keep" selected>✎ ${esc(raw.slice(1))}</option>`;
+        const pool = mealsByCategory(cat.id);
+        if(has && !pool.some(x => x.id === mid)) pool.push(mealById(mid));
+        pool.slice().sort((a,b)=>a.name.localeCompare(b.name,'sl')).forEach(m => {
+          opts += `<option value="${esc(m.id)}"${mid===m.id?' selected':''}>${esc(m.name)}</option>`;
+        });
+        opts += `<option value="__custom">✎ Vpiši ročno …</option>`;
+        slots += `<div class="slot"><span class="sl">${cat.label}</span>
+          <select data-day="${key}" data-cat="${cat.id}" class="${has||custom?'f':''}" aria-label="${cat.label}">${opts}</select>
+          ${has ? `<button class="ib" data-view="${esc(mid)}" aria-label="Poglej recept">${IC.search}</button>` : '<span style="width:44px"></span>'}</div>`;
+      });
+      days += `<div class="day${isToday?' today':''}"><div class="dh">${DAY_NAMES[i]} <small>${fmtShort(d)}</small>${isToday?'<span class="td">DANES</span>':''}</div>${slots}</div>`;
+    }
+    body = `<div class="tools"><button class="btn sm" id="genW">✨ Ustvari kosila</button><button class="btn sm" id="copyW">↶ Kopiraj prejšnji teden</button></div>${days}
+      <div style="text-align:center"><button class="lnk danger" id="clrW">Počisti ta teden</button></div>`;
+  } else {
+    const shopping = buildShoppingList();
+    const groups = {};
+    shopping.filter(it => !hideCheckedShopping || !weekMenu.shoppingChecked[it.key]).forEach(it => { (groups[it.shopCat] = groups[it.shopCat] || []).push(it); });
+    const order = [...SHOP_CATEGORIES.map(c=>c.id), 'drugo'];
+    const list = order.filter(id => groups[id] && groups[id].length).map(id => {
+      const cd = SHOP_CATEGORIES.find(c=>c.id===id);
+      return `<div class="shop-h">${cd ? cd.emoji + ' ' + cd.label : 'Drugo'}</div>` + groups[id].map(it => {
+        const c = !!weekMenu.shoppingChecked[it.key];
+        return `<label class="shop-item${c?' checked':''}"><input type="checkbox" data-shop="${esc(it.key)}"${c?' checked':''}>
+          <span class="txt">${esc(it.label)}</span>${(!it.hasQty && it.count>1)?`<span class="c">×${it.count}</span>`:''}
+          ${it.isManual?`<button class="ib" data-delm="${esc(it.manualId)}" aria-label="Odstrani">${IC.close}</button>`:''}</label>`;
+      }).join('');
+    }).join('');
+    body = `<p class="sub">Sestavljen iz sestavin obrokov, ki so izbrani v tedenskem jedilniku.</p>
+      <div class="shop-add"><input id="shopIn" placeholder="Dopiši na seznam …" maxlength="80" enterkeyhint="done"><button class="btn pri sm" id="shopAdd">Dodaj</button></div>
+      <div class="rowx"><button class="btn sm" id="togChk">${hideCheckedShopping?'👁 Pokaži kupljeno':'✓ Skrij kupljeno'}</button><button class="btn sm" id="shareShop">↗ Deli seznam</button></div>
+      ${list || '<div class="empty">Seznam je prazen. Izberi obroke v jedilniku ali dopiši kaj ročno.</div>'}`;
+  }
+  $('#vWeek').innerHTML = `<div class="ttl"><h1>Teden</h1></div>
+    <div class="wk"><button class="ib" id="prevW" aria-label="Prejšnji teden">${IC.back}</button>
+      <div class="wr">${fmtShort(weekStart)} – ${fmtShort(weekEnd)} ${weekEnd.getFullYear()}${!isCur?'<br><button class="lnk" id="todayW">Ta teden</button>':''}</div>
+      <button class="ib" id="nextW" aria-label="Naslednji teden" style="transform:scaleX(-1)">${IC.back}</button></div>
+    <div class="seg"><button data-wt="menu" class="${weekTab==='menu'?'on':''}">Jedilnik</button><button data-wt="shop" class="${weekTab==='shop'?'on':''}">Nakupi</button></div>${body}`;
+  window.scrollTo(0, y);
+}
+(function bindWeek(){
+  const v = $('#vWeek');
+  v.addEventListener('click', async e => {
+    const b = e.target.closest('button'); if(!b) return;
+    if(b.id === 'prevW') return goToWeek(addDays(weekStart, -7));
+    if(b.id === 'nextW') return goToWeek(addDays(weekStart, 7));
+    if(b.id === 'todayW') return goToWeek(getMonday(REAL_TODAY));
+    if(b.dataset.wt){ weekTab = b.dataset.wt; return renderWeek(); }
+    if(b.dataset.view) return go('r/' + b.dataset.view);
+    if(b.id === 'genW') return generateWeek();
+    if(b.id === 'copyW') return copyPreviousWeek();
+    if(b.id === 'clrW'){
+      if(!confirm(`Počistim izbrane obroke za teden ${fmtShort(weekStart)}–${fmtShort(addDays(weekStart,6))}?`)) return;
+      weekMenu = { selections: {}, shoppingChecked: {}, extraItems: [] }; await saveWeek(); return renderWeek();
+    }
+    if(b.id === 'togChk'){ hideCheckedShopping = !hideCheckedShopping; return renderWeek(); }
+    if(b.id === 'shareShop') return shareShoppingList();
+    if(b.id === 'shopAdd') return addShopItem();
+    if(b.dataset.delm){
+      e.preventDefault();
+      const id = b.dataset.delm;
+      weekMenu.extraItems = (weekMenu.extraItems||[]).filter(it => it.id !== id);
+      delete weekMenu.shoppingChecked['manual:' + id]; await saveWeek(); renderWeek();
+    }
+  });
+  v.addEventListener('change', async e => {
+    const t = e.target;
+    if(t.matches('select[data-day]')){
+      const day = t.dataset.day, cat = t.dataset.cat;
+      if(!weekMenu.selections[day]) weekMenu.selections[day] = {};
+      if(t.value === '__keep') return;
+      if(t.value === '__custom'){
+        const cur = weekMenu.selections[day][cat] || '';
+        const txt = prompt('Kaj bo na jedilniku?', cur.startsWith('~') ? cur.slice(1) : '');
+        if(txt === null){ return renderWeek(); }
+        if(txt.trim()) weekMenu.selections[day][cat] = '~' + txt.trim(); else delete weekMenu.selections[day][cat];
+      } else if(t.value) weekMenu.selections[day][cat] = t.value;
+      else delete weekMenu.selections[day][cat];
+      await saveWeek(); renderWeek();
+    } else if(t.matches('input[data-shop]')){
+      const k = t.dataset.shop;
+      if(t.checked) weekMenu.shoppingChecked[k] = true; else delete weekMenu.shoppingChecked[k];
+      await saveWeek(); renderWeek();
+    }
+  });
+  v.addEventListener('keydown', e => { if(e.key === 'Enter' && e.target.id === 'shopIn') addShopItem(); });
+  async function addShopItem(){
+    const inp = $('#shopIn'), text = inp.value.trim(); if(!text) return;
+    if(!weekMenu.extraItems) weekMenu.extraItems = [];
+    weekMenu.extraItems.push({ id: 'x' + Date.now() + Math.floor(Math.random()*1000), text });
+    await saveWeek(); renderWeek();
+  }
+})();
+
+/* ============================ MENI / UVOZ / IZVOZ ============================ */
+let installPrompt = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPrompt = e; });
+window.addEventListener('appinstalled', () => { installPrompt = null; });
+function openMenu(){
+  openSheet(`<h3>Več možnosti</h3>
+    <button class="opt" id="mImp">📥 Uvozi recepte iz datoteke</button>
+    <button class="opt" id="mExp">📤 Izvozi vse recepte (varnostna kopija)</button>
+    ${installPrompt?'<button class="opt" id="mInst">📲 Namesti aplikacijo</button>':''}
+    <button class="opt danger" id="mClr">🗑 Počisti celotno bazo</button>
+    <button class="btn block" id="mX" style="margin-top:14px">Zapri</button>`);
+  $('#mX').onclick = closeSheet;
+  $('#mImp').onclick = () => { closeSheet(); $('#impFile').click(); };
+  $('#mExp').onclick = () => {
+    closeSheet();
+    const blob = new Blob([JSON.stringify(db.meals, null, 1)], { type: 'application/json' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'recepti-' + isoDate(REAL_TODAY) + '.json'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  };
+  const mi = $('#mInst'); if(mi) mi.onclick = async () => { closeSheet(); installPrompt.prompt(); await installPrompt.userChoice; installPrompt = null; };
+  $('#mClr').onclick = async () => {
+    closeSheet();
+    if(!db.meals.length) return;
+    if(!confirm(`Izbrišem VSE recepte (${db.meals.length})? Tega ni mogoče razveljaviti.`)) return;
+    if(!confirm('Si čisto prepričana? Vsi recepti bodo trajno izbrisani.')) return;
+    if(!(await deleteAllMeals())){ toast('Brisanje ni uspelo.'); return; }
+    db.meals = []; indexAll(); cacheMeals(); applyFilter(); toast('Baza je počiščena');
+  };
+}
+document.getElementById('impFile').addEventListener('change', e => {
+  const file = e.target.files && e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onerror = () => alert('Datoteke ni bilo mogoče prebrati.');
+  reader.onload = () => runImport(String(reader.result));
+  reader.readAsText(file); e.target.value = '';
+});
+async function runImport(raw){
+  if(!raw || !raw.trim()) return;
+  let parsed;
+  try{ parsed = JSON.parse(raw); }
+  catch(e){ alert('JSON ni veljaven — datoteka je morda okrnjena.'); return; }
+  if(!Array.isArray(parsed)){ alert('Pričakovan je seznam obrokov v [ ] oklepajih.'); return; }
+  const validCats = CATEGORIES.map(c=>c.id);
+  const toTags = v => (Array.isArray(v) ? v : String(v).split(',')).map(s => String(s).trim().replace(/^#/,'').toLowerCase()).filter(Boolean);
+  let added = 0, updated = 0, skipped = 0; const toSave = [];
+  toast('Uvažam …', 60000);
+  parsed.forEach(item => {
+    if(!item || !item.name){ skipped++; return; }
+    const nameNorm = String(item.name).trim().toLowerCase();
+    const existing = db.meals.find(m => m.name.trim().toLowerCase() === nameNorm);
+    if(existing){
+      if(item.category != null && validCats.includes(item.category)) existing.category = item.category;
+      if(Array.isArray(item.ingredients)) existing.ingredients = item.ingredients.map(String);
+      if(item.recipe != null) existing.recipe = String(item.recipe);
+      ['kcal','carbs','protein','fat','prepTime','servings','source'].forEach(k => { if(item[k] != null) existing[k] = String(item[k]); });
+      if(item.image) existing.image = String(item.image);
+      if(item.tags != null) existing.tags = toTags(item.tags);
+      if(item.favorite != null) existing.favorite = !!item.favorite;
+      toSave.push(existing); updated++;
+    } else if(validCats.includes(item.category)){
+      const meal = {
+        id: 'm' + Date.now() + Math.floor(Math.random()*10000) + added,
+        name: String(item.name).slice(0,120), category: item.category,
+        ingredients: Array.isArray(item.ingredients) ? item.ingredients.map(String) : [],
+        recipe: item.recipe ? String(item.recipe) : '',
+        kcal: item.kcal!=null ? String(item.kcal) : '', carbs: item.carbs!=null ? String(item.carbs) : '',
+        protein: item.protein!=null ? String(item.protein) : '', fat: item.fat!=null ? String(item.fat) : '',
+        image: item.image ? String(item.image) : '', prepTime: item.prepTime ? String(item.prepTime) : '',
+        servings: item.servings ? String(item.servings) : '', source: item.source ? String(item.source) : '',
+        tags: item.tags != null ? toTags(item.tags) : [], favorite: !!item.favorite,
+      };
+      db.meals.push(meal); toSave.push(meal); added++;
+    } else skipped++;
+  });
+  const ok = await saveMealsInChunks(toSave);
+  indexAll(); cacheMeals(); listDirty = true;
+  if(curView === 'List') applyFilter(true);
+  $('#toast').hidden = true;
+  if(!ok) alert('Shranjevanje ni uspelo v celoti. Poskusi znova — že shranjeni recepti ostanejo, ostale lahko uvoziš še enkrat.');
+  else alert(`Dodanih ${added}, posodobljenih ${updated}.` + (skipped ? ` Preskočenih ${skipped} (ni ujemanja po imenu in manjka/napačna kategorija).` : ''));
+}
+
+/* ============================ ZAGON ============================ */
+function route(){
+  stopWake();
+  const [p, id] = location.hash.replace(/^#\/?/, '').split('/');
+  closeSheet();
+  if(p === 'r' && mealById(id)) return openRead(id);
+  if(p === 'edit' && mealById(id)) return openEdit(id);
+  if(p === 'new') return openEdit(null);
+  if(p === 'cook' && mealById(id)){
+    if(parseRecipe(mealById(id)).steps.length) return openCook(id);
+    toast('Ta recept nima postopka.'); return go('r/' + id, true);
+  }
+  if(p === 'ing'){ if(!$('#ingQ')) buildIng(); return show('Ing'); }
+  if(p === 'week') return openWeek();
+  if(!listBuilt) buildList();
+  if(listDirty || !$('#grid').children.length) applyFilter(true);
+  show('List');
+}
+window.addEventListener('popstate', route);
+document.getElementById('tabbar').addEventListener('click', e => {
+  const b = e.target.closest('button'); if(!b) return;
+  const t = b.dataset.tab, cur = location.hash.replace(/^#\/?/, '').split('/')[0];
+  if(t === cur) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  go(t, !!cur && ['ing','week'].includes(cur) && ['', 'ing', 'week'].includes(t));
+});
+document.addEventListener('keydown', e => {
+  if(curView === 'Cook'){
+    if(e.key === 'ArrowRight') cookNext();
+    else if(e.key === 'ArrowLeft' && cook.i > 0){ cook.i--; renderCook(); }
+  }
+  if(e.key === 'Escape') closeSheet();
+});
+document.getElementById('vList').addEventListener('keydown', e => {
+  if(e.key === 'Enter' && e.target.classList && e.target.classList.contains('card')) go('r/' + e.target.dataset.id);
+});
+
+(async function init(){
+  if('serviceWorker' in navigator && location.protocol !== 'file:'){
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  }
+  history.replaceState({ i: 0 }, '', location.href);
+  if(!CONFIG_READY){ $('#vList').innerHTML = '<div class="loading">Manjka nastavitev Firebase.</div>'; return; }
+  buildList();
+  const cached = await cacheGet('meals');
+  let haveCache = false;
+  if(Array.isArray(cached) && cached.length){ db.meals = cached; indexAll(); haveCache = true; route(); }
+  else $('#grid').innerHTML = '<div class="loading" style="grid-column:1/-1">Nalagam recepte …</div>';
+  try{
+    const fresh = await fetchMeals();
+    const changed = JSON.stringify(fresh) !== JSON.stringify(db.meals);
+    if(changed || !haveCache){
+      db.meals = fresh; indexAll(); cacheMeals(); listDirty = true;
+      if(!haveCache) route();
+      else if(curView === 'List') applyFilter(true);
+    }
+  }catch(e){
+    console.error('Nalaganje baze ni uspelo', e);
+    if(haveCache) toast('Ni povezave — prikazani so shranjeni recepti.', 4000);
+    else $('#grid').innerHTML = '<div class="empty" style="grid-column:1/-1">Receptov ni bilo mogoče naložiti.<br><br><button class="btn pri" id="retry">Poskusi znova</button></div>', $('#retry').onclick = () => location.reload();
+  }
+})();
+
+</script>
+</body>
+</html>
