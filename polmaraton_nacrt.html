@@ -5,9 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Polmaraton pod 2 h</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#F2F4F1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1715" media="(prefers-color-scheme: dark)">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Polmaraton">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&display=swap">
 <style>
-/* Layout: one narrow column built for a phone. Summary card first, then one collapsible block per training phase; each week is a two-line row with tick boxes. */
+/* Layout: one narrow column built for a phone. "Ta teden" card with both runs and logging first, then progress, a chart of weekend runs, one collapsible block per training phase, and inside it one collapsible row per week. */
 :root {
   --bg: #F2F4F1;
   --surface: #FFFFFF;
@@ -35,10 +44,13 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
+  margin: 0;
   background: var(--bg); color: var(--fg);
   font: 16px/1.5 var(--body);
-  padding-block: 20px 40px;
+  padding-top: max(20px, env(safe-area-inset-top, 0px));
+  padding-bottom: max(40px, env(safe-area-inset-bottom, 0px));
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
@@ -49,43 +61,88 @@ h1 { font-size: 1.75rem; line-height: 1.15; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
 .now { border-color: var(--accent); }
 .eyebrow { font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-.now h2 { font-size: 1.25rem; margin: 4px 0 10px; }
-.line { display: flex; gap: 10px; margin: 6px 0; min-width: 0; }
-.tag { flex: none; width: 26px; height: 26px; border-radius: 6px; background: var(--soft); color: var(--accent); font: 700 .85rem/26px var(--display); text-align: center; }
-.line span:last-child { min-width: 0; }
+.now h2 { font-size: 1.25rem; margin: 4px 0 6px; }
 button {
   font: 600 .95rem var(--body); color: var(--accent-fg); background: var(--accent);
   border: 0; border-radius: 8px; min-height: 44px; padding: 0 16px; margin-top: 8px;
 }
-button:focus-visible, summary:focus-visible, input:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--line); min-height: 44px; margin-top: 2px; }
+button.quiet { background: transparent; color: var(--muted); border: 1px solid var(--line); }
+button:focus-visible, summary:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 .bar { height: 8px; border-radius: 4px; background: var(--soft); overflow: hidden; margin: 10px 0 6px; }
 .bar i { display: block; height: 100%; background: var(--accent); width: 0; }
 .stat { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: .9rem; font-variant-numeric: tabular-nums; }
+
+/* graf */
+.chart svg { display: block; width: 100%; height: auto; margin-top: 8px; }
+.chart .gl { stroke: var(--line); stroke-width: 1; }
+.chart .gt { fill: var(--muted); font: 10px var(--body); }
+.chart .bp { fill: var(--muted); fill-opacity: .3; }
+.chart .bt { fill: var(--test); fill-opacity: .5; }
+.chart .ba { fill: var(--accent); }
+.chart .cw { fill: var(--soft); }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--muted); font-size: .8rem; margin-top: 6px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.legend .lp { background: var(--muted); opacity: .4; }
+.legend .lt { background: var(--test); opacity: .6; }
+.legend .la { background: var(--accent); }
+
+/* faze in tedni */
 details.phase { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
 details.phase > summary { list-style: none; cursor: pointer; padding: 14px 16px; min-height: 56px; display: flex; flex-direction: column; gap: 2px; }
 details.phase > summary::-webkit-details-marker { display: none; }
 summary h3 { font-size: 1.05rem; }
 summary .meta { color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
 .pnote { margin: 0; padding: 0 16px 8px; color: var(--muted); font-size: .9rem; }
-.week { border-top: 1px solid var(--line); padding: 12px 16px; }
-.week.cur { background: var(--soft); }
-.week.test { background: var(--test-bg); }
-.whead { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 4px; }
-.whead b { font-family: var(--display); font-variant-numeric: tabular-nums; }
-.whead span { color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
-.badge { font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--test); }
+details.wk { border-top: 1px solid var(--line); }
+details.wk > summary { list-style: none; cursor: pointer; padding: 10px 16px; min-height: 52px; display: flex; align-items: center; gap: 8px; }
+details.wk > summary::-webkit-details-marker { display: none; }
+details.wk > summary::after { content: "\203A"; color: var(--muted); font-size: 1.4rem; line-height: 1; margin-left: 2px; }
+details.wk[open] > summary::after { transform: rotate(90deg); }
+details.wk.cur { background: var(--soft); }
+details.wk.test { background: var(--test-bg); }
+.wl { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.wt { font-family: var(--display); font-weight: 700; font-variant-numeric: tabular-nums; }
+.wd { color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; }
+.ws { font-size: .85rem; font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ws.ok { color: var(--accent); }
+.ws.miss { color: var(--test); }
+.wbody { padding: 0 16px 12px; }
+.badge { font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--test); margin-left: 6px; }
+
+/* en tek */
+.run { padding: 2px 0 8px; }
+.run + .run { border-top: 1px dashed var(--line); padding-top: 8px; }
 label.row { display: flex; gap: 12px; align-items: flex-start; min-height: 44px; padding: 6px 0; cursor: pointer; }
 label.row input { flex: none; width: 24px; height: 24px; margin: 2px 0 0; accent-color: var(--accent); }
 label.row .txt { min-width: 0; }
 label.row small { display: block; color: var(--muted); font-size: .85rem; }
 input:checked + .txt { opacity: .55; }
+.sum { margin: 0 0 6px 36px; padding: 8px 10px; border-radius: 8px; background: var(--bg); border: 1px solid var(--line); font-size: .9rem; font-variant-numeric: tabular-nums; }
+.sum .note { color: var(--muted); margin-top: 2px; white-space: pre-wrap; overflow-wrap: anywhere; }
+.logbtn { margin-left: 36px; }
+.logform { margin: 8px 0 4px 36px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.logform .f { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.logform .f.wide { grid-column: 1 / -1; }
+.logform .f span { font-size: .8rem; color: var(--muted); font-weight: 600; }
+.logform input, .logform textarea {
+  font: 16px var(--body); color: var(--fg); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-height: 44px; width: 100%;
+}
+.logform textarea { min-height: 76px; resize: vertical; }
+.logform .acts { grid-column: 1 / -1; display: flex; gap: 8px; flex-wrap: wrap; }
+.logform .acts button { margin-top: 0; }
+
 ul.rules { margin: 8px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
 .pace { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: .9rem; font-variant-numeric: tabular-nums; }
 .pace td { padding: 6px 0; border-top: 1px solid var(--line); }
 .pace td:last-child { text-align: right; font-weight: 600; }
-@media (prefers-reduced-motion: no-preference) { .bar i { transition: width .3s; } }
+.hint { color: var(--muted); font-size: .9rem; margin: 6px 0 0; }
+.acts2 { display: flex; gap: 8px; flex-wrap: wrap; }
+@media (prefers-reduced-motion: no-preference) { .bar i { transition: width .3s; } details.wk > summary::after { transition: transform .15s; } }
 </style>
-
+</head>
+<body>
 <main>
   <header>
     <h1>Polmaraton pod 2 h</h1>
@@ -98,6 +155,18 @@ ul.rules { margin: 8px 0 0; padding-left: 20px; display: flex; flex-direction: c
     <div class="eyebrow">Napredek</div>
     <div class="bar"><i id="barfill"></i></div>
     <div class="stat"><span id="done">0 od 88 tekov</span><span id="pct">0 %</span></div>
+    <div class="stat" style="margin-top:4px"><span>Skupaj vneseno</span><span id="kmtot">0 km</span></div>
+  </section>
+
+  <section class="card chart">
+    <h2 style="font-size:1.1rem">Vikend tek po tednih</h2>
+    <div id="chart"></div>
+    <div class="legend">
+      <span><i class="lp"></i>načrt (km)</span>
+      <span><i class="lt"></i>test / poskus</span>
+      <span><i class="la"></i>dejansko</span>
+    </div>
+    <p class="hint">Tek med tednom je v načrtu v minutah, zato ni na grafu.</p>
   </section>
 
   <div id="phases" style="display:flex;flex-direction:column;gap:12px"></div>
@@ -124,6 +193,16 @@ ul.rules { margin: 8px 0 0; padding-left: 20px; display: flex; flex-direction: c
       <li>Ljubljanski maraton je običajno konec oktobra, torej imaš po 44. tednu še rezervo.</li>
     </ul>
   </section>
+
+  <section class="card">
+    <h2 style="font-size:1.1rem">Varnostna kopija</h2>
+    <p class="hint">Podatki so shranjeni samo v tem brskalniku in za ta naslov. Občasno si kopiraj kopijo in jo shrani, npr. v zapiske.</p>
+    <div class="acts2">
+      <button type="button" id="bkcopy">Kopiraj podatke</button>
+      <button type="button" class="quiet" id="bkrestore">Obnovi iz kopije</button>
+    </div>
+    <p class="hint" id="bkmsg" role="status"></p>
+  </section>
 </main>
 
 <script>
@@ -141,6 +220,7 @@ var PHASES = [
   {n: "Dolge razdalje", a: 31, b: 40, t: "Dolgi tek z delom v ciljnem tempu."},
   {n: "Cilj", a: 41, b: 44, t: "Zadnji ostri tek, umirjanje in poskus 21 km."}
 ];
+var NW = 44;
 
 function span(w) {
   var s = new Date(START); s.setDate(s.getDate() + (w - 1) * 7);
@@ -174,28 +254,145 @@ function runB(w) {
   if (tail) return km(d) + ", zadnjih " + tail + " km v ~5:40";
   return km(d) + " lahko";
 }
-function sessionCount() { return 88; }
+function sessionCount() { return NW * 2; }
 
+/* ---------- shranjevanje ---------- */
+var KEY = "polmaraton-nacrt-v1";
 var store = {};
-try { store = JSON.parse(localStorage.getItem("polmaraton-nacrt-v1") || "{}"); } catch (e) { store = {}; }
-function save() { try { localStorage.setItem("polmaraton-nacrt-v1", JSON.stringify(store)); } catch (e) {} }
+try { store = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch (e) { store = {}; }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(store)); } catch (e) {} }
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {}); } catch (e) {}
+
+/* ---------- pomožne funkcije za vnos ---------- */
+function parseKm(s) {
+  var n = parseFloat(String(s || "").replace(",", ".").trim());
+  return isFinite(n) && n > 0 ? n : null;
+}
+function parseTime(s) {
+  s = String(s || "").trim();
+  if (!s) return null;
+  var p = s.split(":").map(Number);
+  for (var i = 0; i < p.length; i++) if (!isFinite(p[i]) || p[i] < 0) return null;
+  var t = p.length === 1 ? p[0] * 60 : p.length === 2 ? p[0] * 60 + p[1] : p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : null;
+  return t && t > 0 ? t : null;
+}
+function z(n) { return n < 10 ? "0" + n : "" + n; }
+function fmtTime(t) {
+  t = Math.round(t);
+  var h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60;
+  return h ? h + ":" + z(m) + ":" + z(s) : m + ":" + z(s);
+}
+function fmtPace(t, k) {
+  var p = Math.round(t / k);
+  return Math.floor(p / 60) + ":" + z(p % 60) + "/km";
+}
+function kmStr(n) { return String(Math.round(n * 100) / 100).replace(".", ","); }
 
 function curWeek() {
   var w = Math.floor((new Date() - START) / (7 * 864e5)) + 1;
-  return Math.max(1, Math.min(44, w));
+  return Math.max(1, Math.min(NW, w));
 }
 var CUR = curWeek();
 var started = new Date() >= START;
 
+/* ---------- en tek: kljukica + vnos dejanskega teka ---------- */
+function runEl(w, slot, label, plan) {
+  var el = document.createElement("div");
+  el.className = "run";
+  el.dataset.id = "w" + w + slot;
+  el.innerHTML =
+    '<label class="row"><input type="checkbox" class="cb"><span class="txt"><b>' + slot.toUpperCase() + '</b> ' + label + '<small>' + plan + '</small></span></label>' +
+    '<div class="sum" hidden></div>' +
+    '<button type="button" class="ghost logbtn" aria-expanded="false">Vnesi dejanski tek</button>' +
+    '<div class="logform" hidden>' +
+      '<label class="f"><span>Razdalja (km)</span><input class="i-km" inputmode="decimal" placeholder="npr. 3,5" autocomplete="off"></label>' +
+      '<label class="f"><span>Čas (min ali m:ss)</span><input class="i-t" placeholder="npr. 29:36" autocomplete="off"></label>' +
+      '<label class="f"><span>Povpr. utrip (neobvezno)</span><input class="i-hr" inputmode="numeric" placeholder="npr. 135" autocomplete="off"></label>' +
+      '<label class="f wide"><span>Opomba: kaj si naredila</span><textarea class="i-nt" placeholder="npr. namesto 35 min sem tekla 30 min, noge težke"></textarea></label>' +
+      '<div class="acts"><button type="button" class="sv">Shrani</button><button type="button" class="quiet cl">Počisti</button></div>' +
+    '</div>';
+  wireRun(el);
+  return el;
+}
+
+function fillForm(el) {
+  var log = store["log_" + el.dataset.id] || {};
+  el.querySelector(".i-km").value = log.km ? kmStr(log.km) : "";
+  el.querySelector(".i-t").value = log.t ? fmtTime(log.t) : "";
+  el.querySelector(".i-hr").value = log.hr || "";
+  el.querySelector(".i-nt").value = log.note || "";
+}
+
+function renderSum(el) {
+  var sum = el.querySelector(".sum"), btn = el.querySelector(".logbtn");
+  var log = store["log_" + el.dataset.id];
+  sum.textContent = "";
+  if (!log) { sum.hidden = true; btn.textContent = "Vnesi dejanski tek"; return; }
+  var parts = [];
+  if (log.km) parts.push(kmStr(log.km) + " km");
+  if (log.t) parts.push(fmtTime(log.t));
+  if (log.km && log.t) parts.push(fmtPace(log.t, log.km));
+  if (log.hr) parts.push("utrip " + log.hr);
+  var l1 = document.createElement("div");
+  l1.textContent = parts.length ? "Dejansko: " + parts.join(" · ") : "Zapisek";
+  sum.appendChild(l1);
+  if (log.note) {
+    var l2 = document.createElement("div");
+    l2.className = "note";
+    l2.textContent = log.note;
+    sum.appendChild(l2);
+  }
+  sum.hidden = false;
+  btn.textContent = "Uredi";
+}
+
+function wireRun(el) {
+  var id = el.dataset.id;
+  var cb = el.querySelector(".cb"), btn = el.querySelector(".logbtn"), form = el.querySelector(".logform");
+  cb.addEventListener("change", function () { store[id] = cb.checked; save(); syncAll(); });
+  btn.addEventListener("click", function () {
+    form.hidden = !form.hidden;
+    btn.setAttribute("aria-expanded", form.hidden ? "false" : "true");
+    if (!form.hidden) { fillForm(el); el.querySelector(".i-km").focus(); }
+  });
+  el.querySelector(".sv").addEventListener("click", function () {
+    var k = parseKm(el.querySelector(".i-km").value);
+    var t = parseTime(el.querySelector(".i-t").value);
+    var hr = parseInt(el.querySelector(".i-hr").value, 10);
+    var note = el.querySelector(".i-nt").value.trim();
+    var log = {};
+    if (k) log.km = k;
+    if (t) log.t = t;
+    if (isFinite(hr) && hr > 0) log.hr = hr;
+    if (note) log.note = note;
+    if (Object.keys(log).length) {
+      store["log_" + id] = log;
+      if (k || t) store[id] = true;
+    } else {
+      delete store["log_" + id];
+    }
+    save();
+    form.hidden = true; btn.setAttribute("aria-expanded", "false");
+    syncAll();
+  });
+  el.querySelector(".cl").addEventListener("click", function () {
+    delete store["log_" + id];
+    save(); syncAll(); fillForm(el);
+  });
+}
+
+/* ---------- tedni in faze ---------- */
 function weekEl(w) {
-  var sp = span(w), div = document.createElement("div");
-  div.className = "week" + (TESTS[w] ? " test" : "") + (w === CUR ? " cur" : "");
-  div.id = "week" + w;
+  var sp = span(w), d = document.createElement("details");
+  d.className = "wk" + (TESTS[w] ? " test" : "") + (w === CUR ? " cur" : "");
+  d.id = "week" + w;
+  if (w === CUR) d.open = true;
   var tb = TESTS[w] ? '<span class="badge">Test</span>' : "";
-  div.innerHTML = '<div class="whead"><b>' + w + '. teden ' + tb + '</b><span>' + fmt(sp[0]) + ' – ' + fmt(sp[1]) + '</span></div>' +
-    '<label class="row"><input type="checkbox" id="w' + w + 'a"><span class="txt"><b>A</b> med tednom<small>' + runA(w) + '</small></span></label>' +
-    '<label class="row"><input type="checkbox" id="w' + w + 'b"><span class="txt"><b>B</b> vikend<small>' + runB(w) + '</small></span></label>';
-  return div;
+  d.innerHTML = '<summary><span class="wl"><span class="wt">' + w + '. teden' + tb + '</span><span class="wd">' + fmt(sp[0]) + ' – ' + fmt(sp[1]) + '</span></span><span class="ws"></span></summary><div class="wbody"></div>';
+  var body = d.querySelector(".wbody");
+  body.appendChild(runEl(w, "a", "med tednom", runA(w)));
+  body.appendChild(runEl(w, "b", "vikend", runB(w)));
+  return d;
 }
 
 var host = document.getElementById("phases");
@@ -204,39 +401,103 @@ PHASES.forEach(function (p) {
   d.className = "phase"; d.id = "phase" + p.a;
   if (CUR >= p.a && CUR <= p.b) d.open = true;
   var s1 = span(p.a)[0], s2 = span(p.b)[1];
-  d.innerHTML = '<summary><h3>' + p.n + '</h3><span class="meta">' + p.a + '–' + p.b + '. teden · ' + fmt(s1) + ' – ' + fmt(s2) + '</span></summary><p class="pnote">' + p.t + '</p>';
+  d.innerHTML = '<summary><h3>' + p.n + '</h3><span class="meta">' + p.a + '–' + p.b + '. teden · ' + fmt(s1) + ' – ' + fmt(s2) + ' · <span class="pp"></span></span></summary><p class="pnote">' + p.t + '</p>';
   for (var w = p.a; w <= p.b; w++) d.appendChild(weekEl(w));
   host.appendChild(d);
 });
 
-function refresh() {
-  var n = 0;
-  document.querySelectorAll('input[type="checkbox"]').forEach(function (c) { if (c.checked) n++; });
-  var t = sessionCount();
+/* ---------- ta teden ---------- */
+var sp0 = span(CUR);
+var now = document.getElementById("now");
+var nowHead = started ? CUR + ". teden" : "Začetek v ponedeljek, " + fmt(START);
+now.innerHTML = '<div class="eyebrow">' + (started ? "Ta teden" : "Prvi teden") + '</div>' +
+  '<h2>' + nowHead + ' · ' + fmt(sp0[0]) + ' – ' + fmt(sp0[1]) + '</h2>';
+now.appendChild(runEl(CUR, "a", "med tednom", runA(CUR)));
+now.appendChild(runEl(CUR, "b", "vikend", runB(CUR)));
+
+/* ---------- osveževanje ---------- */
+function weekDone(w) { return (store["w" + w + "a"] ? 1 : 0) + (store["w" + w + "b"] ? 1 : 0); }
+function weekKm(w) {
+  var t = 0;
+  ["a", "b"].forEach(function (s) { var l = store["log_w" + w + s]; if (l && l.km) t += l.km; });
+  return t;
+}
+
+function renderChart() {
+  var W = 360, H = 150, pl = 26, pr = 4, pt = 8, pb = 20, iw = W - pl - pr, ih = H - pt - pb, slot = iw / NW, max = 22;
+  function y(v) { return pt + ih - (v / max) * ih; }
+  var s = "";
+  [0, 10, 20].forEach(function (g) {
+    s += '<line class="gl" x1="' + pl + '" x2="' + (W - pr) + '" y1="' + y(g) + '" y2="' + y(g) + '"/>' +
+         '<text class="gt" x="' + (pl - 4) + '" y="' + (y(g) + 3) + '" text-anchor="end">' + g + '</text>';
+  });
+  if (started) s += '<rect class="cw" x="' + (pl + (CUR - 1) * slot) + '" y="' + pt + '" width="' + slot + '" height="' + ih + '"/>';
+  var logged = 0;
+  for (var w = 1; w <= NW; w++) {
+    var x = pl + (w - 1) * slot, d = B[w - 1];
+    s += '<rect class="' + (TESTS[w] ? "bt" : "bp") + '" x="' + (x + slot * 0.1) + '" y="' + y(d) + '" width="' + (slot * 0.8) + '" height="' + (y(0) - y(d)) + '" rx="1"/>';
+    var lg = store["log_w" + w + "b"];
+    if (lg && lg.km) {
+      logged++;
+      var a = Math.min(lg.km, max);
+      s += '<rect class="ba" x="' + (x + slot * 0.27) + '" y="' + y(a) + '" width="' + (slot * 0.46) + '" height="' + (y(0) - y(a)) + '" rx="1"/>';
+    }
+    if (w === 1 || w % 4 === 0) s += '<text class="gt" x="' + (x + slot / 2) + '" y="' + (H - 6) + '" text-anchor="middle">' + w + '</text>';
+  }
+  document.getElementById("chart").innerHTML =
+    '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Vikend tek po tednih, načrt in dejansko v kilometrih. Vnesenih vikend tekov: ' + logged + ' od ' + NW + '.">' + s + '</svg>';
+}
+
+function syncAll() {
+  document.querySelectorAll(".run").forEach(function (el) {
+    el.querySelector(".cb").checked = !!store[el.dataset.id];
+    renderSum(el);
+  });
+  var n = 0, tot = 0, w;
+  for (w = 1; w <= NW; w++) {
+    var dn = weekDone(w), wk = weekKm(w);
+    n += dn; tot += wk;
+    var st = document.querySelector("#week" + w + " .ws");
+    st.textContent = dn + "/2" + (wk ? " · " + kmStr(wk) + " km" : "") + (dn === 2 ? " ✓" : "");
+    st.className = "ws" + (dn === 2 ? " ok" : (started && w < CUR ? " miss" : ""));
+  }
+  PHASES.forEach(function (p) {
+    var c = 0;
+    for (var i = p.a; i <= p.b; i++) c += weekDone(i);
+    document.querySelector("#phase" + p.a + " .pp").textContent = c + "/" + (p.b - p.a + 1) * 2 + " tekov";
+  });
+  var t = sessionCount(), pct = Math.round(n / t * 100);
   document.getElementById("done").textContent = n + " od " + t + " tekov";
-  var pct = Math.round(n / t * 100);
   document.getElementById("pct").textContent = pct + " %";
   document.getElementById("barfill").style.width = pct + "%";
+  document.getElementById("kmtot").textContent = kmStr(tot) + " km";
+  renderChart();
 }
-document.querySelectorAll('input[type="checkbox"]').forEach(function (c) {
-  c.checked = !!store[c.id];
-  c.addEventListener("change", function () { store[c.id] = c.checked; save(); refresh(); });
-});
-refresh();
+syncAll();
 
-var sp = span(CUR);
-var head = started ? CUR + ". teden" : "Začetek v ponedeljek, " + fmt(START);
-var now = document.getElementById("now");
-now.innerHTML = '<div class="eyebrow">' + (started ? "Ta teden" : "Prvi teden") + '</div>' +
-  '<h2>' + head + ' · ' + fmt(sp[0]) + ' – ' + fmt(sp[1]) + '</h2>' +
-  '<div class="line"><span class="tag">A</span><span>' + runA(CUR) + '</span></div>' +
-  '<div class="line"><span class="tag">B</span><span>' + runB(CUR) + '</span></div>' +
-  '<button type="button" id="goto">Pokaži v seznamu</button>';
-document.getElementById("goto").addEventListener("click", function () {
-  var el = document.getElementById("week" + CUR);
-  var d = el.closest("details"); if (d) d.open = true;
-  el.scrollIntoView({block: "center"});
+/* ---------- varnostna kopija ---------- */
+var bkmsg = document.getElementById("bkmsg");
+document.getElementById("bkcopy").addEventListener("click", function () {
+  var text = JSON.stringify(store);
+  function fallback() { window.prompt("Kopiraj to besedilo in ga shrani:", text); }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function () { bkmsg.textContent = "Kopirano. Prilepi v zapiske."; }, fallback);
+  } else { fallback(); }
 });
+document.getElementById("bkrestore").addEventListener("click", function () {
+  var text = window.prompt("Prilepi prej kopirane podatke:");
+  if (!text) return;
+  try {
+    var obj = JSON.parse(text);
+    if (!obj || typeof obj !== "object") throw new Error("bad");
+    store = obj; save(); location.reload();
+  } catch (e) { bkmsg.textContent = "Podatkov ni mogoče prebrati."; }
+});
+
+/* ---------- namestitev kot aplikacija ---------- */
+if ("serviceWorker" in navigator && /^https?:/.test(location.protocol)) {
+  window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+}
 </script>
-
+</body>
 </html>
